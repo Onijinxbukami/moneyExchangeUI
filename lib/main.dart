@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'components/header_section.dart';
-import 'components/footer_section.dart';
-import 'components/features_section.dart';
+
 
 
 void main() {
@@ -33,9 +31,7 @@ class HomePage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            HeaderSection(),
-            FeaturesSection(),
-            FooterSection(),
+
           ],
         ),
       ),
