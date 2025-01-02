@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'features/signUp/signup_page.dart';
-
+import 'package:flutter_application_1/features/auth/login/login_page.dart';
+import 'package:flutter_application_1/app/routes.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,7 +12,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SignupPage(),
+      title: 'Flutter App',
+      initialRoute: Routes.login, // Trang khởi động khi mở ứng dụng
+      routes: Routes.getRoutes(),
     );
   }
 }
@@ -44,4 +47,3 @@ class _CounterPageState extends State<CounterPage> {
     );
   }
 }
-
