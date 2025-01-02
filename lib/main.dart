@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'features/signUp/signup_page.dart';
 
 
 void main() {
@@ -11,30 +11,37 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Web Homepage',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomePage(),
+      home: SignupPage(),
     );
   }
 }
 
-class HomePage extends StatelessWidget {
+class CounterPage extends StatefulWidget {
+  @override
+  _CounterPageState createState() => _CounterPageState();
+}
+
+class _CounterPageState extends State<CounterPage> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Homepage'),
-        centerTitle: true,
+      appBar: AppBar(title: Text('Counter Test')),
+      body: Center(
+        child: Text('$_counter', style: TextStyle(fontSize: 24)),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-
-          ],
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        child: Icon(Icons.add),
       ),
     );
   }
 }
+
