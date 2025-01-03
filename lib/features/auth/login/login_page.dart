@@ -3,6 +3,7 @@ import 'package:flutter_application_1/app/constants.dart';
 import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart';
 import 'package:flutter_application_1/app/routes.dart';
+import 'package:flutter_application_1/shared/widgets/password_field.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -103,74 +104,7 @@ class LoginPage extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  // "Don't have an account?" text with the login button next to it
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center, // Center align the row
-                      children: [
-                        const Text(
-                          "Don't have an account?",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 37, 34, 109),
-                            letterSpacing: 1.5,
-                            height: 1.2,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            // Handle login action
-                          },
-                          child: const Text(
-                            "Register",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF4743C9),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 25),
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center, // Canh giữa hai nút
-                    children: [
-                      Expanded(
-                        child: GoogleSignInButton(
-                          onPressed: () {},
-                        ),
-                      ),
-                      const SizedBox(width: 16), // Khoảng cách giữa hai nút
-                      Expanded(
-                        child: FacebookSignInButton(
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-
                   // Register to continue
-                  const Center(
-                    child: Text(
-                      "LOGIN TO CONTINUE",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 37, 34, 109),
-                        letterSpacing: 1.2,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-
                   const SizedBox(height: verticalSpacing),
 
                   // Email Input
@@ -187,13 +121,7 @@ class LoginPage extends StatelessWidget {
                   // Password Input
                   const Text("Password", style: labelStyle),
                   const SizedBox(height: inputSpacing),
-                  TextField(
-                    obscureText: true,
-                    decoration: inputFieldDecoration.copyWith(
-                      hintText: "Enter Your Password",
-                    ),
-                  ),
-
+                  PasswordField(),
                   const SizedBox(height: verticalSpacing),
 
                   // Sign Up Button
@@ -224,8 +152,9 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   Padding(
-                    padding: const EdgeInsets.only(top: 16),
+                    padding: const EdgeInsets.only(top: 10),
                     child: Row(
                       mainAxisAlignment:
                           MainAxisAlignment.center, // Center align the row
@@ -234,7 +163,7 @@ class LoginPage extends StatelessWidget {
                           "Forgot your password?",
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                             color: Color.fromARGB(255, 37, 34, 109),
                             letterSpacing: 1.5,
                             height: 1.2,
@@ -248,7 +177,7 @@ class LoginPage extends StatelessWidget {
                             "Click here",
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                               color: Color(0xFF4743C9),
                             ),
                           ),
@@ -256,6 +185,60 @@ class LoginPage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // "Don't have an account?" text with the login button next to it
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Center align the row
+                      children: [
+                        const Text(
+                          "Don't have an account?",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Color.fromARGB(255, 37, 34, 109),
+                            letterSpacing: 1.5,
+                            height: 1.2,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            // Handle login action
+                            Navigator.pushNamed(context, Routes.signup);
+                          },
+                          child: const Text(
+                            "Sign up",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF4743C9),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+                  Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center, // Canh giữa hai nút
+                    children: [
+                      Expanded(
+                        child: GoogleSignInButton(
+                          onPressed: () {},
+                        ),
+                      ),
+                      const SizedBox(width: 16), // Khoảng cách giữa hai nút
+                      Expanded(
+                        child: FacebookSignInButton(
+                          onPressed: () {},
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 25),
                 ],
               ),
             ),
