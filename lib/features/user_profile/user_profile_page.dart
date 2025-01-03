@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -30,17 +29,12 @@ class UserProfilePage extends StatelessWidget {
   Widget _buildSidebar(BuildContext context) {
     return Container(
       width: 250,
-      color: Colors.white, // Sidebar background color
+      color: Colors.white,
       child: SingleChildScrollView(
-        // Bọc trong SingleChildScrollView để có thể cuộn khi quá dài
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          // Căn từ trên xuống
           children: [
-            // Sidebar Header (Avatar và thông tin người dùng)
-
             const SizedBox(height: 20),
-            // Sidebar Menu
             _buildSidebarItem(
               icon: Icons.dashboard,
               title: 'Dashboard',
@@ -227,7 +221,7 @@ class UserProfilePage extends StatelessWidget {
         const SizedBox(width: 30), // Khoảng cách giữa 2 phần
         // Phần cài đặt tài khoản
         Expanded(
-          flex: 3, // Tỉ lệ phần chiếm không gian
+          flex: 2, // Tỉ lệ phần chiếm không gian
           child: _buildAccountSettings(),
         ),
       ],
@@ -236,14 +230,14 @@ class UserProfilePage extends StatelessWidget {
 
 // Widget hiển thị phần Profile
   Widget _buildProfileSection() {
-    return const Row(
+    return Row(
       children: [
-        CircleAvatar(
+        const CircleAvatar(
           radius: 50,
           backgroundImage: NetworkImage('https://via.placeholder.com/150'),
         ),
-        SizedBox(width: 20),
-        Column(
+        const SizedBox(width: 20),
+        const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -255,6 +249,50 @@ class UserProfilePage extends StatelessWidget {
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
+        ),
+        const Spacer(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Colors.black,
+              width: 1.0,
+            ),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Current Balance',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.attach_money, // Icon ví tiền
+                    color: Colors.black,
+                  ),
+                  SizedBox(width: 4), // Khoảng cách giữa icon và text
+                  Text(
+                    '1,000,000 VND', // Số dư giả định
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black, // Màu xanh để nổi bật
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -341,6 +379,3 @@ class UserProfilePage extends StatelessWidget {
     );
   }
 }
-
-
- 
