@@ -129,6 +129,15 @@ class SignupPage extends StatelessWidget {
                   ),
 
                   const SizedBox(height: verticalSpacing),
+                  const Text("Phone Number", style: labelStyle),
+                  const SizedBox(height: inputSpacing),
+                  TextField(
+                    decoration: inputFieldDecoration.copyWith(
+                      hintText: "Enter Your PhoneNumber",
+                    ),
+                  ),
+
+                  const SizedBox(height: verticalSpacing),
 
                   // Password Input
                   const Text("Password", style: labelStyle),
