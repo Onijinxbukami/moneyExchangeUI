@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
+import 'package:flutter_application_1/app/routes.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
@@ -33,11 +34,11 @@ class SignupPage extends StatelessWidget {
         actions: [
           // Nút Login ở bên phải
           Padding(
-            padding: const EdgeInsets.only(
-                top: 10, right: 20), // Cách lề phải và lề trên
+            padding: const EdgeInsets.only(top: 10, right: 20),
             child: ElevatedButton(
               onPressed: () {
                 // Handle login action
+                Navigator.pushNamed(context, Routes.login);
               },
               child: const Text("Login", style: buttonTextStyle),
               style: ElevatedButton.styleFrom(
@@ -54,12 +55,12 @@ class SignupPage extends StatelessWidget {
           ),
         ],
         bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1), // Chiều cao của Divider
+          preferredSize: Size.fromHeight(1),
           child: Divider(
-            color: Colors.black, // Màu của đường line
-            thickness: 1, // Độ dày của đường line
-            indent: 0, // Khoảng cách từ trái
-            endIndent: 0, // Khoảng cách từ phải
+            color: Colors.black,
+            thickness: 1,
+            indent: 0,
+            endIndent: 0,
           ),
         ),
       ),
@@ -88,7 +89,7 @@ class SignupPage extends StatelessWidget {
                   // Title
                   const Center(
                     child: Text(
-                      "ACCOUNT",
+                      "REGISTER",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
