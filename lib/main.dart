@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'features/signUp/signup_page.dart';
-import 'package:flutter_application_1/features/auth/login/login_page.dart';
 import 'package:flutter_application_1/app/routes.dart';
 
 void main() {
