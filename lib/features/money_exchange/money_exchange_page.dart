@@ -270,7 +270,7 @@ class MoneyExchangePage extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF00274D), // Màu sắc dễ nhìn
+              color: Color(0xFF00274D),
             ),
           ),
           const Divider(height: 20, thickness: 1, color: Colors.grey),
@@ -333,8 +333,6 @@ class MoneyExchangePage extends StatelessWidget {
                                     ))
                                 .toList(),
                             onChanged: (value) {
-                              // Cập nhật selectedDeliveryMethod
-
                               selectedDeliveryMethod = value!;
                             },
                             icon: const Icon(Icons.arrow_drop_down,
@@ -436,6 +434,66 @@ class MoneyExchangePage extends StatelessWidget {
           _buildTransactionDetail(
             title: 'Transfer time',
             value: 'Same Day',
+          ),
+          const Divider(color: Colors.black),
+          const SizedBox(height: 20),
+          _buildTransactionDetail(
+            title: 'Total Pay',
+            value: 'Same Day',
+          ),
+          const SizedBox(height: 20),
+          _buildTransactionDetail(
+            title: 'Recipient gets',
+            value: 'Same Day',
+          ),
+          const SizedBox(height: 20),
+          const Divider(color: Colors.black),
+
+          Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                    height: 30), // Khoảng cách giữa dropdown và nút Continue
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Hành động khi bấm nút Continue
+                      debugPrint('Continue pressed');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          const Color(0xFF6200EE), // Màu tím nổi bật
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 60, vertical: 30), // Padding nhỏ hơn
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(20), // Bo tròn góc nút
+                      ),
+                      elevation: 6, // Hiệu ứng đổ bóng
+                      shadowColor: Colors.grey.withOpacity(0.5), // Màu bóng nhẹ
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.arrow_forward,
+                            color: Colors.white, size: 20), // Thêm icon
+                        SizedBox(width: 8), // Khoảng cách giữa icon và chữ
+                        Text(
+                          'Continue',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.2, // Khoảng cách giữa các chữ cái
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
