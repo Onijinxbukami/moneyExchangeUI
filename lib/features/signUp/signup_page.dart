@@ -4,9 +4,47 @@ import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/password_field.dart';
+import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
-class SignupPage extends StatelessWidget {
+import 'package:flutter_application_1/features/signUp/signup_service.dart';
+
+class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
+
+  @override
+  _SignupPageState createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+
+  String? _userNameError;
+  String? _emailError;
+  String? _phoneNumberError;
+
+  final ValidationService _validationService = ValidationService();
+  void _validateUserName() {
+    final userName = _userNameController.text;
+    setState(() {
+      _userNameError = _validationService.validateUsername(userName);
+    });
+  }
+
+  void _validateEmail() {
+    final email = _emailController.text;
+    setState(() {
+      _emailError = _validationService.validateEmail(email);
+    });
+  }
+
+  void _validatePhoneNumber() {
+    final phoneNumber = _phoneNumberController.text;
+    setState(() {
+      _phoneNumberError = _validationService.validatePhoneNumber(phoneNumber);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +81,6 @@ class SignupPage extends StatelessWidget {
                 // Handle login action
                 Navigator.pushNamed(context, Routes.login);
               },
-              child: const Text("Login", style: buttonTextStyle),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF4743C9),
                 padding: const EdgeInsets.symmetric(
@@ -54,6 +91,7 @@ class SignupPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
+              child: const Text("Login", style: buttonTextStyle),
             ),
           ),
         ],
@@ -111,30 +149,30 @@ class SignupPage extends StatelessWidget {
                   const Text("Username", style: labelStyle),
                   const SizedBox(height: inputSpacing),
                   TextField(
+                    controller: _userNameController,
                     obscureText: true,
                     decoration: inputFieldDecoration.copyWith(
                       hintText: "Enter Your Username",
+                      errorText: _userNameError,
                     ),
+                    onChanged: (value) => _validateUserName(),
                   ),
 
                   const SizedBox(height: verticalSpacing),
 
-                  // Email Input
                   const Text("Email", style: labelStyle),
                   const SizedBox(height: inputSpacing),
-                  TextField(
-                    decoration: inputFieldDecoration.copyWith(
-                      hintText: "Enter Your Email",
-                    ),
-                  ),
+                  EmailField(),
 
                   const SizedBox(height: verticalSpacing),
                   const Text("Phone Number", style: labelStyle),
                   const SizedBox(height: inputSpacing),
                   TextField(
+                    controller: _phoneNumberController,
                     decoration: inputFieldDecoration.copyWith(
-                      hintText: "Enter Your PhoneNumber",
-                    ),
+                        hintText: "Enter Your PhoneNumber",
+                        errorText: _phoneNumberError),
+                    onChanged: (value) => _validatePhoneNumber(),
                   ),
 
                   const SizedBox(height: verticalSpacing),
@@ -183,26 +221,29 @@ class SignupPage extends StatelessWidget {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Handle signup
+                        _validateEmail();
+                        if (_emailError == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Email is valid")),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF4743C9), // Button color
+                        backgroundColor: const Color(0xFF4743C9),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 80,
                           vertical: 16,
                         ),
-                        minimumSize: const Size(
-                            double.infinity, 56), // Full width and fixed height
+                        minimumSize: const Size(double.infinity, 56),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(8.0), // Rounded corners
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                       ),
                       child: const Text(
                         "Sign Up",
                         style: TextStyle(
-                          fontSize: 16, // Font size for button text
-                          fontWeight: FontWeight.bold, // Bold text
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -232,5 +273,11 @@ class SignupPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
   }
 }

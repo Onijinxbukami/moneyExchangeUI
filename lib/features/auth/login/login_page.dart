@@ -4,6 +4,7 @@ import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dar
 import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/password_field.dart';
+import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -110,11 +111,7 @@ class LoginPage extends StatelessWidget {
                   // Email Input
                   const Text("Email", style: labelStyle),
                   const SizedBox(height: inputSpacing),
-                  TextField(
-                    decoration: inputFieldDecoration.copyWith(
-                      hintText: "Enter Your Email",
-                    ),
-                  ),
+                  EmailField(),
 
                   const SizedBox(height: verticalSpacing),
 
