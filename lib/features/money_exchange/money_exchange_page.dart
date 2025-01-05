@@ -115,44 +115,6 @@ class MoneyExchangePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSidebarItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    bool isSelected = false,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(
-            vertical: 12, horizontal: 16), // Căn đều bằng margin
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white, // Giữ màu nền là trắng cho tất cả mục
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: Colors.black, // Đặt màu icon là đen
-            ),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: TextStyle(
-                color: Colors.black, // Đặt màu chữ là đen
-                fontWeight: isSelected
-                    ? FontWeight.bold
-                    : FontWeight.normal, // Chữ đậm khi chọn
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildHeader() {
     return Column(
       children: [
@@ -225,21 +187,6 @@ class MoneyExchangePage extends StatelessWidget {
         ),
         const Divider(color: Colors.black),
       ],
-    );
-  }
-
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          midHeader(),
-          const SizedBox(height: 20),
-          _buildSecuritySettings(),
-          // Now works correctly
-        ],
-      ),
     );
   }
 
@@ -527,6 +474,21 @@ class MoneyExchangePage extends StatelessWidget {
     );
   }
 
+  Widget _buildContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          midHeader(),
+          const SizedBox(height: 20),
+          _buildSecuritySettings(),
+          // Now works correctly
+        ],
+      ),
+    );
+  }
+
   Widget _buildExchangeCard({
     required String title,
     required String amount,
@@ -582,6 +544,44 @@ class MoneyExchangePage extends StatelessWidget {
             style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSidebarItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool isSelected = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+            vertical: 12, horizontal: 16), // Căn đều bằng margin
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white, // Giữ màu nền là trắng cho tất cả mục
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: Colors.black, // Đặt màu icon là đen
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.black, // Đặt màu chữ là đen
+                fontWeight: isSelected
+                    ? FontWeight.bold
+                    : FontWeight.normal, // Chữ đậm khi chọn
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
