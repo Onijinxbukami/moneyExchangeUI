@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/user_profile/user_profile_widget.dart';
+import 'package:flutter_application_1/features/user_profile/selectionButton.dart';
+import 'package:flutter_application_1/features/user_profile/screens/notification_setting_screen.dart';
+import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
+
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -32,7 +35,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             child: Column(
               children: [
                 // Header
-                _buildHeader(),
+                HeaderWidget(),
                 // Content
                 Expanded(
                   child: _buildContent(),
@@ -169,47 +172,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // Căn giữa các phần tử
-        children: [
-          // Ô tìm kiếm sử dụng Expanded để chiếm không gian còn lại
-          Expanded(
-            child: Container(
-              margin:
-                  const EdgeInsets.only(right: 16), // Cách biểu tượng thông báo
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  hintStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(color: Colors.grey, width: 1),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey[600], // Màu của biểu tượng kính lúp
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Biểu tượng thông báo
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Handle notification
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -225,7 +187,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           if (selectedButton == 'Payment Methods')
             _buildPaymentMethodsSettings(), // Hiển thị phần thanh toán nếu nút "Payment Methods" được chọn
           if (selectedButton == 'Notification')
-            _buildNotificationSettings(), // Hiển thị phần thông báo nếu nút "Notification" được chọn
+            const NotificationSetting(), // Hiển thị phần thông báo nếu nút "Notification" được chọn
         ],
       ),
     );
