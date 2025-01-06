@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/money_exchange/money_exchange_service.dart';
 
-class MoneyExchangePage extends StatelessWidget {
+class MoneyExchangePage extends StatefulWidget {
+  const MoneyExchangePage({super.key});
+  @override
+  _MoneyExchangePageState createState() => _MoneyExchangePageState();
+}
+
+class _MoneyExchangePageState extends State<MoneyExchangePage> {
   final MoneyExchangeService _menuService = MoneyExchangeService();
+  String selectedDeliveryMethod = 'Bank Transfer'; // Default delivery method
+  String selectedPartnerBank = 'HSBC';
+
+  final List<String> deliveryMethods = [
+    'Bank Transfer',
+    'Cash Pickup',
+    'Mobile Wallet'
+  ];
+  final List<String> partnerBanks = ['HSBC', 'Standard Chartered', 'Citibank'];
 
   @override
   Widget build(BuildContext context) {
@@ -191,21 +206,6 @@ class MoneyExchangePage extends StatelessWidget {
   }
 
   Widget midHeader() {
-    // State variables for dropdown selections
-    String selectedDeliveryMethod = 'Bank Transfer'; // Default delivery method
-    String selectedPartnerBank = 'HSBC'; // Default partner bank
-
-    final List<String> deliveryMethods = [
-      'Bank Transfer',
-      'Cash Pickup',
-      'Mobile Wallet'
-    ];
-    final List<String> partnerBanks = [
-      'HSBC',
-      'Standard Chartered',
-      'Citibank'
-    ];
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -270,20 +270,29 @@ class MoneyExchangePage extends StatelessWidget {
                             items: deliveryMethods
                                 .map((method) => DropdownMenuItem(
                                       value: method,
-                                      child: Text(
-                                        method,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF00274D),
+                                      child: SizedBox(
+                                        width: 150, // Cố định chiều rộng
+                                        child: Text(
+                                          method,
+                                          overflow: TextOverflow
+                                              .ellipsis, // Cắt chữ dài
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0xFF00274D),
+                                          ),
                                         ),
                                       ),
                                     ))
                                 .toList(),
                             onChanged: (value) {
-                              selectedDeliveryMethod = value!;
+                              setState(() {
+                                selectedDeliveryMethod = value!;
+                              });
                             },
-                            icon: const Icon(Icons.arrow_drop_down,
-                                color: Color(0xFF00274D)),
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: Color(0xFF00274D),
+                            ),
                             dropdownColor: Colors.white,
                             isExpanded: true,
                           ),
@@ -341,25 +350,27 @@ class MoneyExchangePage extends StatelessWidget {
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: selectedPartnerBank,
-                            items: partnerBanks
-                                .map((bank) => DropdownMenuItem(
-                                      value: bank,
-                                      child: Text(
-                                        bank,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF00274D),
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
+                            items: partnerBanks.map((bank) {
+                              return DropdownMenuItem(
+                                value: bank,
+                                child: SizedBox(
+                                  width: 150, // Cố định chiều rộng
+                                  child: Text(
+                                    bank,
+                                    overflow:
+                                        TextOverflow.ellipsis, // Cắt chữ dài
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                             onChanged: (value) {
-                              selectedPartnerBank = value!;
+                              setState(() {
+                                selectedPartnerBank = value!;
+                              });
                             },
-                            icon: const Icon(Icons.arrow_drop_down,
-                                color: Color(0xFF00274D)),
-                            dropdownColor: Colors.white,
-                            isExpanded: true,
+                            isExpanded:
+                                true, // Đảm bảo chiếm toàn bộ chiều rộng
                           ),
                         ),
                       ),
@@ -384,14 +395,62 @@ class MoneyExchangePage extends StatelessWidget {
           ),
           const Divider(color: Colors.black),
           const SizedBox(height: 20),
-          _buildTransactionDetail(
-            title: 'Total Pay',
-            value: 'Same Day',
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100, // Nền sáng
+              borderRadius: BorderRadius.circular(10), // Bo góc
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1), // Bóng nhẹ
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: _buildTransactionDetail(
+              title: 'Total Pay',
+              value: 'Same Day',
+              titleStyle: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              valueStyle: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF6200EE), // Màu tím nổi bật
+              ),
+            ),
           ),
           const SizedBox(height: 20),
-          _buildTransactionDetail(
-            title: 'Recipient gets',
-            value: 'Same Day',
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100, // Nền sáng
+              borderRadius: BorderRadius.circular(10), // Bo góc
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1), // Bóng nhẹ
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: _buildTransactionDetail(
+              title: 'Recipient gets',
+              value: 'Same Day',
+              titleStyle: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              valueStyle: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF6200EE), // Màu tím nổi bật
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           const Divider(color: Colors.black),
@@ -444,6 +503,29 @@ class MoneyExchangePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTransactionDetail({
+    required String title,
+    required String value,
+    TextStyle? titleStyle,
+    TextStyle? valueStyle,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: titleStyle ??
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        Text(
+          value,
+          style:
+              valueStyle ?? const TextStyle(fontSize: 16, color: Colors.black),
+        ),
+      ],
     );
   }
 
@@ -583,23 +665,6 @@ class MoneyExchangePage extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTransactionDetail(
-      {required String title, required String value}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, color: Colors.black),
-        ),
-      ],
     );
   }
 }
