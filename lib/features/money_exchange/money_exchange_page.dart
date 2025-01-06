@@ -483,14 +483,14 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 20), // Thêm icon
-                        SizedBox(width: 8), // Khoảng cách giữa icon và chữ
+                            color: Colors.white, size: 20), 
+                        SizedBox(width: 8), 
                         Text(
                           'Continue',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            letterSpacing: 1.2, // Khoảng cách giữa các chữ cái
+                            letterSpacing: 1.2, 
                             color: Colors.white,
                           ),
                         ),

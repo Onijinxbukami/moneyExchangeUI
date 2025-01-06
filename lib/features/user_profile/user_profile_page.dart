@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/features/user_profile/user_profile_widget.dart';
 
-class UserProfilePage extends StatelessWidget {
+class UserProfilePage extends StatefulWidget {
+  const UserProfilePage({super.key});
+  @override
+  _UserProfilePageState createState() => _UserProfilePageState();
+}
+
+class _UserProfilePageState extends State<UserProfilePage> {
+  String? selectedButton;
+
+  void _onButtonPressed(String buttonLabel) {
+    setState(() {
+      if (selectedButton == buttonLabel) {
+        selectedButton = null;
+      } else {
+        selectedButton = buttonLabel;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,7 +188,7 @@ class UserProfilePage extends StatelessWidget {
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide(color: Colors.grey, width: 1),
+                    borderSide: const BorderSide(color: Colors.grey, width: 1),
                   ),
                   prefixIcon: Icon(
                     Icons.search,
@@ -197,38 +216,21 @@ class UserProfilePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildProfileSection(),
+          _buildProfileSection(), // Hiển thị phần profile (tài khoản người dùng)
           const SizedBox(height: 20),
-          _buildAccountSettings(),
-          const SizedBox(height: 20),
-          _buildSecuritySettings(),
+          if (selectedButton == 'Account')
+            _buildAccountSettings(), // Hiển thị phần chỉnh sửa tài khoản nếu nút "Account" được chọn
+          if (selectedButton == 'Security')
+            _buildSecuritySettings(), // Hiển thị phần bảo mật nếu nút "Security" được chọn
+          if (selectedButton == 'Payment Methods')
+            _buildPaymentMethodsSettings(), // Hiển thị phần thanh toán nếu nút "Payment Methods" được chọn
+          if (selectedButton == 'Notification')
+            _buildNotificationSettings(), // Hiển thị phần thông báo nếu nút "Notification" được chọn
         ],
       ),
     );
   }
 
-  // Widget để hiển thị từng mục cài đặt
-
-// Widget hiển thị cả Profile và Account Settings cạnh nhau
-  Widget _buildProfileAndSettings() {
-    return Row(
-      children: [
-        // Phần profile
-        Expanded(
-          flex: 2, // Tỉ lệ phần chiếm không gian
-          child: _buildProfileSection(),
-        ),
-        const SizedBox(width: 30), // Khoảng cách giữa 2 phần
-        // Phần cài đặt tài khoản
-        Expanded(
-          flex: 2, // Tỉ lệ phần chiếm không gian
-          child: _buildAccountSettings(),
-        ),
-      ],
-    );
-  }
-
-// Widget hiển thị phần Profile
   Widget _buildProfileSection() {
     return Row(
       children: [
@@ -250,6 +252,50 @@ class UserProfilePage extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 30),
+        // Buttons Section
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(width: 20),
+            OptionButton(
+              icon: Icons.account_circle,
+              label: 'Account',
+              onPressed: () {
+                _onButtonPressed('Account');
+              },
+              isSelected: selectedButton == 'Account',
+            ),
+            const SizedBox(width: 20),
+            OptionButton(
+              icon: Icons.security,
+              label: 'Security',
+              onPressed: () {
+                _onButtonPressed('Security');
+              },
+              isSelected: selectedButton == 'Security',
+            ),
+            const SizedBox(width: 20),
+            OptionButton(
+              icon: Icons.payment,
+              label: 'Payment Methods',
+              onPressed: () {
+                _onButtonPressed('Payment Methods');
+              },
+              isSelected: selectedButton == 'Payment Methods',
+            ),
+            const SizedBox(width: 20),
+            OptionButton(
+              icon: Icons.notifications,
+              label: 'Notification',
+              onPressed: () {
+                _onButtonPressed('Notification');
+              },
+              isSelected: selectedButton == 'Notification',
+            ),
+          ],
+        ),
+
         const Spacer(),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -298,7 +344,6 @@ class UserProfilePage extends StatelessWidget {
     );
   }
 
-// Widget hiển thị phần Account Settings
   Widget _buildAccountSettings() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,7 +380,7 @@ class UserProfilePage extends StatelessWidget {
           obscureText: obscureText,
           decoration: InputDecoration(
             hintText: hint,
-            fillColor: Color.fromARGB(255, 232, 228, 240), // Đặt màu nền
+            fillColor: const Color.fromARGB(255, 232, 228, 240), // Đặt màu nền
             filled: true, // Áp dụng màu nền
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -346,6 +391,14 @@ class UserProfilePage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildPaymentMethodsSettings() {
+    return Center(child: Text('Payment Methods Settings'));
+  }
+
+  Widget _buildNotificationSettings() {
+    return Center(child: Text('Notification Settings'));
   }
 
   Widget _buildSecuritySettings() {
