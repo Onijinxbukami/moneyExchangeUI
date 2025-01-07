@@ -44,7 +44,8 @@ class _ProfileSectionState extends State<ProfileSection> {
               children: [
                 Text(
                   widget.name,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   widget.email,
@@ -53,32 +54,31 @@ class _ProfileSectionState extends State<ProfileSection> {
               ],
             ),
             const Spacer(),
-            
           ],
         ),
         const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            SelectionButton(
+            OptionButton(
               icon: Icons.account_circle,
               label: 'Account',
               onPressed: () => _onButtonPressed('Account'),
               isSelected: selectedButton == 'Account',
             ),
-            SelectionButton(
+            OptionButton(
               icon: Icons.security,
               label: 'Security',
               onPressed: () => _onButtonPressed('Security'),
               isSelected: selectedButton == 'Security',
             ),
-            SelectionButton(
+            OptionButton(
               icon: Icons.payment,
               label: 'Payment Methods',
               onPressed: () => _onButtonPressed('Payment Methods'),
               isSelected: selectedButton == 'Payment Methods',
             ),
-            SelectionButton(
+            OptionButton(
               icon: Icons.notifications,
               label: 'Notification',
               onPressed: () => _onButtonPressed('Notification'),

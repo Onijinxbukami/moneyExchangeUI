@@ -15,9 +15,9 @@ class Routes {
   static Map<String, WidgetBuilder> getRoutes() {
     return {
       login: (context) => LoginPage(),
-      signup: (context) => SignupPage(),
-      userprofile: (context) => UserProfilePage(),
-      moneyexchang: (context) => MoneyExchangePage(),
+      signup: (context) => const SignupPage(),
+      userprofile: (context) => const UserProfilePage(),
+      moneyexchang: (context) => const MoneyExchangePage(),
     };
   }
 }
