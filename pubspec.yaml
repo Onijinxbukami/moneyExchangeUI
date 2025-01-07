@@ -61,6 +61,11 @@ flutter:
     - assets/images/login-reg-bg.png
     - assets/images/bell.png
     - assets/images/lang.png
+    - assets/images/visa-card.png
+    - assets/images/paylio-card.png
+    - assets/images/paypal-card.png
+    - assets/images/blockchain-card.png
+
 
 
   # To add assets to your application, add an assets section, like this:
