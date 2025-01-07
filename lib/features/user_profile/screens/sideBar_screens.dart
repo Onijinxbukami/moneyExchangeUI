@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/app/routes.dart';
 
 class Sidebar extends StatefulWidget {
   @override
@@ -22,7 +23,12 @@ class _SidebarState extends State<Sidebar> {
               icon: Icons.dashboard,
               title: 'Dashboard',
               onTap: () {
-                _onItemTap('Dashboard');
+                setState(() {
+                  _selectedItem = 'Exchange'; // Update the selected item
+                });
+
+                // Navigate to login route
+                Navigator.pushNamed(context, Routes.userprofile);
               },
               isSelected: _selectedItem == 'Dashboard',
             ),
@@ -54,7 +60,12 @@ class _SidebarState extends State<Sidebar> {
               icon: Icons.expand,
               title: 'Exchange',
               onTap: () {
-                _onItemTap('Exchange');
+                setState(() {
+                  _selectedItem = 'Exchange'; // Update the selected item
+                });
+
+                // Navigate to login route
+                Navigator.pushNamed(context, Routes.moneyexchang);
               },
               isSelected: _selectedItem == 'Exchange',
             ),

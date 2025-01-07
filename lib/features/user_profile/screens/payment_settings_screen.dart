@@ -28,7 +28,9 @@ class _PaymentSettingsState extends State<PaymentSettings> {
                   'assets/images/paylio-card.png', 'transactionsMod'),
               _buildCardButton(
                   'assets/images/paypal-card.png', 'transactionsMod'),
-              _buildCardButton('https://example.com/add-new.png', 'addcardMod'),
+              _buildCardButton(
+                  'assets/images/blockchain-card.png', 'transactionsMod'),
+              _buildCardButton('assets/images/add-new.png', 'addcardMod'),
             ],
           ),
         ),
