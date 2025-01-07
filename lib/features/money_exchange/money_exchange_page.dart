@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/money_exchange/money_exchange_service.dart';
+import 'package:flutter_application_1/features/user_profile/screens/sideBar_screens.dart';
+import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
 
 class MoneyExchangePage extends StatefulWidget {
   const MoneyExchangePage({super.key});
@@ -25,13 +27,13 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
       body: Row(
         children: [
           // Sidebar
-          _buildSidebar(context),
+          Sidebar(),
           // User Information Area
           Expanded(
             child: Column(
               children: [
                 // Header
-                _buildHeader(),
+                HeaderWidget(),
                 // Content
                 Expanded(
                   child: _buildContent(),
@@ -44,166 +46,7 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
     );
   }
 
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            _buildSidebarItem(
-              icon: Icons.dashboard,
-              title: 'Dashboard',
-              onTap: () {
-                // Handle Dashboard tap
-              },
-            ),
-            _buildSidebarItem(
-              icon: Icons.person,
-              title: 'Transaction',
-              onTap: () {
-                // Handle Transaction tap
-              },
-            ),
-            _buildSidebarItem(
-              icon: Icons.payments,
-              title: 'Pay',
-              onTap: () {
-                // Handle Pay tap
-              },
-            ),
-            _buildSidebarItem(
-              icon: Icons.account_balance_wallet,
-              title: 'Receive',
-              onTap: () {
-                // Handle Receive tap
-              },
-            ),
-            _buildSidebarItem(
-              icon: Icons.expand,
-              title: 'Exchange',
-              onTap: () {
-                // Handle Exchange tap
-              },
-            ),
-            _buildSidebarItem(
-              icon: Icons.attach_money,
-              title: 'Deposit Money',
-              onTap: () {
-                // Handle Deposit Money tap
-              },
-            ),
-            _buildSidebarItem(
-              icon: Icons.money_off,
-              title: 'Withdraw Money',
-              onTap: () {
-                // Handle Withdraw Money tap
-              },
-            ),
-            const Divider(color: Colors.black),
-            _buildSidebarItem(
-              icon: Icons.support_agent,
-              title: 'Support',
-              onTap: () {
-                // Handle Support tap
-              },
-            ),
-            _buildSidebarItem(
-              icon: Icons.settings,
-              title: 'Setting',
-              onTap: () {
-                // Handle Logout tap
-              },
-            ),
-            _buildSidebarItem(
-              icon: Icons.logout,
-              title: 'Logout',
-              onTap: () {
-                // Handle Logout tap
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          color: const Color(0xFFF7F9FD), // Màu nền cho toàn bộ header
-          child: Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween, // Căn giữa các phần tử
-            children: [
-              // Ô tìm kiếm
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only(
-                      right: 16), // Cách biểu tượng thông báo
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide:
-                            const BorderSide(color: Colors.grey, width: 1),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Colors.grey[600], // Màu của biểu tượng kính lúp
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // Biểu tượng thông báo
-              IconButton(
-                icon: const Icon(Icons.notifications),
-                onPressed: () {
-                  // Xử lý sự kiện thông báo
-                },
-              ),
-              // Thông tin người dùng (avatar và menu)
-              Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 25, // Kích thước nhỏ hơn để phù hợp với Header
-                    backgroundImage:
-                        NetworkImage('https://via.placeholder.com/150'),
-                  ),
-                  const SizedBox(width: 12), // Khoảng cách giữa avatar và menu
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.arrow_drop_down),
-                    onSelected: (String value) {
-                      _menuService
-                          .onMenuItemSelected(value); // Hàm xử lý khi chọn menu
-                    },
-                    itemBuilder: (BuildContext context) => [
-                      const PopupMenuItem<String>(
-                        value: 'settings',
-                        child: Text('Settings'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'logout',
-                        child: Text('Logout'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const Divider(color: Colors.black),
-      ],
-    );
-  }
+ 
 
   Widget midHeader() {
     return Padding(
