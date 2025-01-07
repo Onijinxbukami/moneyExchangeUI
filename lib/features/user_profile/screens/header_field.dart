@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/app/routes.dart';
 
 class HeaderWidget extends StatefulWidget {
   @override
@@ -96,6 +97,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                 // Handle Settings
               } else if (value == 'Logout') {
                 // Handle Logout
+                Navigator.pushNamed(context, Routes.login);
               }
             },
             itemBuilder: (BuildContext context) {
