@@ -126,6 +126,7 @@ class LoginPage extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         // Handle signup
+                        Navigator.pushNamed(context, Routes.userprofile);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF4743C9), // Button color
