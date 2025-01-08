@@ -228,6 +228,7 @@ class _SignupPageState extends State<SignupPage> {
                             const SnackBar(content: Text("Email is valid")),
                           );
                         }
+                        Navigator.pushNamed(context, Routes.userprofile);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4743C9),
