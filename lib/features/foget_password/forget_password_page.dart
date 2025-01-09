@@ -1,12 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
+import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart';
-import 'package:flutter_application_1/app/routes.dart';
-import 'package:flutter_application_1/shared/widgets/password_field.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
-class LoginPage extends StatelessWidget {
+import 'package:flutter_application_1/features/signUp/signup_service.dart';
+
+class ForgetPasswordPage extends StatefulWidget {
+  const ForgetPasswordPage({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ForgetPasswordPageState createState() => _ForgetPasswordPageState();
+}
+
+class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+
+ 
+  String? _emailError;
+ 
+
+  final ValidationService _validationService = ValidationService();
+
+
+  void _validateEmail() {
+    final email = _emailController.text;
+    setState(() {
+      _emailError = _validationService.validateEmail(email);
+    });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,21 +44,21 @@ class LoginPage extends StatelessWidget {
         backgroundColor: lightColor,
         elevation: 0,
         toolbarHeight: 80,
-title: Column(
+    title: Column(
   crossAxisAlignment: CrossAxisAlignment.start,
   children: [
-    // Tiêu đề "MoneyExchange" ở bên trái
+
     Padding(
-      padding: const EdgeInsets.only(top: 20, left: 20), // Cách lề trái và lề trên
+      padding: const EdgeInsets.only(top: 20, left: 20), 
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            Navigator.pushNamed(context, '/homepage'); // Hành động khi nhấn
+            Navigator.pushNamed(context, Routes.homepage);
           },
-          child: const Text(
+          child: Text(
             "MoneyExchange",
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -41,17 +70,16 @@ title: Column(
   ],
 ),
 
+
         actions: [
           // Nút Login ở bên phải
           Padding(
-            padding: const EdgeInsets.only(
-                top: 10, right: 20), // Cách lề phải và lề trên
+            padding: const EdgeInsets.only(top: 10, right: 20),
             child: ElevatedButton(
               onPressed: () {
                 // Handle login action
-                Navigator.pushNamed(context, Routes.signup);
+                Navigator.pushNamed(context, Routes.login);
               },
-              child: const Text("Sign Up", style: buttonTextStyle),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF4743C9),
                 padding: const EdgeInsets.symmetric(
@@ -62,6 +90,7 @@ title: Column(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
+              child: const Text("Login", style: buttonTextStyle),
             ),
           ),
         ],
@@ -70,8 +99,8 @@ title: Column(
           child: Divider(
             color: Colors.black,
             thickness: 1,
-            indent: 0, // Khoảng cách từ trái
-            endIndent: 0, // Khoảng cách từ phải
+            indent: 0,
+            endIndent: 0,
           ),
         ),
       ),
@@ -100,7 +129,7 @@ title: Column(
                   // Title
                   const Center(
                     child: Text(
-                      "LOGIN",
+                      "Forget Password",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -113,84 +142,17 @@ title: Column(
 
                   const SizedBox(height: 16),
 
-                  // Register to continue
                   const SizedBox(height: verticalSpacing),
 
-                  // Email Input
+                  // Username Input
+                  
+                  const SizedBox(height: verticalSpacing),
+
                   const Text("Email", style: labelStyle),
                   const SizedBox(height: inputSpacing),
                   EmailField(),
 
-                  const SizedBox(height: verticalSpacing),
 
-                  // Password Input
-                  const Text("Password", style: labelStyle),
-                  const SizedBox(height: inputSpacing),
-                  PasswordField(),
-                  const SizedBox(height: verticalSpacing),
-
-                  // Sign Up Button
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Handle signup
-                        Navigator.pushNamed(context, Routes.userprofile);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF4743C9), // Button color
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 80,
-                          vertical: 16,
-                        ),
-                        minimumSize: const Size(
-                            double.infinity, 56), // Full width and fixed height
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(8.0), // Rounded corners
-                        ),
-                      ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(
-                          fontSize: 16, // Font size for button text
-                          fontWeight: FontWeight.bold, // Bold text
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center, // Center align the row
-                      children: [
-                        const Text(
-                          "Forgot your password?",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color.fromARGB(255, 37, 34, 109),
-                            letterSpacing: 1.5,
-                            height: 1.2,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                           Navigator.pushNamed(context, Routes.forgetpassword);
-                          },
-                          child: const Text(
-                            "Click here",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF4743C9),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   // "Don't have an account?" text with the login button next to it
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
@@ -211,10 +173,10 @@ title: Column(
                         TextButton(
                           onPressed: () {
                             // Handle login action
-                            Navigator.pushNamed(context, Routes.signup);
+                            Navigator.pushNamed(context, Routes.login);
                           },
                           child: const Text(
-                            "Sign up",
+                            "Login",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -225,7 +187,40 @@ title: Column(
                       ],
                     ),
                   ),
+                  const SizedBox(height: verticalSpacing),
 
+                  // Sign Up Button
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _validateEmail();
+                        if (_emailError == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Email is valid")),
+                          );
+                        }
+                        Navigator.pushNamed(context, Routes.userprofile);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4743C9),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 80,
+                          vertical: 16,
+                        ),
+                        minimumSize: const Size(double.infinity, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Text(
+                        "Sign Up",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment:
@@ -244,7 +239,6 @@ title: Column(
                       ),
                     ],
                   ),
-                  const SizedBox(height: 25),
                 ],
               ),
             ),
@@ -252,5 +246,11 @@ title: Column(
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
   }
 }
