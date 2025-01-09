@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/charts_screen.dart';
 import 'package:flutter_application_1/features/user_profile/selectionButton.dart';
-import 'package:flutter_application_1/features/user_profile/screens/notification_setting_screen.dart';
-import 'package:flutter_application_1/features/user_profile/screens/security_settings_screen.dart';
-import 'package:flutter_application_1/features/user_profile/screens/payment_settings_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/exchang_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_screen.dart';
+import 'package:flutter_application_1/features/home_page/screens/location_screen.dart';
 
 
 
@@ -166,7 +164,7 @@ Widget _buildContent() {
         if (selectedButton == 'Convert') ExchangeForm(),
         if (selectedButton == 'Send')   SendMoneyForm(),
         if (selectedButton == 'Charts') ChartForm(),
-        if (selectedButton == 'Near me') const NotificationSetting(),
+        if (selectedButton == 'Near me') LocationForm(),
         const SizedBox(height: 40), // Khoảng cách dưới cùng
       ],
     ),

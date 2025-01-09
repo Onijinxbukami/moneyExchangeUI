@@ -13,34 +13,46 @@ class _ExchangeFormState extends State<ExchangeForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 20),
-        _buildInputSection("From", fromCurrency, (value) {
-          setState(() {
-            fromCurrency = value!;
-          });
-        }), // Input cho "From"
-        const SizedBox(height: 20),
-        _buildInputSection("To", toCurrency, (value) {
-          setState(() {
-            toCurrency = value!;
-          });
-        }), // Input cho "To"
-        const SizedBox(height: 40),
-        _buildExchangeInfo(), // Hiển thị thông tin Exchange
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            // Hành động khi nhấn nút "Get Started"
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Get Started Pressed!")),
-            );
-          },
-          child: const Text("Get Started"),
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey, width: 1), // Thêm border
+          borderRadius: BorderRadius.circular(12),          // Bo góc cho border
+          color: Colors.white,                              // Màu nền cho container
         ),
-      ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildInputSection("From", fromCurrency, (value) {
+              setState(() {
+                fromCurrency = value!;
+              });
+            }), // Input cho "From"
+            const SizedBox(height: 20),
+            _buildInputSection("To", toCurrency, (value) {
+              setState(() {
+                toCurrency = value!;
+              });
+            }), // Input cho "To"
+            const SizedBox(height: 40),
+            _buildExchangeInfo(), // Hiển thị thông tin Exchange
+            const SizedBox(height: 20),
+            Center(
+              child:             ElevatedButton(
+              onPressed: () {
+             
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Get Started Pressed!")),
+                );
+              },
+              child: const Text("Get Started"),
+            ),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -50,17 +62,12 @@ class _ExchangeFormState extends State<ExchangeForm> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: label,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            ],
+          child: TextField(
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: label,
+              border: const OutlineInputBorder(),
+            ),
           ),
         ),
         const SizedBox(width: 16),

@@ -113,7 +113,7 @@ class _ChartFormState extends State<ChartForm> {
       children: const [
         Text(
           "GBP to USD Chart",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black),
         ),
         SizedBox(height: 4),
         Text(
@@ -124,14 +124,14 @@ class _ChartFormState extends State<ChartForm> {
     );
   }
 
-  // Right section with exchange rate and timestamp
+
   Widget _buildTopRight() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: const [
         Text(
           "1 GBP = 1.37684 USD",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
         ),
         SizedBox(height: 4),
         Text(
