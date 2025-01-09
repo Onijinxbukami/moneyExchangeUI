@@ -176,7 +176,7 @@ class _SecuritySettingsState extends State<SecuritySettings> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              primary: buttonColor, // Dynamic color for the button
+              backgroundColor: buttonColor, 
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),

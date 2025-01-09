@@ -15,24 +15,32 @@ class LoginPage extends StatelessWidget {
         backgroundColor: lightColor,
         elevation: 0,
         toolbarHeight: 80,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tiêu đề "MoneyExchange" ở bên trái
-            Padding(
-              padding:
-                  EdgeInsets.only(top: 20, left: 20), // Cách lề trái và lề trên
-              child: Text(
-                "MoneyExchange",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+title: Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    // Tiêu đề "MoneyExchange" ở bên trái
+    Padding(
+      padding: const EdgeInsets.only(top: 20, left: 20), // Cách lề trái và lề trên
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, '/homepage'); // Hành động khi nhấn
+          },
+          child: const Text(
+            "MoneyExchange",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-          ],
+          ),
         ),
+      ),
+    ),
+  ],
+),
+
         actions: [
           // Nút Login ở bên phải
           Padding(

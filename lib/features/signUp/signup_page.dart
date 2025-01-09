@@ -55,24 +55,33 @@ class _SignupPageState extends State<SignupPage> {
         backgroundColor: lightColor,
         elevation: 0,
         toolbarHeight: 80,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tiêu đề "MoneyExchange" ở bên trái
-            Padding(
-              padding:
-                  EdgeInsets.only(top: 20, left: 20), // Cách lề trái và lề trên
-              child: Text(
-                "MoneyExchange",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+    title: Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+
+    Padding(
+      padding: const EdgeInsets.only(top: 20, left: 20), 
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, Routes.homepage);
+          },
+          child: Text(
+            "MoneyExchange",
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-          ],
+          ),
         ),
+      ),
+    ),
+  ],
+),
+
+
         actions: [
           // Nút Login ở bên phải
           Padding(
