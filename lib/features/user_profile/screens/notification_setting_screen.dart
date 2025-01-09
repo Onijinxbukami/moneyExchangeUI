@@ -35,6 +35,9 @@ class _NotificationSettingState extends State<NotificationSetting> {
             inactiveThumbColor: Colors.grey, // Màu khi tắt
             inactiveTrackColor: Colors.grey[300], // Màu nền khi tắt
           ),
+
+
+          
         ],
       ),
     );
