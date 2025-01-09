@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
+import 'package:flutter_application_1/features/home_page/screens/charts_screen.dart';
+import 'package:flutter_application_1/features/user_profile/selectionButton.dart';
+import 'package:flutter_application_1/features/user_profile/screens/notification_setting_screen.dart';
+import 'package:flutter_application_1/features/user_profile/screens/security_settings_screen.dart';
+import 'package:flutter_application_1/features/user_profile/screens/payment_settings_screen.dart';
+import 'package:flutter_application_1/features/home_page/screens/exchang_screen.dart';
+import 'package:flutter_application_1/features/home_page/screens/send_screen.dart';
+
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -10,6 +19,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _selectedLanguage = 'EN';
+  String? selectedButton;
+
+  void _onButtonPressed(String buttonLabel) {
+    setState(() {
+      if (selectedButton == buttonLabel) {
+        selectedButton = null;
+      } else {
+        selectedButton = buttonLabel;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +39,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             _buildHeader(),
-            _buildHeroSection(),
+            _buildContent(),
             _buildFeaturesSection(),
             _buildFooter(),
           ],
@@ -133,52 +153,79 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildHeroSection() {
-    return Container(
-      color: Colors.blue[50],
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-      child: Column(
-        children: [
-          const Text(
-            "Send & Receive Payments Globally",
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+Widget _buildContent() {
+  return Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center, // Cănr giữa theo chiều dọc
+      crossAxisAlignment: CrossAxisAlignment.center, // Căn giữa theo chiều ngang
+      children: [
+        _buildProfileSection(), // Profile section
+        const SizedBox(height: 20),
+        // Nội dung thay đổi dựa trên nút được chọn
+        if (selectedButton == 'Convert') ExchangeForm(),
+        if (selectedButton == 'Send')   SendMoneyForm(),
+        if (selectedButton == 'Charts') ChartForm(),
+        if (selectedButton == 'Near me') const NotificationSetting(),
+        const SizedBox(height: 40), // Khoảng cách dưới cùng
+      ],
+    ),
+  );
+}
+
+
+
+Widget _buildProfileSection() {
+    return Row(
+      children: [
+        const SizedBox(width: 30),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(width: 20),
+            OptionButton(
+              icon: Icons.account_circle,
+              label: 'Convert',
+              onPressed: () {
+                _onButtonPressed('Convert');
+              },
+              isSelected: selectedButton == 'Convert',
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "Easily manage your finances and transactions with our secure platform.",
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey,
+            const SizedBox(width: 20),
+            OptionButton(
+              icon: Icons.security,
+              label: 'Send',
+              onPressed: () {
+                _onButtonPressed('Send');
+              },
+              isSelected: selectedButton == 'Send',
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            const SizedBox(width: 20),
+            OptionButton(
+              icon: Icons.payment,
+              label: 'Charts',
+              onPressed: () {
+                _onButtonPressed('Charts');
+              },
+              isSelected: selectedButton == 'Charts',
             ),
-            child: const Text(
-              "Get Started",
-              style: TextStyle(fontSize: 16, color: Colors.white),
+            const SizedBox(width: 20),
+            OptionButton(
+              icon: Icons.notifications,
+              label: 'Near me',
+              onPressed: () {
+                _onButtonPressed('Near me');
+              },
+              isSelected: selectedButton == 'Near me',
             ),
-          ),
-          const SizedBox(height: 20),
-          Image.asset(
-            'assets/img/hero-image.png', // Replace with your hero image
-            height: 300,
-            fit: BoxFit.contain,
-          ),
-        ],
-      ),
+          ],
+        ),
+        const Spacer(),
+      ],
     );
   }
 
+    
   Widget _buildFooter() {
     return Container(
       color: Colors.black,
