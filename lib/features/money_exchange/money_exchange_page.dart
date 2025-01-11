@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/money_exchange/money_exchange_service.dart';
+
 import 'package:flutter_application_1/features/user_profile/screens/sideBar_screens.dart';
 import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
 
 class MoneyExchangePage extends StatefulWidget {
   const MoneyExchangePage({super.key});
   @override
+  // ignore: library_private_types_in_public_api
   _MoneyExchangePageState createState() => _MoneyExchangePageState();
 }
 
 class _MoneyExchangePageState extends State<MoneyExchangePage> {
-  final MoneyExchangeService _menuService = MoneyExchangeService();
+
   String selectedDeliveryMethod = 'Bank Transfer'; // Default delivery method
   String selectedPartnerBank = 'HSBC';
 
@@ -245,6 +246,7 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
               borderRadius: BorderRadius.circular(10), // Bo góc
               boxShadow: [
                 BoxShadow(
+                  // ignore: deprecated_member_use
                   color: Colors.black.withOpacity(0.1), // Bóng nhẹ
                   blurRadius: 8,
                   offset: const Offset(0, 4),
@@ -274,6 +276,7 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
               borderRadius: BorderRadius.circular(10), // Bo góc
               boxShadow: [
                 BoxShadow(
+                  // ignore: deprecated_member_use
                   color: Colors.black.withOpacity(0.1), // Bóng nhẹ
                   blurRadius: 8,
                   offset: const Offset(0, 4),
@@ -320,6 +323,7 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                             BorderRadius.circular(20), // Bo tròn góc nút
                       ),
                       elevation: 6, // Hiệu ứng đổ bóng
+                      // ignore: deprecated_member_use
                       shadowColor: Colors.grey.withOpacity(0.5), // Màu bóng nhẹ
                     ),
                     child: const Row(
@@ -429,6 +433,7 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 5,
             offset: const Offset(0, 3),
@@ -473,41 +478,5 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
     );
   }
 
-  Widget _buildSidebarItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    bool isSelected = false,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(
-            vertical: 12, horizontal: 16), // Căn đều bằng margin
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white, // Giữ màu nền là trắng cho tất cả mục
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: Colors.black, // Đặt màu icon là đen
-            ),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: TextStyle(
-                color: Colors.black, // Đặt màu chữ là đen
-                fontWeight: isSelected
-                    ? FontWeight.bold
-                    : FontWeight.normal, // Chữ đậm khi chọn
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+ 
 }

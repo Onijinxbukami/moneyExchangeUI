@@ -6,7 +6,36 @@ import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/password_field.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
-class LoginPage extends StatelessWidget {
+
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _handleLogin() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng nhập đầy đủ thông tin'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Hiển thị thông tin nhập vào trong console log
+    print('Username: ${_emailController.text}');
+    print('Password: ${_passwordController.text}');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,32 +44,33 @@ class LoginPage extends StatelessWidget {
         backgroundColor: lightColor,
         elevation: 0,
         toolbarHeight: 80,
-title: Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    // Tiêu đề "MoneyExchange" ở bên trái
-    Padding(
-      padding: const EdgeInsets.only(top: 20, left: 20), // Cách lề trái và lề trên
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, '/homepage'); // Hành động khi nhấn
-          },
-          child: const Text(
-            "MoneyExchange",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Tiêu đề "MoneyExchange" ở bên trái
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 20, left: 20), // Cách lề trái và lề trên
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(
+                        context, '/homepage'); // Hành động khi nhấn
+                  },
+                  child: const Text(
+                    "MoneyExchange",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ),
-    ),
-  ],
-),
-
         actions: [
           // Nút Login ở bên phải
           Padding(
@@ -51,6 +81,7 @@ title: Column(
                 // Handle login action
                 Navigator.pushNamed(context, Routes.signup);
               },
+              // ignore: sort_child_properties_last
               child: const Text("Sign Up", style: buttonTextStyle),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF4743C9),
@@ -119,23 +150,29 @@ title: Column(
                   // Email Input
                   const Text("Email", style: labelStyle),
                   const SizedBox(height: inputSpacing),
-                  EmailField(),
+                  EmailField(
+                    emailController:
+                        _emailController, 
+                    hintText: "Enter Your Email", 
+                  ),
 
                   const SizedBox(height: verticalSpacing),
 
                   // Password Input
                   const Text("Password", style: labelStyle),
                   const SizedBox(height: inputSpacing),
-                  PasswordField(),
+                  PasswordField(
+                    passwordController:
+                        _passwordController, 
+                    hintText: "Enter Your Password", 
+                  ),
                   const SizedBox(height: verticalSpacing),
 
                   // Sign Up Button
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Handle signup
-                        Navigator.pushNamed(context, Routes.userprofile);
-                      },
+                      onPressed: _isLoading ? null : _handleLogin,
+                      // Navigator.pushNamed(context, Routes.userprofile);
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF4743C9), // Button color
                         padding: const EdgeInsets.symmetric(
@@ -177,7 +214,7 @@ title: Column(
                         ),
                         TextButton(
                           onPressed: () {
-                           Navigator.pushNamed(context, Routes.forgetpassword);
+                            Navigator.pushNamed(context, Routes.forgetpassword);
                           },
                           child: const Text(
                             "Click here",

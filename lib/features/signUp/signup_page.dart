@@ -20,12 +20,37 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-
+  final TextEditingController _passwordController = TextEditingController();
+  final ValidationService _validationService = ValidationService();
+  bool _isLoading = false;
   String? _userNameError;
   String? _emailError;
   String? _phoneNumberError;
 
-  final ValidationService _validationService = ValidationService();
+  Future<void> _handleRegister() async {
+    // Kiểm tra các trường nhập liệu
+    if (_userNameController.text.isEmpty ||
+            _emailController.text.isEmpty ||
+            _phoneNumberController.text.isEmpty ||
+            _passwordController.text.isEmpty
+
+        // _initialsController.text.isEmpty ||
+        // _roleController.text.isEmpty
+        ) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng nhập đầy đủ thông tin'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    print('Username: ${_userNameController.text}');
+    print('Email: ${_emailController.text}');
+    print('Phone Number: ${_phoneNumberController.text}');
+    print('Password: ${_passwordController.text}');
+  }
+
   void _validateUserName() {
     final userName = _userNameController.text;
     setState(() {
@@ -55,33 +80,30 @@ class _SignupPageState extends State<SignupPage> {
         backgroundColor: lightColor,
         elevation: 0,
         toolbarHeight: 80,
-    title: Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-
-    Padding(
-      padding: const EdgeInsets.only(top: 20, left: 20), 
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, Routes.homepage);
-          },
-          child: Text(
-            "MoneyExchange",
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 20, left: 20),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(context, Routes.homepage);
+                  },
+                  child: Text(
+                    "MoneyExchange",
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ),
-    ),
-  ],
-),
-
-
         actions: [
           // Nút Login ở bên phải
           Padding(
@@ -172,7 +194,11 @@ class _SignupPageState extends State<SignupPage> {
 
                   const Text("Email", style: labelStyle),
                   const SizedBox(height: inputSpacing),
-                  EmailField(),
+                  EmailField(
+                    emailController:
+                        _emailController, // Gán controller từ màn hình cha
+                    hintText: "Enter Your Email", // Placeholder tùy chỉnh
+                  ),
 
                   const SizedBox(height: verticalSpacing),
                   const Text("Phone Number", style: labelStyle),
@@ -190,7 +216,11 @@ class _SignupPageState extends State<SignupPage> {
                   // Password Input
                   const Text("Password", style: labelStyle),
                   const SizedBox(height: inputSpacing),
-                  PasswordField(),
+                  PasswordField(
+                    passwordController:
+                        _passwordController, // Gán controller từ màn hình cha
+                    hintText: "Enter Your Password", // Placeholder tùy chỉnh
+                  ),
                   // "Don't have an account?" text with the login button next to it
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
@@ -230,15 +260,7 @@ class _SignupPageState extends State<SignupPage> {
                   // Sign Up Button
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
-                        _validateEmail();
-                        if (_emailError == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Email is valid")),
-                          );
-                        }
-                        Navigator.pushNamed(context, Routes.userprofile);
-                      },
+                      onPressed: _isLoading ? null : _handleRegister,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4743C9),
                         padding: const EdgeInsets.symmetric(
