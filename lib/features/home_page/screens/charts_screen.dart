@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/shared/widgets/numberic_field.dart';
 
 class ChartForm extends StatefulWidget {
   const ChartForm({Key? key}) : super(key: key);
@@ -8,18 +9,19 @@ class ChartForm extends StatefulWidget {
 }
 
 class _ChartFormState extends State<ChartForm> {
-  String fromCurrency = "GBP"; 
-  String toCurrency = "USD";   
+  String fromCurrency = "GBP";
+  String toCurrency = "USD";
 
   @override
   Widget build(BuildContext context) {
-    return Center(  // Đặt widget vào giữa màn hình
+    return Center(
+      // Đặt widget vào giữa màn hình
       child: Container(
-        padding: const EdgeInsets.all(16),  // Padding cho toàn bộ widget
+        padding: const EdgeInsets.all(16), // Padding cho toàn bộ widget
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 1),  // Thêm border
-          borderRadius: BorderRadius.circular(12),  // Bo góc cho border
-          color: Colors.white,  // Màu nền cho container
+          border: Border.all(color: Colors.grey, width: 1), // Thêm border
+          borderRadius: BorderRadius.circular(12), // Bo góc cho border
+          color: Colors.white, // Màu nền cho container
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,45 +48,47 @@ class _ChartFormState extends State<ChartForm> {
   }
 
   // Input section with text field and dropdown
-  Widget _buildInputSection(String label, String selectedValue,
-      ValueChanged<String?> onChanged) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: label,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            ],
+  Widget _buildInputSection(
+      String label, String selectedValue, ValueChanged<String?> onChanged) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border:
+            Border.all(color: Colors.grey), // Add border around the container
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                NumericField(),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(10),
+          const SizedBox(width: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: DropdownButton<String>(
+              items: const [
+                DropdownMenuItem(value: "GBP", child: Text("GBP")),
+                DropdownMenuItem(value: "USD", child: Text("USD")),
+              ],
+              onChanged: onChanged,
+              value: selectedValue,
+              underline: Container(),
+              isExpanded: false,
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
+              dropdownColor: Colors.grey.shade200,
+            ),
           ),
-          child: DropdownButton<String>(
-            items: const [
-              DropdownMenuItem(value: "GBP", child: Text("GBP")),
-              DropdownMenuItem(value: "USD", child: Text("USD")),
-            ],
-            onChanged: onChanged,
-            value: selectedValue,
-            underline: Container(),
-            isExpanded: false,
-            icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
-            dropdownColor: Colors.grey.shade200,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -113,7 +117,8 @@ class _ChartFormState extends State<ChartForm> {
       children: const [
         Text(
           "GBP to USD Chart",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black),
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black),
         ),
         SizedBox(height: 4),
         Text(
@@ -124,14 +129,14 @@ class _ChartFormState extends State<ChartForm> {
     );
   }
 
-
   Widget _buildTopRight() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: const [
         Text(
           "1 GBP = 1.37684 USD",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
+          style: TextStyle(
+              fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
         ),
         SizedBox(height: 4),
         Text(

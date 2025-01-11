@@ -6,10 +6,8 @@ import 'package:flutter_application_1/features/home_page/screens/exchang_screen.
 import 'package:flutter_application_1/features/home_page/screens/send_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/location_screen.dart';
 
-
-
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -37,6 +35,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             _buildHeader(),
+            _buildTransferMoneySection(),
             _buildContent(),
             _buildFeaturesSection(),
             _buildFooter(),
@@ -151,79 +150,76 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-Widget _buildContent() {
-  return Padding(
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center, // Cănr giữa theo chiều dọc
-      crossAxisAlignment: CrossAxisAlignment.center, // Căn giữa theo chiều ngang
-      children: [
-        _buildProfileSection(), // Profile section
-        const SizedBox(height: 20),
-        // Nội dung thay đổi dựa trên nút được chọn
-        if (selectedButton == 'Convert') ExchangeForm(),
-        if (selectedButton == 'Send')   SendMoneyForm(),
-        if (selectedButton == 'Charts') ChartForm(),
-        if (selectedButton == 'Near me') LocationForm(),
-        const SizedBox(height: 40), // Khoảng cách dưới cùng
-      ],
-    ),
-  );
-}
-
-
-
-Widget _buildProfileSection() {
-    return Row(
-      children: [
-        const SizedBox(width: 30),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+  Widget _buildContent() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(width: 20),
-            OptionButton(
-              icon: Icons.account_circle,
-              label: 'Convert',
-              onPressed: () {
-                _onButtonPressed('Convert');
-              },
-              isSelected: selectedButton == 'Convert',
-            ),
-            const SizedBox(width: 20),
-            OptionButton(
-              icon: Icons.security,
-              label: 'Send',
-              onPressed: () {
-                _onButtonPressed('Send');
-              },
-              isSelected: selectedButton == 'Send',
-            ),
-            const SizedBox(width: 20),
-            OptionButton(
-              icon: Icons.payment,
-              label: 'Charts',
-              onPressed: () {
-                _onButtonPressed('Charts');
-              },
-              isSelected: selectedButton == 'Charts',
-            ),
-            const SizedBox(width: 20),
-            OptionButton(
-              icon: Icons.notifications,
-              label: 'Near me',
-              onPressed: () {
-                _onButtonPressed('Near me');
-              },
-              isSelected: selectedButton == 'Near me',
-            ),
+            _buildProfileSection(),
+            const SizedBox(height: 20),
+            // Dynamic content based on the selected button
+            if (selectedButton == 'Convert') ExchangeForm(),
+            if (selectedButton == 'Send') SendMoneyForm(),
+            if (selectedButton == 'Charts') ChartForm(),
+            if (selectedButton == 'Near me') LocationForm(),
+            const SizedBox(height: 40),
           ],
         ),
-        const Spacer(),
-      ],
+      ),
     );
   }
 
-    
+  Widget _buildProfileSection() {
+    return Center(
+      // Center the entire content of the Row
+      child: Row(
+        mainAxisSize: MainAxisSize.min, // Shrink Row to fit its children
+        mainAxisAlignment:
+            MainAxisAlignment.center, // Center children horizontally
+        children: [
+          OptionButton(
+            icon: Icons.account_circle,
+            label: 'Convert',
+            onPressed: () {
+              _onButtonPressed('Convert');
+            },
+            isSelected: selectedButton == 'Convert',
+          ),
+          const SizedBox(width: 20),
+          OptionButton(
+            icon: Icons.security,
+            label: 'Send',
+            onPressed: () {
+              _onButtonPressed('Send');
+            },
+            isSelected: selectedButton == 'Send',
+          ),
+          const SizedBox(width: 20),
+          OptionButton(
+            icon: Icons.payment,
+            label: 'Charts',
+            onPressed: () {
+              _onButtonPressed('Charts');
+            },
+            isSelected: selectedButton == 'Charts',
+          ),
+          const SizedBox(width: 20),
+          OptionButton(
+            icon: Icons.notifications,
+            label: 'Near me',
+            onPressed: () {
+              _onButtonPressed('Near me');
+            },
+            isSelected: selectedButton == 'Near me',
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFooter() {
     return Container(
       color: Colors.black,
@@ -296,6 +292,59 @@ Widget _buildProfileSection() {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ],
+    );
+  }
+
+  Widget _buildTransferMoneySection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Title
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Text(
+              'Transfer money across borders',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          // Features list
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildFeatureItemWithImage(
+                  'assets/images/feature-icon-1.png', 'Fast & hassle-free'),
+              _buildFeatureItemWithImage('assets/images/feature-icon-2.png',
+                  'Trusted by over 3M customers'),
+              _buildFeatureItemWithImage(
+                  'assets/images/feature-icon-3.png', 'Global 24/7 support'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItemWithImage(String imagePath, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(imagePath, width: 24, height: 24), // Icon image
+          SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
     );
   }
 }

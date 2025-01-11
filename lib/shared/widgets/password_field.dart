@@ -3,37 +3,47 @@ import 'package:flutter_application_1/app/constants.dart';
 import 'package:flutter_application_1/features/signUp/signup_service.dart';
 
 class PasswordField extends StatefulWidget {
+  final TextEditingController passwordController; // Controller từ widget cha
+  final String hintText; // Placeholder cho TextField
+  final ValidationService?
+      validationService; // Dịch vụ kiểm tra mật khẩu tùy chọn
+
+  const PasswordField({
+    Key? key,
+    required this.passwordController,
+    this.hintText = "Enter Your Password", // Giá trị mặc định
+    this.validationService,
+  }) : super(key: key);
+
   @override
   _PasswordFieldState createState() => _PasswordFieldState();
 }
 
 class _PasswordFieldState extends State<PasswordField> {
-  final TextEditingController _passwordController = TextEditingController();
   String? _passwordError;
-  final ValidationService _validationService = ValidationService();
+  bool _isObscured = true;
 
   void _validatePassword() {
-    final password = _passwordController.text;
+    // Sử dụng validation service nếu được cung cấp
+    final validationService = widget.validationService ?? ValidationService();
+    final password = widget.passwordController.text;
     setState(() {
-      _passwordError = _validationService.validatePassword(password);
+      _passwordError = validationService.validatePassword(password);
     });
   }
-
-  bool _isObscured = true;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Password input field
         TextField(
-          controller: _passwordController,
+          controller:
+              widget.passwordController, // Controller được truyền từ ngoài
           obscureText: _isObscured,
-          onChanged: (value) =>
-              _validatePassword(), // Kiểm tra password khi nhập
+          onChanged: (value) => _validatePassword(),
           decoration: inputFieldDecoration.copyWith(
-            hintText: "Enter Your Password",
+            hintText: widget.hintText, // Placeholder tùy chỉnh
             errorText: _passwordError, // Hiển thị lỗi nếu có
             suffixIcon: IconButton(
               icon: Icon(
@@ -41,7 +51,7 @@ class _PasswordFieldState extends State<PasswordField> {
               ),
               onPressed: () {
                 setState(() {
-                  _isObscured = !_isObscured; // Toggle visibility
+                  _isObscured = !_isObscured; // Toggle chế độ ẩn/hiện mật khẩu
                 });
               },
             ),

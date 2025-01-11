@@ -166,7 +166,5 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   // Placeholder widget for payment methods settings
-  Widget _buildPaymentMethodsSettings() {
-    return Center(child: Text('Payment Methods Settings'));
-  }
+
 }

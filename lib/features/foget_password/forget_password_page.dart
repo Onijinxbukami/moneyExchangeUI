@@ -16,16 +16,10 @@ class ForgetPasswordPage extends StatefulWidget {
 }
 
 class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
-  final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
-
- 
-  String? _emailError;
- 
-
   final ValidationService _validationService = ValidationService();
 
+  String? _emailError;
 
   void _validateEmail() {
     final email = _emailController.text;
@@ -33,8 +27,6 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
       _emailError = _validationService.validateEmail(email);
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -44,33 +36,30 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
         backgroundColor: lightColor,
         elevation: 0,
         toolbarHeight: 80,
-    title: Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-
-    Padding(
-      padding: const EdgeInsets.only(top: 20, left: 20), 
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, Routes.homepage);
-          },
-          child: Text(
-            "MoneyExchange",
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 20, left: 20),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(context, Routes.homepage);
+                  },
+                  child: Text(
+                    "MoneyExchange",
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ),
-    ),
-  ],
-),
-
-
         actions: [
           // Nút Login ở bên phải
           Padding(
@@ -145,13 +134,16 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                   const SizedBox(height: verticalSpacing),
 
                   // Username Input
-                  
+
                   const SizedBox(height: verticalSpacing),
 
                   const Text("Email", style: labelStyle),
                   const SizedBox(height: inputSpacing),
-                  EmailField(),
-
+                  EmailField(
+                    emailController:
+                        _emailController, // Gán controller từ màn hình cha
+                    hintText: "Enter Your Email", // Placeholder tùy chỉnh
+                  ),
 
                   // "Don't have an account?" text with the login button next to it
                   Padding(
