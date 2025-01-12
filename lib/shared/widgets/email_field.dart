@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
-import 'package:flutter_application_1/features/signUp/signup_service.dart';
+import 'package:flutter_application_1/features/auth/signUp/signup_service.dart';
 
 class EmailField extends StatefulWidget {
   final TextEditingController
@@ -9,13 +9,14 @@ class EmailField extends StatefulWidget {
   final ValidationService? validationService; // Dịch vụ kiểm tra email tùy chọn
 
   const EmailField({
-    Key? key,
+    super.key,
     required this.emailController,
     this.hintText = "Enter Your Email", // Giá trị mặc định
     this.validationService,
-  }) : super(key: key);
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _EmailFieldState createState() => _EmailFieldState();
 }
 

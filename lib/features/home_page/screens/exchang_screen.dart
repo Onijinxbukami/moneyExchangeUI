@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/shared/widgets/numberic_field.dart';
 
 class ExchangeForm extends StatefulWidget {
-  const ExchangeForm({Key? key}) : super(key: key);
+  const ExchangeForm({super.key});
 
   @override
   State<ExchangeForm> createState() => _ExchangeFormState();

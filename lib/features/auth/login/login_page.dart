@@ -6,19 +6,18 @@ import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/password_field.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
-
-
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   Future<void> _handleLogin() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -151,9 +150,8 @@ class _LoginPageState extends State<LoginPage> {
                   const Text("Email", style: labelStyle),
                   const SizedBox(height: inputSpacing),
                   EmailField(
-                    emailController:
-                        _emailController, 
-                    hintText: "Enter Your Email", 
+                    emailController: _emailController,
+                    hintText: "Enter Your Email",
                   ),
 
                   const SizedBox(height: verticalSpacing),
@@ -162,9 +160,8 @@ class _LoginPageState extends State<LoginPage> {
                   const Text("Password", style: labelStyle),
                   const SizedBox(height: inputSpacing),
                   PasswordField(
-                    passwordController:
-                        _passwordController, 
-                    hintText: "Enter Your Password", 
+                    passwordController: _passwordController,
+                    hintText: "Enter Your Password",
                   ),
                   const SizedBox(height: verticalSpacing),
 
@@ -179,18 +176,17 @@ class _LoginPageState extends State<LoginPage> {
                           horizontal: 80,
                           vertical: 16,
                         ),
-                        minimumSize: const Size(
-                            double.infinity, 56), // Full width and fixed height
+                        minimumSize: const Size(double.infinity, 56),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(8.0), // Rounded corners
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                       ),
                       child: const Text(
                         "Login",
                         style: TextStyle(
-                          fontSize: 16, // Font size for button text
-                          fontWeight: FontWeight.bold, // Bold text
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -230,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   // "Don't have an account?" text with the login button next to it
                   Padding(
-                    padding: const EdgeInsets.only(top: 16),
+                    padding: const EdgeInsets.only(top: 12),
                     child: Row(
                       mainAxisAlignment:
                           MainAxisAlignment.center, // Center align the row

@@ -3,7 +3,7 @@ import 'package:flutter_application_1/features/user_profile/screens/payment_sett
 
 import 'package:flutter_application_1/features/user_profile/screens/security_settings_screen.dart';
 import 'package:flutter_application_1/features/user_profile/screens/sideBar_screens.dart';
-import 'package:flutter_application_1/features/user_profile/selectionButton.dart';
+import 'package:flutter_application_1/features/user_profile/screens/selectionButton.dart';
 import 'package:flutter_application_1/features/user_profile/screens/notification_setting_screen.dart';
 import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
 
@@ -11,6 +11,7 @@ class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _UserProfilePageState createState() => _UserProfilePageState();
 }
 

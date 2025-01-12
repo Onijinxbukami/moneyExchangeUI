@@ -1,3 +1,4 @@
+// ignore: file_names
 import 'package:flutter/material.dart';
 
 class OptionButton extends StatelessWidget {
@@ -6,7 +7,7 @@ class OptionButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool isSelected;
 
-  const OptionButton({
+  const OptionButton({super.key, 
     required this.icon,
     required this.label,
     required this.onPressed,

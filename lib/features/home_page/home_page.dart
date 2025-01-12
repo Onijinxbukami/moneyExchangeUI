@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/charts_screen.dart';
-import 'package:flutter_application_1/features/user_profile/selectionButton.dart';
+import 'package:flutter_application_1/features/user_profile/screens/selectionButton.dart';
 import 'package:flutter_application_1/features/home_page/screens/exchang_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/location_screen.dart';

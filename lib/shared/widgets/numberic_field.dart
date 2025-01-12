@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class NumericField extends StatefulWidget {
+  const NumericField({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _NumericFieldState createState() => _NumericFieldState();
 }
 

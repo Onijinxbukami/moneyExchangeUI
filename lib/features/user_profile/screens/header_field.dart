@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 
 class HeaderWidget extends StatefulWidget {
+  const HeaderWidget({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _HeaderWidgetState createState() => _HeaderWidgetState();
 }
 
