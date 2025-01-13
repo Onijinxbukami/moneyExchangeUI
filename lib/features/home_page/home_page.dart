@@ -30,24 +30,54 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildTransferMoneySection(),
-            _buildContent(),
-            _buildFeaturesSection(),
-            _buildFooter(),
-          ],
-        ),
+      backgroundColor: const Color(0xFF433883),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isMobile = constraints.maxWidth < 600;
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                // Header
+                _buildHeader(),
+
+                // Transfer Money Section
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 16 : 32,
+                    vertical: isMobile ? 8 : 16,
+                  ),
+                  child: _buildTransferMoneySection(),
+                ),
+
+                // Content Section
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 16 : 32,
+                    vertical: isMobile ? 8 : 16,
+                  ),
+                  child: _buildContent(),
+                ),
+
+                // Footer Section
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 16 : 32,
+                    vertical: isMobile ? 8 : 16,
+                  ),
+                  child: _buildFooter(),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      color: Colors.black,
+      color: const Color(0xFF6610F2),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -59,27 +89,32 @@ class _HomePageState extends State<HomePage> {
             fit: BoxFit.contain,
           ),
           // Menu Items
-          Row(
-            children: [
-              _buildNavbarItem('Home', onTap: () {}),
-              _buildNavbarItem('Send', onTap: () {}),
-              _buildNavbarItem('Receive', onTap: () {}),
-              _buildNavbarItem('Help', onTap: () {}),
-            ],
-          ),
+
           // Language Selector and Buttons
           Row(
             children: [
               DropdownButton<String>(
                 value: _selectedLanguage,
-                dropdownColor: Colors.black,
+                dropdownColor: Colors.white,
                 items: ['EN', 'BN', 'ES', 'NL']
                     .map(
                       (lang) => DropdownMenuItem(
                         value: lang,
-                        child: Text(
-                          lang,
-                          style: const TextStyle(color: Colors.white),
+                        child: Row(
+                          children: [
+                            Image.asset(
+                                'assets/images/lang.png', // Đường dẫn tới icon của bạn
+                                height: 20, // Độ cao của icon
+                                width: 20, // Độ rộng của icon
+                                fit: BoxFit.contain,
+                                color: Colors.white),
+                            const SizedBox(
+                                width: 8), // Khoảng cách giữa icon và văn bản
+                            Text(
+                              lang,
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ],
                         ),
                       ),
                     )
@@ -100,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                   side: const BorderSide(color: Colors.white),
                 ),
                 child: const Text(
-                  'Login',
+                  'LOGIN',
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -109,40 +144,20 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   Navigator.pushNamed(context, Routes.signup);
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(
+                      0xFF5732C6), // Màu nền của nút (background-color: #5732C6)
+                  shadowColor: const Color(0xFF000000), // Màu bóng đổ
+                  elevation: 4, // Độ cao của bóng đổ
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8), // Bo góc cho nút
+                  ),
+                ),
                 child: const Text(
-                  'Sign up',
-                  style: TextStyle(color: Colors.white),
+                  'SIGN UP',
+                  style: TextStyle(color: Colors.white), // Màu chữ là trắng
                 ),
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeaturesSection() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-      child: Column(
-        children: [
-          const Text(
-            "Our Features",
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildFeatureItem(Icons.send, "Send Payment"),
-              _buildFeatureItem(Icons.payment, "Receive Payment"),
-              _buildFeatureItem(Icons.help, "Request Payment"),
-              _buildFeatureItem(Icons.error, "Have a Problem"),
             ],
           ),
         ],
@@ -173,49 +188,57 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildProfileSection() {
-    return Center(
-      // Center the entire content of the Row
-      child: Row(
-        mainAxisSize: MainAxisSize.min, // Shrink Row to fit its children
-        mainAxisAlignment:
-            MainAxisAlignment.center, // Center children horizontally
-        children: [
-          OptionButton(
-            icon: Icons.account_circle,
-            label: 'Convert',
-            onPressed: () {
-              _onButtonPressed('Convert');
-            },
-            isSelected: selectedButton == 'Convert',
-          ),
-          const SizedBox(width: 20),
-          OptionButton(
-            icon: Icons.security,
-            label: 'Send',
-            onPressed: () {
-              _onButtonPressed('Send');
-            },
-            isSelected: selectedButton == 'Send',
-          ),
-          const SizedBox(width: 20),
-          OptionButton(
-            icon: Icons.payment,
-            label: 'Charts',
-            onPressed: () {
-              _onButtonPressed('Charts');
-            },
-            isSelected: selectedButton == 'Charts',
-          ),
-          const SizedBox(width: 20),
-          OptionButton(
-            icon: Icons.notifications,
-            label: 'Near me',
-            onPressed: () {
-              _onButtonPressed('Near me');
-            },
-            isSelected: selectedButton == 'Near me',
-          ),
-        ],
+    final isMobile =
+        MediaQuery.of(context).size.width < 600; // Kiểm tra nếu là màn hình nhỏ
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Wrap(
+          spacing: isMobile ? 12 : 20, // Khoảng cách ngang giữa các nút
+          runSpacing: isMobile ? 16 : 24, // Khoảng cách dọc giữa các hàng
+          alignment: WrapAlignment.center, // Canh giữa các nút
+          children: [
+            _buildOptionButton(
+              icon: Icons.account_circle,
+              label: 'Convert',
+              isMobile: isMobile,
+            ),
+            _buildOptionButton(
+              icon: Icons.security,
+              label: 'Send',
+              isMobile: isMobile,
+            ),
+            _buildOptionButton(
+              icon: Icons.payment,
+              label: 'Charts',
+              isMobile: isMobile,
+            ),
+            _buildOptionButton(
+              icon: Icons.notifications,
+              label: 'Near me',
+              isMobile: isMobile,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionButton({
+    required IconData icon,
+    required String label,
+    required bool isMobile,
+  }) {
+    return SizedBox(
+      width: isMobile ? 140 : 180, // Chiều rộng nút tùy thuộc vào thiết bị
+      child: OptionButton(
+        icon: icon,
+        label: label,
+        onPressed: () {
+          _onButtonPressed(label);
+        },
+        isSelected: selectedButton == label,
       ),
     );
   }
@@ -263,60 +286,45 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Helper for Navbar Items
-  Widget _buildNavbarItem(String title, {VoidCallback? onTap}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: InkWell(
-        onTap: onTap,
-        child: Text(
-          title,
-          style: const TextStyle(color: Colors.white, fontSize: 16),
-        ),
-      ),
-    );
-  }
-
-  // Helper for Feature Items
-  Widget _buildFeatureItem(IconData icon, String title) {
-    return Column(
-      children: [
-        CircleAvatar(
-          backgroundColor: Colors.blue[100],
-          radius: 30,
-          child: Icon(icon, color: Colors.blue, size: 30),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ],
-    );
-  }
-
   Widget _buildTransferMoneySection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(
+        MediaQuery.of(context).size.width > 600
+            ? 32
+            : 16, // Điều chỉnh padding cho màn hình rộng
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Title
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).size.width > 600
+                  ? 24
+                  : 16, // Điều chỉnh khoảng cách dưới tiêu đề
+            ),
             child: Text(
               'Transfer money across borders',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: MediaQuery.of(context).size.width > 600
+                    ? 32
+                    : 24, // Điều chỉnh font-size cho các thiết bị lớn
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ),
 
-          // Features list
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          // Features list (Dùng Wrap thay vì Row để hiển thị tính năng linh hoạt hơn trên cả mobile và web)
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: MediaQuery.of(context).size.width > 600
+                ? 40
+                : 20, // Điều chỉnh khoảng cách giữa các item
+            runSpacing: MediaQuery.of(context).size.width > 600
+                ? 24
+                : 16, // Khoảng cách giữa các dòng
             children: [
               _buildFeatureItemWithImage(
                   'assets/images/feature-icon-1.png', 'Fast & hassle-free'),
@@ -337,11 +345,24 @@ class _HomePageState extends State<HomePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(imagePath, width: 24, height: 24), // Icon image
-          SizedBox(width: 8),
+          Image.asset(imagePath,
+              width: MediaQuery.of(context).size.width > 600 ? 30 : 24,
+              height: MediaQuery.of(context).size.width > 600
+                  ? 30
+                  : 24), // Điều chỉnh kích thước hình ảnh
+          SizedBox(
+              width: MediaQuery.of(context).size.width > 600
+                  ? 16
+                  : 8), // Khoảng cách giữa icon và văn bản
           Text(
             text,
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width > 600
+                  ? 18
+                  : 16, // Điều chỉnh font-size cho các thiết bị lớn
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

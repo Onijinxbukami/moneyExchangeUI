@@ -107,23 +107,26 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Row(
         children: [
+          // Expanded for background image
           Expanded(
             flex: 1,
             child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/login-reg-bg.png'),
-                  fit: BoxFit.scaleDown,
+                  fit: BoxFit
+                      .cover, // Use BoxFit.cover for better responsiveness
                   alignment: Alignment.centerLeft,
                 ),
               ),
             ),
           ),
+          // Expanded for form content
           Expanded(
             flex: 1,
             child: SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: horizontalPadding),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16), // Adjust padding for smaller screens
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -140,38 +143,32 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
-                  // Register to continue
-                  const SizedBox(height: verticalSpacing),
 
                   // Email Input
                   const Text("Email", style: labelStyle),
-                  const SizedBox(height: inputSpacing),
+                  const SizedBox(height: 8),
                   EmailField(
                     emailController: _emailController,
                     hintText: "Enter Your Email",
                   ),
-
-                  const SizedBox(height: verticalSpacing),
+                  const SizedBox(height: 16),
 
                   // Password Input
                   const Text("Password", style: labelStyle),
-                  const SizedBox(height: inputSpacing),
+                  const SizedBox(height: 8),
                   PasswordField(
                     passwordController: _passwordController,
                     hintText: "Enter Your Password",
                   ),
-                  const SizedBox(height: verticalSpacing),
+                  const SizedBox(height: 16),
 
-                  // Sign Up Button
+                  // Login Button
                   Center(
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _handleLogin,
-                      // Navigator.pushNamed(context, Routes.userprofile);
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF4743C9), // Button color
+                        backgroundColor: const Color(0xFF4743C9),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 80,
                           vertical: 16,
@@ -192,11 +189,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
 
+                  // Forgot Password Section
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center, // Center align the row
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
                           "Forgot your password?",
@@ -204,8 +201,6 @@ class _LoginPageState extends State<LoginPage> {
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: Color.fromARGB(255, 37, 34, 109),
-                            letterSpacing: 1.5,
-                            height: 1.2,
                           ),
                         ),
                         TextButton(
@@ -224,12 +219,12 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                   ),
-                  // "Don't have an account?" text with the login button next to it
+
+                  // Sign Up Section
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center, // Center align the row
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
                           "Don't have an account?",
@@ -237,13 +232,10 @@ class _LoginPageState extends State<LoginPage> {
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: Color.fromARGB(255, 37, 34, 109),
-                            letterSpacing: 1.5,
-                            height: 1.2,
                           ),
                         ),
                         TextButton(
                           onPressed: () {
-                            // Handle login action
                             Navigator.pushNamed(context, Routes.signup);
                           },
                           child: const Text(
@@ -259,17 +251,16 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
 
+                  // Social Media Sign-In Buttons
                   const SizedBox(height: 25),
                   Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center, // Canh giữa hai nút
                     children: [
                       Expanded(
                         child: GoogleSignInButton(
                           onPressed: () {},
                         ),
                       ),
-                      const SizedBox(width: 16), // Khoảng cách giữa hai nút
+                      const SizedBox(width: 16),
                       Expanded(
                         child: FacebookSignInButton(
                           onPressed: () {},
