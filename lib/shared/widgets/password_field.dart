@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
-import 'package:flutter_application_1/features/signUp/signup_service.dart';
+import 'package:flutter_application_1/features/auth/signUp/signup_service.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController passwordController; // Controller từ widget cha
@@ -9,13 +9,14 @@ class PasswordField extends StatefulWidget {
       validationService; // Dịch vụ kiểm tra mật khẩu tùy chọn
 
   const PasswordField({
-    Key? key,
+    super.key,
     required this.passwordController,
     this.hintText = "Enter Your Password", // Giá trị mặc định
     this.validationService,
-  }) : super(key: key);
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _PasswordFieldState createState() => _PasswordFieldState();
 }
 

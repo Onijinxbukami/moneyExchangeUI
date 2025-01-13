@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/shared/widgets/numberic_field.dart';
 
 class SendMoneyForm extends StatefulWidget {
-  const SendMoneyForm({Key? key}) : super(key: key);
+  const SendMoneyForm({super.key});
 
   @override
   State<SendMoneyForm> createState() => _SendMoneyFormState();

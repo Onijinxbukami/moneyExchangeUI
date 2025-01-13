@@ -6,7 +6,7 @@ import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart'
 import 'package:flutter_application_1/shared/widgets/password_field.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
-import 'package:flutter_application_1/features/signUp/signup_service.dart';
+import 'package:flutter_application_1/features/auth/signUp/signup_service.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -22,9 +22,8 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final ValidationService _validationService = ValidationService();
-  bool _isLoading = false;
+  final bool _isLoading = false;
   String? _userNameError;
-  String? _emailError;
   String? _phoneNumberError;
 
   Future<void> _handleRegister() async {
@@ -55,13 +54,6 @@ class _SignupPageState extends State<SignupPage> {
     final userName = _userNameController.text;
     setState(() {
       _userNameError = _validationService.validateUsername(userName);
-    });
-  }
-
-  void _validateEmail() {
-    final email = _emailController.text;
-    setState(() {
-      _emailError = _validationService.validateEmail(email);
     });
   }
 
@@ -277,6 +269,7 @@ class _SignupPageState extends State<SignupPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),

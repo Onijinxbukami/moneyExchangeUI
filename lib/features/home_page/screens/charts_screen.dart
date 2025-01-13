@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/shared/widgets/numberic_field.dart';
 
 class ChartForm extends StatefulWidget {
-  const ChartForm({Key? key}) : super(key: key);
+  const ChartForm({super.key});
 
   @override
   State<ChartForm> createState() => _ChartFormState();

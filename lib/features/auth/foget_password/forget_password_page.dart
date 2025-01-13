@@ -5,7 +5,7 @@ import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dar
 import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
-import 'package:flutter_application_1/features/signUp/signup_service.dart';
+import 'package:flutter_application_1/features/auth/signUp/signup_service.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({super.key});

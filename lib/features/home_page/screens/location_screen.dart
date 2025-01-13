@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LocationForm extends StatefulWidget {
-  const LocationForm({Key? key}) : super(key: key);
+  const LocationForm({super.key});
 
   @override
   State<LocationForm> createState() => _LocationFormState();

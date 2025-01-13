@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/user_profile/selectionButton.dart';
+import 'package:flutter_application_1/features/user_profile/screens/selectionButton.dart';
 
 class ProfileSection extends StatefulWidget {
   final String name;
