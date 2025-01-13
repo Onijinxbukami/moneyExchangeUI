@@ -209,29 +209,37 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(16.0),
       child: Center(
         child: Wrap(
-          spacing: isMobile ? 12 : 20, // Khoảng cách ngang giữa các nút
-          runSpacing: isMobile ? 16 : 24, // Khoảng cách dọc giữa các hàng
-          alignment: WrapAlignment.center, // Canh giữa các nút
+          spacing: isMobile ? 8 : 16, // Giảm khoảng cách cho thiết bị nhỏ
+          runSpacing: isMobile ? 12 : 24,
+          alignment: WrapAlignment.center,
           children: [
-            _buildOptionButton(
-              icon: Icons.account_circle,
-              label: 'Convert',
-              isMobile: isMobile,
+            Flexible(
+              child: _buildOptionButton(
+                icon: Icons.account_circle,
+                label: 'Convert',
+                isMobile: isMobile,
+              ),
             ),
-            _buildOptionButton(
-              icon: Icons.security,
-              label: 'Send',
-              isMobile: isMobile,
+            Flexible(
+              child: _buildOptionButton(
+                icon: Icons.security,
+                label: 'Send',
+                isMobile: isMobile,
+              ),
             ),
-            _buildOptionButton(
-              icon: Icons.payment,
-              label: 'Charts',
-              isMobile: isMobile,
+            Flexible(
+              child: _buildOptionButton(
+                icon: Icons.payment,
+                label: 'Charts',
+                isMobile: isMobile,
+              ),
             ),
-            _buildOptionButton(
-              icon: Icons.notifications,
-              label: 'Near me',
-              isMobile: isMobile,
+            Flexible(
+              child: _buildOptionButton(
+                icon: Icons.notifications,
+                label: 'Near me',
+                isMobile: isMobile,
+              ),
             ),
           ],
         ),
@@ -244,8 +252,16 @@ class _HomePageState extends State<HomePage> {
     required String label,
     required bool isMobile,
   }) {
+    double buttonWidth = isMobile ? 140 : 180;
+
+    // Điều chỉnh chiều rộng dựa trên kích thước màn hình
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth < 360) {
+      buttonWidth = (screenWidth / 2) - 24; // Dành không gian cho khoảng cách
+    }
+
     return SizedBox(
-      width: isMobile ? 140 : 180, // Chiều rộng nút tùy thuộc vào thiết bị
+      width: buttonWidth,
       child: OptionButton(
         icon: icon,
         label: label,

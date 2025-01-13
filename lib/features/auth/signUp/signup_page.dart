@@ -25,6 +25,7 @@ class _SignupPageState extends State<SignupPage> {
   final bool _isLoading = false;
   String? _userNameError;
   String? _phoneNumberError;
+  String _selectedLanguage = 'EN';
 
   Future<void> _handleRegister() async {
     // Kiểm tra các trường nhập liệu
@@ -67,238 +68,262 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: lightColor,
-      appBar: AppBar(
         backgroundColor: lightColor,
-        elevation: 0,
-        toolbarHeight: 80,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20, left: 20),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, Routes.homepage);
-                  },
-                  child: Text(
-                    "MoneyExchange",
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF6610F2), // Màu nền của app bar
+          elevation: 0,
+          toolbarHeight: 80,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Logo
+              Image.asset(
+                'assets/images/logo.png', // Đường dẫn tới logo của bạn
+                height: 20, // Độ cao của logo
+                fit: BoxFit.contain,
               ),
-            ),
-          ],
-        ),
-        actions: [
-          // Nút Login ở bên phải
-          Padding(
-            padding: const EdgeInsets.only(top: 10, right: 20),
-            child: ElevatedButton(
-              onPressed: () {
-                // Handle login action
-                Navigator.pushNamed(context, Routes.login);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF4743C9),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 50,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              child: const Text("Login", style: buttonTextStyle),
-            ),
-          ),
-        ],
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(
-            color: Colors.black,
-            thickness: 1,
-            indent: 0,
-            endIndent: 0,
-          ),
-        ),
-      ),
-      body: Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/login-reg-bg.png'),
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+
+              Row(
                 children: [
-                  // Title
-                  const Center(
-                    child: Text(
-                      "Sign Up",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF4743C9),
-                        letterSpacing: 1.5,
-                        height: 1.2,
+                  // Dropdown ngôn ngữ
+                  DropdownButton<String>(
+                    value: _selectedLanguage,
+                    dropdownColor: Colors.white,
+                    items: ['EN', 'BN', 'ES', 'NL']
+                        .map(
+                          (lang) => DropdownMenuItem(
+                            value: lang,
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/lang.png', // Đường dẫn tới icon của bạn
+                                  height: 20, // Độ cao của icon
+                                  width: 20, // Độ rộng của icon
+                                  fit: BoxFit.contain,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  lang,
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedLanguage = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Nút LOGIN
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, Routes.login);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'LOGIN',
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+            ],
+          ),
+        ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenWidth = constraints.maxWidth;
 
-                  const SizedBox(height: 16),
-
-                  const SizedBox(height: verticalSpacing),
-
-                  // Username Input
-                  const Text("Username", style: labelStyle),
-                  const SizedBox(height: inputSpacing),
-                  TextField(
-                    controller: _userNameController,
-                    obscureText: true,
-                    decoration: inputFieldDecoration.copyWith(
-                      hintText: "Enter Your Username",
-                      errorText: _userNameError,
-                    ),
-                    onChanged: (value) => _validateUserName(),
-                  ),
-
-                  const SizedBox(height: verticalSpacing),
-
-                  const Text("Email", style: labelStyle),
-                  const SizedBox(height: inputSpacing),
-                  EmailField(
-                    emailController:
-                        _emailController, // Gán controller từ màn hình cha
-                    hintText: "Enter Your Email", // Placeholder tùy chỉnh
-                  ),
-
-                  const SizedBox(height: verticalSpacing),
-                  const Text("Phone Number", style: labelStyle),
-                  const SizedBox(height: inputSpacing),
-                  TextField(
-                    controller: _phoneNumberController,
-                    decoration: inputFieldDecoration.copyWith(
-                        hintText: "Enter Your PhoneNumber",
-                        errorText: _phoneNumberError),
-                    onChanged: (value) => _validatePhoneNumber(),
-                  ),
-
-                  const SizedBox(height: verticalSpacing),
-
-                  // Password Input
-                  const Text("Password", style: labelStyle),
-                  const SizedBox(height: inputSpacing),
-                  PasswordField(
-                    passwordController:
-                        _passwordController, // Gán controller từ màn hình cha
-                    hintText: "Enter Your Password", // Placeholder tùy chỉnh
-                  ),
-                  // "Don't have an account?" text with the login button next to it
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center, // Center align the row
-                      children: [
-                        const Text(
-                          "Don't have an account?",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color.fromARGB(255, 37, 34, 109),
-                            letterSpacing: 1.5,
-                            height: 1.2,
-                          ),
+            return Row(
+              children: [
+                // Background Image (Responsive for large screens)
+                if (screenWidth >=
+                    600) // Chỉ hiển thị background image trên các màn hình lớn
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/login-reg-bg.png'),
+                          fit: BoxFit
+                              .cover, // Chỉnh sửa lại để ảnh bao phủ toàn bộ
+                          alignment: Alignment.centerLeft,
                         ),
-                        TextButton(
-                          onPressed: () {
-                            // Handle login action
-                            Navigator.pushNamed(context, Routes.login);
-                          },
-                          child: const Text(
-                            "Login",
+                      ),
+                    ),
+                  ),
+                // Main content (Sign up form)
+                Expanded(
+                  flex: 1,
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth *
+                          0.05, // Điều chỉnh padding theo tỷ lệ màn hình
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title
+                        const Center(
+                          child: Text(
+                            "Sign Up",
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                               color: Color(0xFF4743C9),
+                              letterSpacing: 1.5,
+                              height: 1.2,
                             ),
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        const SizedBox(height: verticalSpacing),
+
+                        // Username Input
+                        const Text("Username", style: labelStyle),
+                        const SizedBox(height: inputSpacing),
+                        TextField(
+                          controller: _userNameController,
+                          obscureText: true,
+                          decoration: inputFieldDecoration.copyWith(
+                            hintText: "Enter Your Username",
+                            errorText: _userNameError,
+                          ),
+                          onChanged: (value) => _validateUserName(),
+                        ),
+                        const SizedBox(height: verticalSpacing),
+
+                        // Email Input
+                        const Text("Email", style: labelStyle),
+                        const SizedBox(height: inputSpacing),
+                        EmailField(
+                          emailController: _emailController,
+                          hintText: "Enter Your Email",
+                        ),
+                        const SizedBox(height: verticalSpacing),
+
+                        // Phone Number Input
+                        const Text("Phone Number", style: labelStyle),
+                        const SizedBox(height: inputSpacing),
+                        TextField(
+                          controller: _phoneNumberController,
+                          decoration: inputFieldDecoration.copyWith(
+                            hintText: "Enter Your PhoneNumber",
+                            errorText: _phoneNumberError,
+                          ),
+                          onChanged: (value) => _validatePhoneNumber(),
+                        ),
+                        const SizedBox(height: verticalSpacing),
+
+                        // Password Input
+                        const Text("Password", style: labelStyle),
+                        const SizedBox(height: inputSpacing),
+                        PasswordField(
+                          passwordController: _passwordController,
+                          hintText: "Enter Your Password",
+                        ),
+
+                        // "Don't have an account?" text with login button
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Don't have an account?",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color.fromARGB(255, 37, 34, 109),
+                                  letterSpacing: 1.5,
+                                  height: 1.2,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, Routes.login);
+                                },
+                                child: const Text(
+                                  "Login",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF4743C9),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: verticalSpacing),
+
+                        // Sign Up Button
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _handleRegister,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF4743C9),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 80,
+                                vertical: 16,
+                              ),
+                              minimumSize: const Size(double.infinity, 56),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: const Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 25),
+
+                        // Social Sign-In Buttons
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: GoogleSignInButton(
+                                onPressed: () {},
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: FacebookSignInButton(
+                                onPressed: () {},
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: verticalSpacing),
-
-                  // Sign Up Button
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleRegister,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4743C9),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 80,
-                          vertical: 16,
-                        ),
-                        minimumSize: const Size(double.infinity, 56),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: const Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 25),
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center, // Canh giữa hai nút
-                    children: [
-                      Expanded(
-                        child: GoogleSignInButton(
-                          onPressed: () {},
-                        ),
-                      ),
-                      const SizedBox(width: 16), // Khoảng cách giữa hai nút
-                      Expanded(
-                        child: FacebookSignInButton(
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+                ),
+              ],
+            );
+          },
+        ));
   }
 
   @override

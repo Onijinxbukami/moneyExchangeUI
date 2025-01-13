@@ -11,9 +11,9 @@ class MoneyExchangePage extends StatefulWidget {
 }
 
 class _MoneyExchangePageState extends State<MoneyExchangePage> {
-
   String selectedDeliveryMethod = 'Bank Transfer'; // Default delivery method
   String selectedPartnerBank = 'HSBC';
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<String> deliveryMethods = [
     'Bank Transfer',
@@ -24,21 +24,33 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        leading: isMobile
+            ? IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+              )
+            : null,
+      ),
+      drawer: isMobile ? Sidebar() : null,
       body: Row(
         children: [
-          // Sidebar
-          Sidebar(),
-          // User Information Area
+          if (!isMobile) Sidebar(), // Sidebar cố định trên web
+
+          // User Information and Content Area
           Expanded(
             child: Column(
               children: [
-                // Header
-                HeaderWidget(),
-                // Content
-                Expanded(
-                  child: _buildContent(),
-                ),
+                // Header Section
+                HeaderWidget(), // Giả sử bạn đã có widget HeaderWidget
+                // Content Section
+                Expanded(child: _buildContent()),
               ],
             ),
           ),
@@ -46,8 +58,6 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
       ),
     );
   }
-
- 
 
   Widget midHeader() {
     return Padding(
@@ -330,14 +340,14 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 20), 
-                        SizedBox(width: 8), 
+                            color: Colors.white, size: 20),
+                        SizedBox(width: 8),
                         Text(
                           'Continue',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            letterSpacing: 1.2, 
+                            letterSpacing: 1.2,
                             color: Colors.white,
                           ),
                         ),
@@ -376,33 +386,6 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
     );
   }
 
-  Widget _buildSecuritySettings() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Security Settings',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        _buildSettingItem(
-          icon: Icons.logout,
-          title: 'Logout',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSettingItem({required IconData icon, required String title}) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.red),
-      title: Text(title),
-      onTap: () {
-        // Handle setting item tap
-      },
-    );
-  }
-
   Widget _buildContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -411,7 +394,6 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
         children: [
           midHeader(),
           const SizedBox(height: 20),
-          _buildSecuritySettings(),
           // Now works correctly
         ],
       ),
@@ -477,6 +459,4 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
       ),
     );
   }
-
- 
 }

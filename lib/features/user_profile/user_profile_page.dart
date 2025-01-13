@@ -17,7 +17,7 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   String? selectedButton;
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   // Function to handle button press and toggle selection
   void _onButtonPressed(String buttonLabel) {
     setState(() {
@@ -31,17 +31,31 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        leading: isMobile
+            ? IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+              )
+            : null,
+      ),
+      drawer: isMobile ? Sidebar() : null,
       body: Row(
         children: [
-          // Sidebar
-          Sidebar(),
-          // User Information Area
+          if (!isMobile) Sidebar(), // Sidebar cố định trên web
+
+          // User Information and Content Area
           Expanded(
             child: Column(
               children: [
                 // Header Section
-                HeaderWidget(),
+                HeaderWidget(), // Giả sử bạn đã có widget HeaderWidget
                 // Content Section
                 Expanded(child: _buildContent()),
               ],
@@ -63,7 +77,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           const SizedBox(height: 20),
           if (selectedButton == 'Account') _buildAccountSettings(),
           if (selectedButton == 'Security') const SecuritySettings(),
-          if (selectedButton == 'Payment Methods') PaymentSettings(),
+          if (selectedButton == 'Payment') PaymentSettings(),
           if (selectedButton == 'Notification') const NotificationSetting(),
         ],
       ),
@@ -71,13 +85,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Widget _buildProfileSection() {
-    return Row(
-      children: [
-        const SizedBox(width: 30),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+    bool isMobile = MediaQuery.of(context).size.width < 600;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          spacing:
+              isMobile ? 8.0 : 20.0, // Điều chỉnh khoảng cách giữa các button
+          runSpacing: isMobile
+              ? 12.0
+              : 20.0, // Khoảng cách giữa các button khi xuống dòng
           children: [
-            const SizedBox(width: 20),
             OptionButton(
               icon: Icons.account_circle,
               label: 'Account',
@@ -86,7 +106,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
               },
               isSelected: selectedButton == 'Account',
             ),
-            const SizedBox(width: 20),
             OptionButton(
               icon: Icons.security,
               label: 'Security',
@@ -95,16 +114,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
               },
               isSelected: selectedButton == 'Security',
             ),
-            const SizedBox(width: 20),
             OptionButton(
               icon: Icons.payment,
-              label: 'Payment Methods',
+              label: 'Payment ',
               onPressed: () {
-                _onButtonPressed('Payment Methods');
+                _onButtonPressed('Payment');
               },
-              isSelected: selectedButton == 'Payment Methods',
+              isSelected: selectedButton == 'Payment',
             ),
-            const SizedBox(width: 20),
             OptionButton(
               icon: Icons.notifications,
               label: 'Notification',
@@ -115,8 +132,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             ),
           ],
         ),
-        const Spacer(),
-      ],
+      ),
     );
   }
 
@@ -167,5 +183,4 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   // Placeholder widget for payment methods settings
-
 }
