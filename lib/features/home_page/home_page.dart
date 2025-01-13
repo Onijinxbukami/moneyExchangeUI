@@ -77,22 +77,23 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHeader() {
     return Container(
-      color: const Color(0xFF6610F2),
+      color: const Color(0xFF6610F2), // Màu nền của header
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Logo
           Image.asset(
             'assets/images/logo.png',
-            height: 40,
+            height: 0,
             fit: BoxFit.contain,
           ),
-          // Menu Items
 
-          // Language Selector and Buttons
+          // Menu Items (Language Selector + Login/Signup)
           Row(
             children: [
+              // Language Dropdown
               DropdownButton<String>(
                 value: _selectedLanguage,
                 dropdownColor: Colors.white,
@@ -108,8 +109,7 @@ class _HomePageState extends State<HomePage> {
                                 width: 20, // Độ rộng của icon
                                 fit: BoxFit.contain,
                                 color: Colors.white),
-                            const SizedBox(
-                                width: 8), // Khoảng cách giữa icon và văn bản
+                            const SizedBox(width: 8),
                             Text(
                               lang,
                               style: const TextStyle(color: Colors.black),
@@ -126,36 +126,50 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: () {
+
+              // LOGIN Button
+              GestureDetector(
+                onTap: () {
                   Navigator.pushNamed(context, Routes.login);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  side: const BorderSide(color: Colors.white),
-                ),
-                child: const Text(
-                  'LOGIN',
-                  style: TextStyle(color: Colors.white),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'LOGIN',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
+
+              // SIGN UP Button
+              GestureDetector(
+                onTap: () {
                   Navigator.pushNamed(context, Routes.signup);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(
-                      0xFF5732C6), // Màu nền của nút (background-color: #5732C6)
-                  shadowColor: const Color(0xFF000000), // Màu bóng đổ
-                  elevation: 4, // Độ cao của bóng đổ
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Bo góc cho nút
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5732C6),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ),
-                child: const Text(
-                  'SIGN UP',
-                  style: TextStyle(color: Colors.white), // Màu chữ là trắng
+                  child: const Text(
+                    'SIGN UP',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],
