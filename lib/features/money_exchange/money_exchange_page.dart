@@ -11,9 +11,9 @@ class MoneyExchangePage extends StatefulWidget {
 }
 
 class _MoneyExchangePageState extends State<MoneyExchangePage> {
-
   String selectedDeliveryMethod = 'Bank Transfer'; // Default delivery method
   String selectedPartnerBank = 'HSBC';
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<String> deliveryMethods = [
     'Bank Transfer',
@@ -24,21 +24,34 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF6610F2),
+        leading: isMobile
+            ? IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+              )
+            : null,
+      ),
+      drawer: isMobile ? Sidebar() : null,
       body: Row(
         children: [
-          // Sidebar
-          Sidebar(),
-          // User Information Area
+          if (!isMobile) Sidebar(), // Sidebar cố định trên web
+
+          // User Information and Content Area
           Expanded(
             child: Column(
               children: [
-                // Header
-                HeaderWidget(),
-                // Content
-                Expanded(
-                  child: _buildContent(),
-                ),
+                // Header Section
+                HeaderWidget(), // Giả sử bạn đã có widget HeaderWidget
+                // Content Section
+                Expanded(child: _buildContent()),
               ],
             ),
           ),
@@ -47,9 +60,8 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
     );
   }
 
- 
-
   Widget midHeader() {
+    bool isMobile = MediaQuery.of(context).size.width < 600;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -69,12 +81,13 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
 
           // Money Exchange Cards
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // "You Send" Card
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(15),
+                  padding: isMobile
+                      ? const EdgeInsets.all(10)
+                      : const EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(12),
@@ -86,8 +99,7 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                       _buildExchangeCard(
                         title: 'You Send',
                         amount: '400.00',
-                        balance: '\$30,700.00',
-                        currency: 'USD',
+
                         flag: Icons.flag, // Placeholder for flag icon
                       ),
                       const SizedBox(height: 10),
@@ -147,16 +159,21 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                 ),
               ),
               const SizedBox(width: 10),
-              const CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.purple,
-                child: Icon(Icons.swap_horiz, color: Colors.white),
-              ),
-              const SizedBox(width: 10),
+              // Swap Icon (For larger screens you can position it in the center)
+              if (!isMobile) ...[
+                const CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.purple,
+                  child: Icon(Icons.swap_horiz, color: Colors.white),
+                ),
+                const SizedBox(width: 10),
+              ],
               // "Recipient Gets" Card
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(15),
+                  padding: isMobile
+                      ? const EdgeInsets.all(10)
+                      : const EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(12),
@@ -168,14 +185,13 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                       _buildExchangeCard(
                         title: 'Recipient Gets',
                         amount: '45162.98',
-                        balance: "Today's rate: 1 GBP = 112.90745 BDT",
-                        currency: 'BDT',
+
                         flag: Icons.flag, // Placeholder for flag icon
                         cardColor: const Color(0xFFEAE6FA),
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        'Bank Transfer Partner',
+                        'Bank Transfer',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -330,14 +346,14 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 20), 
-                        SizedBox(width: 8), 
+                            color: Colors.white, size: 20),
+                        SizedBox(width: 8),
                         Text(
                           'Continue',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            letterSpacing: 1.2, 
+                            letterSpacing: 1.2,
                             color: Colors.white,
                           ),
                         ),
@@ -376,33 +392,6 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
     );
   }
 
-  Widget _buildSecuritySettings() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Security Settings',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        _buildSettingItem(
-          icon: Icons.logout,
-          title: 'Logout',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSettingItem({required IconData icon, required String title}) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.red),
-      title: Text(title),
-      onTap: () {
-        // Handle setting item tap
-      },
-    );
-  }
-
   Widget _buildContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -411,7 +400,6 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
         children: [
           midHeader(),
           const SizedBox(height: 20),
-          _buildSecuritySettings(),
           // Now works correctly
         ],
       ),
@@ -421,19 +409,18 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
   Widget _buildExchangeCard({
     required String title,
     required String amount,
-    required String balance,
-    required String currency,
     required IconData flag,
     Color cardColor = Colors.white,
   }) {
+    bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: isMobile ? const EdgeInsets.all(12) : const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 5,
             offset: const Offset(0, 3),
@@ -445,7 +432,10 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: isMobile ? 14 : 16, // Adjust size based on screen size
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -453,30 +443,22 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
               Expanded(
                 child: Text(
                   amount,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: isMobile ? 18 : 24, // Adjust font size
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
               ),
-              Icon(flag, size: 24, color: Colors.black),
+              Icon(flag,
+                  size: isMobile ? 20 : 24,
+                  color: Colors.black), // Adjust icon size
               const SizedBox(width: 5),
-              Text(
-                currency,
-                style: const TextStyle(fontSize: 16),
-              ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            balance,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
         ],
       ),
     );
   }
-
- 
 }

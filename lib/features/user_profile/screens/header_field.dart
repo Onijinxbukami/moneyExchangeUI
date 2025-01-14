@@ -37,30 +37,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
             ),
           ),
           // Language Dropdown
-          PopupMenuButton<String>(
-            initialValue: _selectedLanguage,
-            icon: const Icon(Icons.language),
-            onSelected: (String value) {
-              setState(() {
-                _selectedLanguage = value;
-              });
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                'English',
-                'Hindi',
-                'English (US)',
-                'Japanese',
-                'Kannada',
-                'Lithuanian'
-              ].map((String language) {
-                return PopupMenuItem<String>(
-                  value: language,
-                  child: Text(language),
-                );
-              }).toList();
-            },
-          ),
+
           // Notifications
           IconButton(
             icon: Stack(

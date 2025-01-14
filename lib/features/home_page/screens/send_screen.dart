@@ -48,7 +48,26 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                     const SnackBar(content: Text("Get Started Pressed!")),
                   );
                 },
-                child: const Text("Get Started"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4743C9), // Màu nền của nút
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 80, // Padding ngang
+                    vertical: 16, // Padding dọc
+                  ),
+                  minimumSize: const Size(double.infinity,
+                      56), // Chiều rộng tự động, chiều cao tối thiểu
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0), // Bo góc của nút
+                  ),
+                ),
+                child: const Text(
+                  "Get Started", // Nội dung nút
+                  style: TextStyle(
+                    fontSize: 16, // Kích thước chữ
+                    fontWeight: FontWeight.bold, // Đậm chữ
+                    color: Colors.white, // Màu chữ trắng
+                  ),
+                ),
               ),
             )
           ],
@@ -103,8 +122,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                 "The Convert rate represents the rate of exchange you will receive when sending your money."),
         _buildInfoRow("Fees", "2.00 GBP"),
         _buildInfoRow("You pay", "402.00 GBP"),
-        _buildInfoRow("Recipient receives (Expected by July 6)", "549.24",
-            isRecipient: true),
+        _buildInfoRow("Recipient receives ", "549.24", isRecipient: true),
       ],
     );
   }
