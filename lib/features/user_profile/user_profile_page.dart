@@ -36,6 +36,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
+        backgroundColor: const Color(0xFF6610F2),
         leading: isMobile
             ? IconButton(
                 icon: Icon(Icons.menu),
@@ -48,15 +49,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
       drawer: isMobile ? Sidebar() : null,
       body: Row(
         children: [
-          if (!isMobile) Sidebar(), // Sidebar cố định trên web
-
-          // User Information and Content Area
+          if (!isMobile) Sidebar(),
           Expanded(
             child: Column(
               children: [
-                // Header Section
-                HeaderWidget(), // Giả sử bạn đã có widget HeaderWidget
-                // Content Section
+                HeaderWidget(),
                 Expanded(child: _buildContent()),
               ],
             ),
@@ -66,7 +63,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  // Builds the main content area based on the selected button
   Widget _buildContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -91,74 +87,121 @@ class _UserProfilePageState extends State<UserProfilePage> {
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Align(
         alignment: Alignment.topLeft,
-        child: Wrap(
-          spacing:
-              isMobile ? 8.0 : 20.0, // Điều chỉnh khoảng cách giữa các button
-          runSpacing: isMobile
-              ? 12.0
-              : 20.0, // Khoảng cách giữa các button khi xuống dòng
-          children: [
-            OptionButton(
-              icon: Icons.account_circle,
-              label: 'Account',
-              onPressed: () {
-                _onButtonPressed('Account');
-              },
-              isSelected: selectedButton == 'Account',
-            ),
-            OptionButton(
-              icon: Icons.security,
-              label: 'Security',
-              onPressed: () {
-                _onButtonPressed('Security');
-              },
-              isSelected: selectedButton == 'Security',
-            ),
-            OptionButton(
-              icon: Icons.payment,
-              label: 'Payment ',
-              onPressed: () {
-                _onButtonPressed('Payment');
-              },
-              isSelected: selectedButton == 'Payment',
-            ),
-            OptionButton(
-              icon: Icons.notifications,
-              label: 'Notification',
-              onPressed: () {
-                _onButtonPressed('Notification');
-              },
-              isSelected: selectedButton == 'Notification',
-            ),
-          ],
+        child: SizedBox(
+          height: isMobile
+              ? 60.0
+              : 80.0, // Điều chỉnh chiều cao cho phù hợp với thiết bị di động
+          child: ListView(
+            scrollDirection: Axis.horizontal, // Cuộn theo chiều ngang
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 12.0), // Khoảng cách giữa các nút
+                child: OptionButton(
+                  icon: Icons.account_circle,
+                  label: 'Account',
+                  onPressed: () {
+                    _onButtonPressed('Account');
+                  },
+                  isSelected: selectedButton == 'Account',
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 12.0), // Khoảng cách giữa các nút
+                child: OptionButton(
+                  icon: Icons.security,
+                  label: 'Security',
+                  onPressed: () {
+                    _onButtonPressed('Security');
+                  },
+                  isSelected: selectedButton == 'Security',
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 12.0), // Khoảng cách giữa các nút
+                child: OptionButton(
+                  icon: Icons.payment,
+                  label: 'Payment',
+                  onPressed: () {
+                    _onButtonPressed('Payment');
+                  },
+                  isSelected: selectedButton == 'Payment',
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 12.0), // Khoảng cách giữa các nút
+                child: OptionButton(
+                  icon: Icons.notifications,
+                  label: 'Notification',
+                  onPressed: () {
+                    _onButtonPressed('Notification');
+                  },
+                  isSelected: selectedButton == 'Notification',
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Account settings form
+// Account settings form
   Widget _buildAccountSettings() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 10, // Column spacing
-          runSpacing: 10, // Row spacing
-          children: [
-            _buildTextField('Last Name', 'Enter your Last Name'),
-            _buildTextField('First Name', 'Enter your First Name'),
-            _buildTextField('Phone Number', 'Enter your Phone Number'),
-            _buildTextField('Email', 'Enter your Email'),
-            _buildTextField('Password', 'Enter your Password',
-                obscureText: true),
-          ],
-        ),
-      ],
+    return SingleChildScrollView(
+      // Cho phép cuộn theo chiều dọc
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 10, // Khoảng cách giữa các trường dữ liệu
+            runSpacing:
+                10, // Khoảng cách giữa các trường dữ liệu khi xuống dòng
+            children: [
+              _buildTextField('Last Name', 'Enter your Last Name'),
+              _buildTextField('First Name', 'Enter your First Name'),
+              _buildTextField('Phone Number', 'Enter your Phone Number'),
+              _buildTextField('Email', 'Enter your Email'),
+              _buildTextField('Password', 'Enter your Password',
+                  obscureText: true),
+            ],
+          ),
+          const SizedBox(height: 20), // Khoảng cách giữa form và nút update
+          ElevatedButton(
+            onPressed: () {
+              // Xử lý cập nhật tài khoản
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  const Color(0xFF4743C9), // Màu nền giống nút login
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 80, vertical: 16), // Padding giống
+              minimumSize: const Size(double.infinity,
+                  56), // Chiều rộng tự động, chiều cao tối thiểu
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(8.0), // Bo tròn góc giống nút login
+              ),
+            ),
+            child: const Text(
+              'Update', // Nội dung nút
+              style: TextStyle(
+                fontSize: 16, // Kích thước chữ giống nút login
+                fontWeight: FontWeight.bold, // Đậm chữ
+                color: Colors.white, // Màu chữ trắng
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 
-  // Helper function for creating text fields
+// Helper function for creating text fields
   Widget _buildTextField(String label, String hint,
       {bool obscureText = false}) {
     return Column(
@@ -171,7 +214,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           obscureText: obscureText,
           decoration: InputDecoration(
             hintText: hint,
-            fillColor: const Color.fromARGB(255, 232, 228, 240),
+            fillColor: Colors.white,
             filled: true,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding:
@@ -181,6 +224,4 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ],
     );
   }
-
-  // Placeholder widget for payment methods settings
 }

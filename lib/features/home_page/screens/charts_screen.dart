@@ -100,50 +100,9 @@ class _ChartFormState extends State<ChartForm> {
         color: Colors.blue.shade50,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildTopLeft(),
-          _buildTopRight(),
-        ],
-      ),
+
     );
   }
 
   // Left section with title and description
-  Widget _buildTopLeft() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
-        Text(
-          "GBP to USD Chart",
-          style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black),
-        ),
-        SizedBox(height: 4),
-        Text(
-          "British Pound to US Dollar",
-          style: TextStyle(fontSize: 14, color: Colors.grey),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTopRight() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: const [
-        Text(
-          "1 GBP = 1.37684 USD",
-          style: TextStyle(
-              fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
-        ),
-        SizedBox(height: 4),
-        Text(
-          "Jul 26, 2021, 08:59 UTC",
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-      ],
-    );
-  }
 }

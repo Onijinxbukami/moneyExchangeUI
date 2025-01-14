@@ -202,46 +202,69 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildProfileSection() {
-    final isMobile =
-        MediaQuery.of(context).size.width < 600; // Kiểm tra nếu là màn hình nhỏ
+    bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: Wrap(
-          spacing: isMobile ? 8 : 16, // Giảm khoảng cách cho thiết bị nhỏ
-          runSpacing: isMobile ? 12 : 24,
-          alignment: WrapAlignment.center,
-          children: [
-            Flexible(
-              child: _buildOptionButton(
-                icon: Icons.account_circle,
-                label: 'Convert',
-                isMobile: isMobile,
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: isMobile
+              ? 60.0
+              : 80.0, // Điều chỉnh chiều cao cho phù hợp với thiết bị di động
+          child: ListView(
+            scrollDirection: Axis.horizontal, // Cuộn theo chiều ngang
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 12.0), // Khoảng cách giữa các nút
+                child: OptionButton(
+                  icon: Icons.account_circle,
+                  label: 'Convert',
+                  onPressed: () {
+                    _onButtonPressed('Convert');
+                  },
+                  isSelected: selectedButton == 'Convert',
+                ),
               ),
-            ),
-            Flexible(
-              child: _buildOptionButton(
-                icon: Icons.security,
-                label: 'Send',
-                isMobile: isMobile,
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 12.0), // Khoảng cách giữa các nút
+                child: OptionButton(
+                  icon: Icons.security,
+                  label: 'Send',
+                  onPressed: () {
+                    _onButtonPressed('Send');
+                  },
+                  isSelected: selectedButton == 'Send',
+                ),
               ),
-            ),
-            Flexible(
-              child: _buildOptionButton(
-                icon: Icons.payment,
-                label: 'Charts',
-                isMobile: isMobile,
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 12.0), // Khoảng cách giữa các nút
+                child: OptionButton(
+                  icon: Icons.payment,
+                  label: 'Charts',
+                  onPressed: () {
+                    _onButtonPressed('Charts');
+                  },
+                  isSelected: selectedButton == 'Charts',
+                ),
               ),
-            ),
-            Flexible(
-              child: _buildOptionButton(
-                icon: Icons.notifications,
-                label: 'Near me',
-                isMobile: isMobile,
+              Padding(
+                padding: const EdgeInsets.only(
+                    right: 12.0), // Khoảng cách giữa các nút
+                child: OptionButton(
+                  icon: Icons.notifications,
+                  label: 'Near me',
+                  onPressed: () {
+                    _onButtonPressed('Near me');
+                  },
+                  isSelected: selectedButton == 'Near me',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -252,16 +275,19 @@ class _HomePageState extends State<HomePage> {
     required String label,
     required bool isMobile,
   }) {
-    double buttonWidth = isMobile ? 140 : 180;
-
-    // Điều chỉnh chiều rộng dựa trên kích thước màn hình
     final screenWidth = MediaQuery.of(context).size.width;
+
+    // Tính toán kích thước nút dựa vào màn hình
+    double buttonWidth =
+        (screenWidth / 2) - 12; // Giảm khoảng cách giữa các nút (24 -> 12)
+
+    // Điều kiện để giảm kích thước nút trên màn hình nhỏ
     if (screenWidth < 360) {
-      buttonWidth = (screenWidth / 2) - 24; // Dành không gian cho khoảng cách
+      buttonWidth = (screenWidth / 2) - 8; // Giảm khoảng cách cho màn hình nhỏ
     }
 
     return SizedBox(
-      width: buttonWidth,
+      width: buttonWidth.clamp(100, 180), // Giới hạn chiều rộng
       child: OptionButton(
         icon: icon,
         label: label,

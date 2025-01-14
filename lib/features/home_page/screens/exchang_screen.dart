@@ -47,7 +47,26 @@ class _ExchangeFormState extends State<ExchangeForm> {
                     const SnackBar(content: Text("Get Started Pressed!")),
                   );
                 },
-                child: const Text("Get Started"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4743C9), // Màu nền của nút
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 80, // Padding ngang
+                    vertical: 16, // Padding dọc
+                  ),
+                  minimumSize: const Size(double.infinity,
+                      56), // Chiều rộng tự động, chiều cao tối thiểu
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0), // Bo góc của nút
+                  ),
+                ),
+                child: const Text(
+                  "Get Started", // Nội dung nút
+                  style: TextStyle(
+                    fontSize: 16, // Kích thước chữ
+                    fontWeight: FontWeight.bold, // Đậm chữ
+                    color: Colors.white, // Màu chữ trắng
+                  ),
+                ),
               ),
             )
           ],
@@ -57,54 +76,52 @@ class _ExchangeFormState extends State<ExchangeForm> {
   }
 
   Widget _buildInputSection(
-      String label, String selectedValue, ValueChanged<String?> onChanged) {
-    return Container(
-      padding: const EdgeInsets.all(8), // Add some padding inside the container
-      decoration: BoxDecoration(
-        border:
-            Border.all(color: Colors.grey), // Add border around the container
-        borderRadius:
-            BorderRadius.circular(8), // Rounded corners for the border
-      ),
-
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Use NumericField here for numeric input
-                NumericField(),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          DropdownButton<String>(
-            items: const [
-              DropdownMenuItem(value: "GBP", child: Text("GBP")),
-              DropdownMenuItem(value: "USD", child: Text("USD")),
+    String label, String selectedValue, ValueChanged<String?> onChanged) {
+  return Container(
+    padding: const EdgeInsets.all(8), // Thêm padding trong container
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey), // Thêm border quanh container
+      borderRadius: BorderRadius.circular(8), // Bo góc cho border
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Ô input có thể thao tác
+              NumericField(), 
             ],
-            onChanged: onChanged,
-            value: selectedValue,
-            underline: Container(),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(width: 16),
+        // DropdownButton cho ô input thứ hai, với enabled = false
+        DropdownButton<String>(
+          items: const [
+            DropdownMenuItem(value: "GBP", child: Text("GBP")),
+            DropdownMenuItem(value: "USD", child: Text("USD")),
+          ],
+          onChanged: onChanged, // Chỉ cho phép thao tác với onChanged
+          value: selectedValue,
+          underline: Container(),
+          disabledHint: Text(selectedValue), // Hiển thị giá trị mặc định khi disabled
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildExchangeInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoRow("Exchange Rate", "1.37310",
+        _buildInfoRow("Exchange Rate", "2,000",
             tooltip:
                 "The Convert rate represents the rate of exchange you will receive when sending your money."),
         _buildInfoRow("Fees", "2.00 GBP"),
         _buildInfoRow("You pay", "402.00 GBP"),
-        _buildInfoRow("Recipient receives (Expected by July 6)", "549.24",
-            isRecipient: true),
       ],
     );
   }

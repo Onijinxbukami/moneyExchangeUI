@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 
 class Sidebar extends StatelessWidget {
-  final String _selectedItem = 'Dashboard'; // Tracks the selected menu item
+  final String _selectedItem = 'Dashboard';
+
+  const Sidebar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,43 +22,27 @@ class Sidebar extends StatelessWidget {
           ),
           _buildSidebarItem(
             icon: Icons.person,
-            title: 'Transaction',
+            title: 'Transaction History',
             onTap: () {
-              _onItemTap('Transaction');
+              Navigator.pushNamed(context, Routes.history);
             },
             isSelected: _selectedItem == 'Transaction',
           ),
           _buildSidebarItem(
-            icon: Icons.payments,
-            title: 'Pay',
+            icon: Icons.money,
+            title: 'Deposite',
             onTap: () {
-              _onItemTap('Pay');
+              Navigator.pushNamed(context, Routes.deposite);
             },
-            isSelected: _selectedItem == 'Pay',
-          ),
-          _buildSidebarItem(
-            icon: Icons.account_balance_wallet,
-            title: 'Receive',
-            onTap: () {
-              _onItemTap('Receive');
-            },
-            isSelected: _selectedItem == 'Receive',
+            isSelected: _selectedItem == 'Deposite',
           ),
           _buildSidebarItem(
             icon: Icons.expand,
             title: 'Exchange',
             onTap: () {
-              Navigator.pushNamed(context, Routes.moneyexchang);
+              Navigator.pushNamed(context, Routes.moneyexchange);
             },
             isSelected: _selectedItem == 'Exchange',
-          ),
-          _buildSidebarItem(
-            icon: Icons.attach_money,
-            title: 'Deposit Money',
-            onTap: () {
-              _onItemTap('Deposit Money');
-            },
-            isSelected: _selectedItem == 'Deposit Money',
           ),
           _buildSidebarItem(
             icon: Icons.money_off,

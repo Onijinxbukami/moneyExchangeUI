@@ -5,8 +5,6 @@ import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dar
 import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
-import 'package:flutter_application_1/features/auth/signUp/signup_service.dart';
-
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({super.key});
 
@@ -17,15 +15,23 @@ class ForgetPasswordPage extends StatefulWidget {
 
 class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
-  final ValidationService _validationService = ValidationService();
 
-  String? _emailError;
+  final bool _isLoading = false;
+  String _selectedLanguage = 'EN';
 
-  void _validateEmail() {
-    final email = _emailController.text;
-    setState(() {
-      _emailError = _validationService.validateEmail(email);
-    });
+  Future<void> _handleLogin() async {
+    if (_emailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng nhập đầy đủ thông tin'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Hiển thị thông tin nhập vào trong console log
+    print('Username: ${_emailController.text}');
   }
 
   @override
@@ -33,216 +39,177 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
     return Scaffold(
       backgroundColor: lightColor,
       appBar: AppBar(
-        backgroundColor: lightColor,
+        backgroundColor: const Color(0xFF6610F2), // Màu nền của app bar
         elevation: 0,
         toolbarHeight: 80,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20, left: 20),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, Routes.homepage);
+            // Logo
+            Image.asset(
+              'assets/images/logo.png', // Đường dẫn tới logo của bạn
+              height: 20, // Độ cao của logo
+              fit: BoxFit.contain,
+            ),
+
+            Row(
+              children: [
+                // Dropdown ngôn ngữ
+                DropdownButton<String>(
+                  value: _selectedLanguage,
+                  dropdownColor: Colors.white,
+                  items: ['EN', 'BN', 'ES', 'NL']
+                      .map(
+                        (lang) => DropdownMenuItem(
+                          value: lang,
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                'assets/images/lang.png', // Đường dẫn tới icon của bạn
+                                height: 20, // Độ cao của icon
+                                width: 20, // Độ rộng của icon
+                                fit: BoxFit.contain,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                lang,
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedLanguage = value!;
+                    });
                   },
-                  child: Text(
-                    "MoneyExchange",
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
                 ),
-              ),
+                const SizedBox(width: 16),
+
+                // Nút LOGIN
+              ],
             ),
           ],
         ),
-        actions: [
-          // Nút Login ở bên phải
-          Padding(
-            padding: const EdgeInsets.only(top: 10, right: 20),
-            child: ElevatedButton(
-              onPressed: () {
-                // Handle login action
-                Navigator.pushNamed(context, Routes.login);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF4743C9),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 50,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              child: const Text("Login", style: buttonTextStyle),
-            ),
-          ),
-        ],
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(
-            color: Colors.black,
-            thickness: 1,
-            indent: 0,
-            endIndent: 0,
-          ),
-        ),
       ),
-      body: Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/login-reg-bg.png'),
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  const Center(
-                    child: Text(
-                      "Forget Password",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF4743C9),
-                        letterSpacing: 1.5,
-                        height: 1.2,
-                      ),
-                    ),
-                  ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
 
-                  const SizedBox(height: 16),
+          return Column(
+            children: [
+              // Thêm khoảng cách giữa AppBar và phần body
+              const SizedBox(height: 10), // Khoảng cách 20 pixels
 
-                  const SizedBox(height: verticalSpacing),
-
-                  // Username Input
-
-                  const SizedBox(height: verticalSpacing),
-
-                  const Text("Email", style: labelStyle),
-                  const SizedBox(height: inputSpacing),
-                  EmailField(
-                    emailController:
-                        _emailController, // Gán controller từ màn hình cha
-                    hintText: "Enter Your Email", // Placeholder tùy chỉnh
-                  ),
-
-                  // "Don't have an account?" text with the login button next to it
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center, // Center align the row
-                      children: [
-                        const Text(
-                          "Don't have an account?",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color.fromARGB(255, 37, 34, 109),
-                            letterSpacing: 1.5,
-                            height: 1.2,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            // Handle login action
-                            Navigator.pushNamed(context, Routes.login);
-                          },
-                          child: const Text(
-                            "Login",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF4743C9),
+              Expanded(
+                child: Row(
+                  children: [
+                    // Background Image
+                    if (screenWidth >=
+                        600) // Hiển thị ảnh nền trên màn hình lớn
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                              image:
+                                  AssetImage('assets/images/login-reg-bg.png'),
+                              fit: BoxFit.cover,
+                              alignment: Alignment.centerLeft,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: verticalSpacing),
+                      ),
 
-                  // Sign Up Button
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _validateEmail();
-                        if (_emailError == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Email is valid")),
-                          );
-                        }
-                        Navigator.pushNamed(context, Routes.userprofile);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4743C9),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 80,
-                          vertical: 16,
+                    // Form Content
+                    Expanded(
+                      flex: 1,
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth *
+                              0.05, // Padding dựa trên tỷ lệ màn hình
                         ),
-                        minimumSize: const Size(double.infinity, 56),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: const Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            const Center(
+                              child: Text(
+                                "FORGET PASSWORD",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF4743C9),
+                                  letterSpacing: 1.5,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                           
+                            const SizedBox(height: 8),
+                            EmailField(
+                              emailController: _emailController,
+                              hintText: "Enter Your Email",
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Submit Button
+                            Center(
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _handleLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF4743C9),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 80,
+                                    vertical: 16,
+                                  ),
+                                  minimumSize: const Size(double.infinity, 56),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "SUBMIT",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 25),
+
+                            // Social Media Buttons
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GoogleSignInButton(onPressed: () {}),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: FacebookSignInButton(onPressed: () {}),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 25),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 25),
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center, // Canh giữa hai nút
-                    children: [
-                      Expanded(
-                        child: GoogleSignInButton(
-                          onPressed: () {},
-                        ),
-                      ),
-                      const SizedBox(width: 16), // Khoảng cách giữa hai nút
-                      Expanded(
-                        child: FacebookSignInButton(
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
   }
 }
