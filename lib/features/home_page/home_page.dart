@@ -207,96 +207,75 @@ class _HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Align(
-        alignment: Alignment.topLeft,
+        alignment: isMobile
+            ? Alignment.topLeft
+            : Alignment.center, // Căn trái trên mobile, căn giữa trên máy tính
         child: SizedBox(
-          height: isMobile
-              ? 60.0
-              : 80.0, // Điều chỉnh chiều cao cho phù hợp với thiết bị di động
-          child: ListView(
-            scrollDirection: Axis.horizontal, // Cuộn theo chiều ngang
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: 12.0), // Khoảng cách giữa các nút
-                child: OptionButton(
-                  icon: Icons.account_circle,
-                  label: 'Convert',
-                  onPressed: () {
-                    _onButtonPressed('Convert');
-                  },
-                  isSelected: selectedButton == 'Convert',
+          height: isMobile ? 60.0 : 80.0, // Điều chỉnh chiều cao cho phù hợp
+          child: isMobile
+              ? ListView(
+                  scrollDirection: Axis.horizontal, // Cuộn ngang trên mobile
+                  children: _buildOptionButtons(),
+                )
+              : Center(
+                  child: Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center, // Căn giữa các nút
+                    children: _buildOptionButtons(),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: 12.0), // Khoảng cách giữa các nút
-                child: OptionButton(
-                  icon: Icons.security,
-                  label: 'Send',
-                  onPressed: () {
-                    _onButtonPressed('Send');
-                  },
-                  isSelected: selectedButton == 'Send',
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: 12.0), // Khoảng cách giữa các nút
-                child: OptionButton(
-                  icon: Icons.payment,
-                  label: 'Charts',
-                  onPressed: () {
-                    _onButtonPressed('Charts');
-                  },
-                  isSelected: selectedButton == 'Charts',
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: 12.0), // Khoảng cách giữa các nút
-                child: OptionButton(
-                  icon: Icons.notifications,
-                  label: 'Near me',
-                  onPressed: () {
-                    _onButtonPressed('Near me');
-                  },
-                  isSelected: selectedButton == 'Near me',
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  Widget _buildOptionButton({
-    required IconData icon,
-    required String label,
-    required bool isMobile,
-  }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Tính toán kích thước nút dựa vào màn hình
-    double buttonWidth =
-        (screenWidth / 2) - 12; // Giảm khoảng cách giữa các nút (24 -> 12)
-
-    // Điều kiện để giảm kích thước nút trên màn hình nhỏ
-    if (screenWidth < 360) {
-      buttonWidth = (screenWidth / 2) - 8; // Giảm khoảng cách cho màn hình nhỏ
-    }
-
-    return SizedBox(
-      width: buttonWidth.clamp(100, 180), // Giới hạn chiều rộng
-      child: OptionButton(
-        icon: icon,
-        label: label,
-        onPressed: () {
-          _onButtonPressed(label);
-        },
-        isSelected: selectedButton == label,
+  List<Widget> _buildOptionButtons() {
+    return [
+      Padding(
+        padding: const EdgeInsets.only(right: 12.0),
+        child: OptionButton(
+          icon: Icons.account_circle,
+          label: 'Convert',
+          onPressed: () {
+            _onButtonPressed('Convert');
+          },
+          isSelected: selectedButton == 'Convert',
+        ),
       ),
-    );
+      Padding(
+        padding: const EdgeInsets.only(right: 12.0),
+        child: OptionButton(
+          icon: Icons.security,
+          label: 'Send',
+          onPressed: () {
+            _onButtonPressed('Send');
+          },
+          isSelected: selectedButton == 'Send',
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(right: 12.0),
+        child: OptionButton(
+          icon: Icons.payment,
+          label: 'Charts',
+          onPressed: () {
+            _onButtonPressed('Charts');
+          },
+          isSelected: selectedButton == 'Charts',
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(right: 12.0),
+        child: OptionButton(
+          icon: Icons.notifications,
+          label: 'Near me',
+          onPressed: () {
+            _onButtonPressed('Near me');
+          },
+          isSelected: selectedButton == 'Near me',
+        ),
+      ),
+    ];
   }
 
   Widget _buildFooter() {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/user_profile/screens/sideBar_screens.dart';
 import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
 import 'package:flutter_application_1/shared/widgets/numberic_field.dart';
+import 'package:flutter_application_1/app/routes.dart';
 
 class DepositMoney extends StatefulWidget {
   const DepositMoney({super.key});
@@ -38,7 +39,7 @@ class _DepositMoneyPageState extends State<DepositMoney> {
               )
             : null,
       ),
-            drawer: isMobile ? Sidebar() : null,
+      drawer: isMobile ? Sidebar() : null,
       body: Row(
         children: [
           if (!isMobile) Sidebar(), // Sidebar for web
@@ -72,7 +73,7 @@ class _DepositMoneyPageState extends State<DepositMoney> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               border: Border.all(
-                color: Colors.grey, // Set border color
+                color: Colors.black, // Set border color
                 width: 1.0, // Set border width
               ),
               borderRadius:
@@ -83,7 +84,7 @@ class _DepositMoneyPageState extends State<DepositMoney> {
               children: [
                 const Text(
                   'How much you want to add?',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 20),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -111,48 +112,74 @@ class _DepositMoneyPageState extends State<DepositMoney> {
                     ),
                   ],
                 ),
+                const Text(
+                  'Available Balance: \$30,700.00',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
               ],
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
 
           // Balance Info Section with Border
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: const Text(
-              'Available Balance: \$30,700.00',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 20),
 
           // Footer Section with Navigation Button
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment
+                .spaceBetween, // Căn khoảng cách đều giữa các nút
             children: [
+              // Button 1
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Xử lý sự kiện bấm
+                },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4743C9),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
+                  backgroundColor: const Color(0xFF4743C9), // Màu nền nút
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 60, vertical: 14), // Padding nhỏ hơn
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(6.0), // Bo góc nhỏ hơn
                   ),
+                  elevation: 2, // Hiệu ứng nổi nhẹ
                 ),
                 child: const Text(
-                  'Next',
+                  'Back', // Nội dung nút
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16, // Kích thước chữ nhỏ hơn
+                    fontWeight: FontWeight.bold, // Trọng lượng chữ vừa
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+
+              // Button 2
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, Routes.depositeDetails);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4743C9), // Màu nền nút
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 60, vertical: 14), // Padding nhỏ hơn
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.0), // Bo góc nhỏ hơn
+                  ),
+                  elevation: 2, // Hiệu ứng nổi nhẹ
+                ),
+                child: const Text(
+                  'Next', // Nội dung nút
+                  style: TextStyle(
+                    fontSize: 16, // Kích thước chữ nhỏ hơn
+                    fontWeight: FontWeight.bold, // Trọng lượng chữ vừa
                     color: Colors.white,
                   ),
                 ),
               ),
             ],
-          ),
+          )
         ],
       ),
     );
