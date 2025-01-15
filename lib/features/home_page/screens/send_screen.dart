@@ -27,6 +27,19 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              decoration: BoxDecoration(
+                border:
+                    Border.all(color: Colors.black, width: 1), // Viền màu xám
+                borderRadius: BorderRadius.circular(12), // Bo góc
+                color: Colors.white, // Nền màu trắng
+              ),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 8), // Thêm padding bên trong
+              child: NumericField(),
+            ),
+            const SizedBox(height: 40),
+
             _buildInputSection("You Send ", fromCurrency, (value) {
               setState(() {
                 fromCurrency = value!;
@@ -45,7 +58,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
               child: ElevatedButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Get Started Pressed!")),
+                    const SnackBar(content: Text("Send Pressed!")),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -61,7 +74,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   ),
                 ),
                 child: const Text(
-                  "Get Started", // Nội dung nút
+                  "Send", // Nội dung nút
                   style: TextStyle(
                     fontSize: 16, // Kích thước chữ
                     fontWeight: FontWeight.bold, // Đậm chữ
@@ -79,36 +92,22 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   Widget _buildInputSection(
       String label, String selectedValue, ValueChanged<String?> onChanged) {
     return Container(
-      padding: const EdgeInsets.all(8), // Add some padding inside the container
+      padding: const EdgeInsets.symmetric(
+          horizontal: 8, vertical: 4), // Thêm padding
       decoration: BoxDecoration(
-        border:
-            Border.all(color: Colors.grey), // Add border around the container
-        borderRadius:
-            BorderRadius.circular(8), // Rounded corners for the border
+        border: Border.all(color: Colors.black), // Thêm border quanh container
+        borderRadius: BorderRadius.circular(8), // Bo góc cho border
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Use NumericField here for numeric input
-                NumericField(),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          DropdownButton<String>(
-            items: const [
-              DropdownMenuItem(value: "GBP", child: Text("GBP")),
-              DropdownMenuItem(value: "USD", child: Text("USD")),
-            ],
-            onChanged: onChanged,
-            value: selectedValue,
-            underline: Container(),
-          ),
+      child: DropdownButton<String>(
+        isExpanded: true, // Cho phép DropdownButton chiếm toàn bộ chiều rộng
+        items: const [
+          DropdownMenuItem(value: "GBP", child: Text("GBP")),
+          DropdownMenuItem(value: "USD", child: Text("USD")),
         ],
+        onChanged: onChanged, // Thay đổi giá trị khi chọn
+        value: selectedValue,
+        underline: Container(), // Xóa đường gạch chân mặc định
+        icon: const Icon(Icons.arrow_drop_down), // Mũi tên tùy chỉnh
       ),
     );
   }
@@ -121,7 +120,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             tooltip:
                 "The Convert rate represents the rate of exchange you will receive when sending your money."),
         _buildInfoRow("Fees", "2.00 GBP"),
-        _buildInfoRow("You pay", "402.00 GBP"),
+
         _buildInfoRow("Recipient receives ", "549.24", isRecipient: true),
       ],
     );

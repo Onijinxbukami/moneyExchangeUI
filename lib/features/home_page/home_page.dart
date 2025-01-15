@@ -15,8 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _selectedLanguage = 'EN';
-  String? selectedButton;
-
+  String? selectedButton = 'Convert';
   void _onButtonPressed(String buttonLabel) {
     setState(() {
       if (selectedButton == buttonLabel) {
@@ -160,6 +159,7 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
+                        // ignore: deprecated_member_use
                         color: Colors.black.withOpacity(0.2),
                         blurRadius: 4,
                         offset: const Offset(0, 2),

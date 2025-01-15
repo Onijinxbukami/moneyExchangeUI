@@ -84,6 +84,8 @@ class _DepositMoneyDetailsPageState extends State<DepositMoneyDetails> {
                 },
                 screenWidth: screenWidth,
               ),
+
+              SizedBox(width: 46),
               // Button Next
               _buildResponsiveButton(
                 text: 'Next',
@@ -100,38 +102,35 @@ class _DepositMoneyDetailsPageState extends State<DepositMoneyDetails> {
   }
 
   Widget _buildResponsiveButton(
-      {required String text,
-      required VoidCallback onPressed,
-      required double screenWidth}) {
-    return Expanded(
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4743C9), // Màu nền nút
-          padding: EdgeInsets.symmetric(
-            horizontal: screenWidth > 600
-                ? 60
-                : 40, // Điều chỉnh padding tùy vào kích thước màn hình
-            vertical: 14,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6.0), // Bo góc nhỏ hơn
-          ),
-          elevation: 2, // Hiệu ứng nổi nhẹ
+    {required String text,
+    required VoidCallback onPressed,
+    required double screenWidth}) {
+  return Expanded(
+    child: ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF4743C9), // Màu nền nút
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth > 600 ? 40 : 20, // Padding tùy vào kích thước màn hình
+          vertical: 14, // Padding dọc
         ),
-        child: Text(
-          text, // Nội dung nút
-          style: TextStyle(
-            fontSize: screenWidth > 600
-                ? 16
-                : 14, // Điều chỉnh font size tùy vào kích thước màn hình
-            fontWeight: FontWeight.bold, // Trọng lượng chữ vừa
-            color: Colors.white,
-          ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6.0), // Bo góc nhỏ hơn
+        ),
+        elevation: 2, // Hiệu ứng nổi nhẹ
+      ),
+      child: Text(
+        text, // Nội dung nút
+        style: TextStyle(
+          fontSize: screenWidth > 600 ? 14 : 12, // Kích thước chữ nhỏ hơn cho màn hình nhỏ
+          fontWeight: FontWeight.bold, // Trọng lượng chữ vừa
+          color: Colors.white,
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildPaymentDetails() {
     final screenWidth = MediaQuery.of(context).size.width;
