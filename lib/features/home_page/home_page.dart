@@ -58,14 +58,7 @@ class _HomePageState extends State<HomePage> {
                   child: _buildContent(),
                 ),
 
-                // Footer Section
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 16 : 32,
-                    vertical: isMobile ? 8 : 16,
-                  ),
-                  child: _buildFooter(),
-                ),
+
               ],
             ),
           );
@@ -278,48 +271,7 @@ class _HomePageState extends State<HomePage> {
     ];
   }
 
-  Widget _buildFooter() {
-    return Container(
-      color: Colors.black,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          const Text(
-            "Paylio",
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            "Secure and fast payment solutions for your business and personal needs.",
-            style: TextStyle(color: Colors.white70),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.facebook, color: Colors.white),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.back_hand, color: Colors.white),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.book, color: Colors.white),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+ 
 
   Widget _buildTransferMoneySection() {
     return Container(

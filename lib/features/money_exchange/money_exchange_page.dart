@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/user_profile/screens/sideBar_screens.dart';
 import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
 
@@ -11,12 +11,15 @@ class MoneyExchangePage extends StatefulWidget {
 }
 
 class _MoneyExchangePageState extends State<MoneyExchangePage> {
-  String selectedDeliveryMethod = 'Bank Transfer'; // Default delivery method
-  String selectedPartnerBank = 'HSBC';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController youSendController = TextEditingController();
+  final TextEditingController recipientGetsController = TextEditingController();
+  String selectedDeliveryMethod =
+      'Wireless Transfer'; // Default delivery method
+  String selectedPartnerBank = 'HSBC';
 
   final List<String> deliveryMethods = [
-    'Bank Transfer',
+    'Wireless Transfer',
     'Cash Pickup',
     'Mobile Wallet'
   ];
@@ -98,62 +101,11 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                     children: [
                       _buildExchangeCard(
                         title: 'You Send',
-                        amount: '400.00',
-
-                        flag: Icons.flag, // Placeholder for flag icon
+                        amountController: youSendController,
+                        isEditable: true,
+                        flag: Icons.money, // Placeholder for flag icon
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Delivery Method',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF00274D),
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      // Dropdown for Delivery Method
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: selectedDeliveryMethod,
-                            items: deliveryMethods
-                                .map((method) => DropdownMenuItem(
-                                      value: method,
-                                      child: SizedBox(
-                                        width: 150, // Cố định chiều rộng
-                                        child: Text(
-                                          method,
-                                          overflow: TextOverflow
-                                              .ellipsis, // Cắt chữ dài
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Color(0xFF00274D),
-                                          ),
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedDeliveryMethod = value!;
-                              });
-                            },
-                            icon: const Icon(
-                              Icons.arrow_drop_down,
-                              color: Color(0xFF00274D),
-                            ),
-                            dropdownColor: Colors.white,
-                            isExpanded: true,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -184,63 +136,68 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                     children: [
                       _buildExchangeCard(
                         title: 'Recipient Gets',
-                        amount: '45162.98',
-
+                        amountController: recipientGetsController,
+                        isEditable: false,
                         flag: Icons.flag, // Placeholder for flag icon
                         cardColor: const Color(0xFFEAE6FA),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Bank Transfer',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF00274D),
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      // Dropdown for Partner Bank
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: selectedPartnerBank,
-                            items: partnerBanks.map((bank) {
-                              return DropdownMenuItem(
-                                value: bank,
-                                child: SizedBox(
-                                  width: 150, // Cố định chiều rộng
-                                  child: Text(
-                                    bank,
-                                    overflow:
-                                        TextOverflow.ellipsis, // Cắt chữ dài
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedPartnerBank = value!;
-                              });
-                            },
-                            isExpanded:
-                                true, // Đảm bảo chiếm toàn bộ chiều rộng
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ),
             ],
           ),
-
+          const Text(
+            'Delivery Method',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF00274D),
+            ),
+          ),
+          const SizedBox(height: 5),
+          // Dropdown for Delivery Method
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade400),
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: selectedDeliveryMethod,
+                items: deliveryMethods
+                    .map((method) => DropdownMenuItem(
+                          value: method,
+                          child: SizedBox(
+                            width: 150, // Cố định chiều rộng
+                            child: Text(
+                              method,
+                              overflow: TextOverflow.ellipsis, // Cắt chữ dài
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF00274D),
+                              ),
+                            ),
+                          ),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedDeliveryMethod = value!;
+                  });
+                },
+                icon: const Icon(
+                  Icons.arrow_drop_down,
+                  color: Color(0xFF00274D),
+                ),
+                dropdownColor: Colors.white,
+                isExpanded: true,
+              ),
+            ),
+          ),
           const SizedBox(height: 30),
 
           // Transaction details
@@ -328,6 +285,7 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
                     onPressed: () {
                       // Hành động khi bấm nút Continue
                       debugPrint('Continue pressed');
+                      Navigator.pushNamed(context, Routes.address);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
@@ -408,9 +366,10 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
 
   Widget _buildExchangeCard({
     required String title,
-    required String amount,
+    required TextEditingController amountController,
     required IconData flag,
     Color cardColor = Colors.white,
+    bool isEditable = true, // Thêm tuỳ chọn để kiểm soát khả năng chỉnh sửa
   }) {
     bool isMobile = MediaQuery.of(context).size.width < 600;
 
@@ -441,18 +400,27 @@ class _MoneyExchangePageState extends State<MoneyExchangePage> {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  amount,
+                child: TextField(
+                  controller: amountController,
+                  readOnly:
+                      !isEditable, // Không cho phép chỉnh sửa nếu isEditable là false
+                  keyboardType: TextInputType.number,
                   style: TextStyle(
                     fontSize: isMobile ? 18 : 24, // Adjust font size
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Enter amount',
+                  ),
                 ),
               ),
-              Icon(flag,
-                  size: isMobile ? 20 : 24,
-                  color: Colors.black), // Adjust icon size
+              Icon(
+                flag,
+                size: isMobile ? 20 : 24, // Adjust icon size
+                color: Colors.black,
+              ),
               const SizedBox(width: 5),
             ],
           ),
