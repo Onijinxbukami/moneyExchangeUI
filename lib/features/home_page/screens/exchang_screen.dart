@@ -18,7 +18,7 @@ class _ExchangeFormState extends State<ExchangeForm> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 1), // Thêm border
+          border: Border.all(color: Colors.black, width: 1), // Thêm border
           borderRadius: BorderRadius.circular(12), // Bo góc cho border
           color: Colors.white, // Màu nền cho container
         ),
@@ -26,6 +26,19 @@ class _ExchangeFormState extends State<ExchangeForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              decoration: BoxDecoration(
+                border:
+                    Border.all(color: Colors.black, width: 1), // Viền màu xám
+                borderRadius: BorderRadius.circular(12), // Bo góc
+                color: Colors.white, // Nền màu trắng
+              ),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 8), // Thêm padding bên trong
+              child: NumericField(),
+            ),
+
+            const SizedBox(height: 40),
             _buildInputSection("From", fromCurrency, (value) {
               setState(() {
                 fromCurrency = value!;
@@ -44,7 +57,7 @@ class _ExchangeFormState extends State<ExchangeForm> {
               child: ElevatedButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Get Started Pressed!")),
+                    const SnackBar(content: Text("Convert Pressed!")),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -60,7 +73,7 @@ class _ExchangeFormState extends State<ExchangeForm> {
                   ),
                 ),
                 child: const Text(
-                  "Get Started", // Nội dung nút
+                  "Convert", // Nội dung nút
                   style: TextStyle(
                     fontSize: 16, // Kích thước chữ
                     fontWeight: FontWeight.bold, // Đậm chữ
@@ -75,53 +88,37 @@ class _ExchangeFormState extends State<ExchangeForm> {
     );
   }
 
-  Widget _buildInputSection(
+Widget _buildInputSection(
     String label, String selectedValue, ValueChanged<String?> onChanged) {
   return Container(
-    padding: const EdgeInsets.all(8), // Thêm padding trong container
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Thêm padding
     decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey), // Thêm border quanh container
+      border: Border.all(color: Colors.black), // Thêm border quanh container
       borderRadius: BorderRadius.circular(8), // Bo góc cho border
     ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Ô input có thể thao tác
-              NumericField(), 
-            ],
-          ),
-        ),
-        const SizedBox(width: 16),
-        // DropdownButton cho ô input thứ hai, với enabled = false
-        DropdownButton<String>(
-          items: const [
-            DropdownMenuItem(value: "GBP", child: Text("GBP")),
-            DropdownMenuItem(value: "USD", child: Text("USD")),
-          ],
-          onChanged: onChanged, // Chỉ cho phép thao tác với onChanged
-          value: selectedValue,
-          underline: Container(),
-          disabledHint: Text(selectedValue), // Hiển thị giá trị mặc định khi disabled
-        ),
+    child: DropdownButton<String>(
+      isExpanded: true, // Cho phép DropdownButton chiếm toàn bộ chiều rộng
+      items: const [
+        DropdownMenuItem(value: "GBP", child: Text("GBP")),
+        DropdownMenuItem(value: "USD", child: Text("USD")),
       ],
+      onChanged: onChanged, // Thay đổi giá trị khi chọn
+      value: selectedValue,
+      underline: Container(), // Xóa đường gạch chân mặc định
+      icon: const Icon(Icons.arrow_drop_down), // Mũi tên tùy chỉnh
     ),
   );
 }
+
 
 
   Widget _buildExchangeInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoRow("Exchange Rate", "2,000",
-            tooltip:
-                "The Convert rate represents the rate of exchange you will receive when sending your money."),
-        _buildInfoRow("Fees", "2.00 GBP"),
-        _buildInfoRow("You pay", "402.00 GBP"),
+        _buildInfoRow("Exchange Rate", "2,000"),
+
+        _buildInfoRow("You get", "402.00 GBP"),
       ],
     );
   }

@@ -21,21 +21,47 @@ class _PaymentSettingsState extends State<PaymentSettings> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
-        SingleChildScrollView(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildCardButton(
-                  'assets/images/visa-card.png', 'transactionsMod'),
-              _buildCardButton(
-                  'assets/images/paylio-card.png', 'transactionsMod'),
-              _buildCardButton(
-                  'assets/images/paypal-card.png', 'transactionsMod'),
-              _buildCardButton(
-                  'assets/images/blockchain-card.png', 'transactionsMod'),
-              _buildCardButton('assets/images/add-new.png', 'addcardMod'),
-            ],
-          ),
+        // Responsive layout for the cards
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Check screen width to decide whether to use a Row or Grid
+            if (constraints.maxWidth > 600) {
+              // For larger screens (like tablets and desktops), use a Row
+              return SingleChildScrollView(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildCardButton('assets/images/visa-card.png', 'transactionsMod'),
+                    _buildCardButton('assets/images/paylio-card.png', 'transactionsMod'),
+                    _buildCardButton('assets/images/paypal-card.png', 'transactionsMod'),
+                    _buildCardButton('assets/images/blockchain-card.png', 'transactionsMod'),
+                    _buildCardButton('assets/images/add-new.png', 'addcardMod'),
+                  ],
+                ),
+              );
+            } else {
+              // For smaller screens (like phones), use a Grid
+              return GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // 2 columns for smaller screens
+                  crossAxisSpacing: 16, // Space between columns
+                  mainAxisSpacing: 16, // Space between rows
+                ),
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  List<String> cardImages = [
+                    'assets/images/visa-card.png',
+                    'assets/images/paylio-card.png',
+                    'assets/images/paypal-card.png',
+                    'assets/images/blockchain-card.png',
+                    'assets/images/add-new.png'
+                  ];
+                  return _buildCardButton(cardImages[index], index == 4 ? 'addcardMod' : 'transactionsMod');
+                },
+              );
+            }
+          },
         ),
       ],
     );

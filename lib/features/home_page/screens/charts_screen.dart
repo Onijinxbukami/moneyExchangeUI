@@ -27,20 +27,61 @@ class _ChartFormState extends State<ChartForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
+            const Text(
+              'From',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold), // Định dạng chữ "From"
+            ),
+            const SizedBox(height: 8),
             _buildInputSection("From", fromCurrency, (value) {
               setState(() {
                 fromCurrency = value!;
               });
             }), // Input cho "From"
             const SizedBox(height: 20),
+            const Text(
+              'To',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold), // Định dạng chữ "From"
+            ),
+            const SizedBox(height: 8),
             _buildInputSection("To", toCurrency, (value) {
               setState(() {
                 toCurrency = value!;
               });
             }), // Input cho "To"
             const SizedBox(height: 40),
-            _buildTopArea(), // Hiển thị thông tin SendSend
-            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("View Chart Pressed!")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4743C9), // Màu nền của nút
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 80, // Padding ngang
+                    vertical: 16, // Padding dọc
+                  ),
+                  minimumSize: const Size(double.infinity,
+                      56), // Chiều rộng tự động, chiều cao tối thiểu
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0), // Bo góc của nút
+                  ),
+                ),
+                child: const Text(
+                  "View Chart", // Nội dung nút
+                  style: TextStyle(
+                    fontSize: 16, // Kích thước chữ
+                    fontWeight: FontWeight.bold, // Đậm chữ
+                    color: Colors.white, // Màu chữ trắng
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),
@@ -51,58 +92,25 @@ class _ChartFormState extends State<ChartForm> {
   Widget _buildInputSection(
       String label, String selectedValue, ValueChanged<String?> onChanged) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 8, vertical: 4), // Thêm padding
       decoration: BoxDecoration(
-        border:
-            Border.all(color: Colors.grey), // Add border around the container
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black), // Thêm border quanh container
+        borderRadius: BorderRadius.circular(8), // Bo góc cho border
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                NumericField(),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: DropdownButton<String>(
-              items: const [
-                DropdownMenuItem(value: "GBP", child: Text("GBP")),
-                DropdownMenuItem(value: "USD", child: Text("USD")),
-              ],
-              onChanged: onChanged,
-              value: selectedValue,
-              underline: Container(),
-              isExpanded: false,
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
-              dropdownColor: Colors.grey.shade200,
-            ),
-          ),
+      child: DropdownButton<String>(
+        isExpanded: true, // Cho phép DropdownButton chiếm toàn bộ chiều rộng
+        items: const [
+          DropdownMenuItem(value: "GBP", child: Text("GBP")),
+          DropdownMenuItem(value: "USD", child: Text("USD")),
         ],
+        onChanged: onChanged, // Thay đổi giá trị khi chọn
+        value: selectedValue,
+        underline: Container(), // Xóa đường gạch chân mặc định
+        icon: const Icon(Icons.arrow_drop_down), // Mũi tên tùy chỉnh
       ),
     );
   }
 
-  // Top area with chart and exchange rate information
-  Widget _buildTopArea() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(10),
-      ),
 
-    );
-  }
-
-  // Left section with title and description
 }

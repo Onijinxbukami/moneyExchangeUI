@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng nhập đầy đủ thông tin'),
+          content: Text('Please fill in all the information'),
           backgroundColor: Colors.red,
         ),
       );
@@ -49,10 +49,15 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Logo
-              Image.asset(
-                'assets/images/logo.png', // Đường dẫn tới logo của bạn
-                height: 20, // Độ cao của logo
-                fit: BoxFit.contain,
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, Routes.homepage);
+                },
+                child: Image.asset(
+                  'assets/images/logo.png', // Đường dẫn tới logo của bạn
+                  height: 20, // Độ cao của logo
+                  fit: BoxFit.contain,
+                ),
               ),
 
               Row(

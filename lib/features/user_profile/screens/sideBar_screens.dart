@@ -54,14 +54,6 @@ class Sidebar extends StatelessWidget {
           ),
           const Divider(color: Colors.black),
           _buildSidebarItem(
-            icon: Icons.support_agent,
-            title: 'Support',
-            onTap: () {
-              _onItemTap('Support');
-            },
-            isSelected: _selectedItem == 'Support',
-          ),
-          _buildSidebarItem(
             icon: Icons.settings,
             title: 'Setting',
             onTap: () {
