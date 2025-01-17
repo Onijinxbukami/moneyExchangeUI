@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/numberic_field.dart';
 
 class SendMoneyForm extends StatefulWidget {
@@ -15,76 +15,69 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 1), // Thêm border
-          borderRadius: BorderRadius.circular(12), // Bo góc cho border
-          color: Colors.white, // Màu nền cho container
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                border:
-                    Border.all(color: Colors.black, width: 1), // Viền màu xám
-                borderRadius: BorderRadius.circular(12), // Bo góc
-                color: Colors.white, // Nền màu trắng
-              ),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 8), // Thêm padding bên trong
-              child: NumericField(),
+    return Padding(
+      padding: const EdgeInsets.all(16), // Padding xung quanh nội dung
+      child: Column(
+        children: [
+          // Số tiền người dùng nhập
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 1),
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
             ),
-            const SizedBox(height: 40),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: NumericField(),
+          ),
+          const SizedBox(height: 20),
 
-            _buildInputSection("You Send ", fromCurrency, (value) {
-              setState(() {
-                fromCurrency = value!;
-              });
-            }), // Input cho "From"
-            const SizedBox(height: 20),
-            _buildInputSection("Recipient gets", toCurrency, (value) {
-              setState(() {
-                toCurrency = value!;
-              });
-            }), // Input cho "To"
-            const SizedBox(height: 40),
-            _buildSendSendInfo(), // Hiển thị thông tin Exchange
-            const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Send Pressed!")),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4743C9), // Màu nền của nút
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 80, // Padding ngang
-                    vertical: 16, // Padding dọc
-                  ),
-                  minimumSize: const Size(double.infinity,
-                      56), // Chiều rộng tự động, chiều cao tối thiểu
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0), // Bo góc của nút
-                  ),
-                ),
-                child: const Text(
-                  "Send", // Nội dung nút
-                  style: TextStyle(
-                    fontSize: 16, // Kích thước chữ
-                    fontWeight: FontWeight.bold, // Đậm chữ
-                    color: Colors.white, // Màu chữ trắng
-                  ),
-                ),
+          // Input "You Send"
+          _buildInputSection("You Send ", fromCurrency, (value) {
+            setState(() {
+              fromCurrency = value!;
+            });
+          }),
+          const SizedBox(height: 20),
+
+          // Input "Recipient gets"
+          _buildInputSection("Recipient gets", toCurrency, (value) {
+            setState(() {
+              toCurrency = value!;
+            });
+          }),
+          const SizedBox(height: 20),
+
+          // Thông tin gửi tiền
+          _buildSendSendInfo(),
+          const SizedBox(height: 20),
+
+          // Nút "Send"
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, Routes.exchangeDetails);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Send Pressed!")),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4743C9),
+              padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
               ),
-            )
-          ],
-        ),
+            ),
+            child: const Text(
+              "Send",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -92,22 +85,21 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   Widget _buildInputSection(
       String label, String selectedValue, ValueChanged<String?> onChanged) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 8, vertical: 4), // Thêm padding
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black), // Thêm border quanh container
-        borderRadius: BorderRadius.circular(8), // Bo góc cho border
+        border: Border.all(color: Colors.black),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<String>(
-        isExpanded: true, // Cho phép DropdownButton chiếm toàn bộ chiều rộng
+        isExpanded: true,
         items: const [
           DropdownMenuItem(value: "GBP", child: Text("GBP")),
           DropdownMenuItem(value: "USD", child: Text("USD")),
         ],
-        onChanged: onChanged, // Thay đổi giá trị khi chọn
+        onChanged: onChanged,
         value: selectedValue,
-        underline: Container(), // Xóa đường gạch chân mặc định
-        icon: const Icon(Icons.arrow_drop_down), // Mũi tên tùy chỉnh
+        underline: Container(),
+        icon: const Icon(Icons.arrow_drop_down),
       ),
     );
   }
@@ -120,8 +112,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             tooltip:
                 "The Convert rate represents the rate of exchange you will receive when sending your money."),
         _buildInfoRow("Fees", "2.00 GBP"),
-
-        _buildInfoRow("Recipient receives ", "549.24", isRecipient: true),
+        _buildInfoRow("Recipient receives", "549.24", isRecipient: true),
       ],
     );
   }
