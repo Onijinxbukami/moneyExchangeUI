@@ -33,10 +33,7 @@ class _SecuritySettingsState extends State<SecuritySettings> {
   Widget _buildChangePassword(double screenWidth) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,24 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_1/app/routes.dart';
-import 'package:flutter_application_1/features/user_profile/screens/sideBar_screens.dart';
-import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
 
-class ExchangeDetailsPage extends StatefulWidget {
-  const ExchangeDetailsPage({super.key});
+class HomepageUserDetailsPage extends StatefulWidget {
+  const HomepageUserDetailsPage({super.key});
 
   @override
-  _ExchangeDetailsPageState createState() => _ExchangeDetailsPageState();
+  _HomepageUserDetailsPageState createState() =>
+      _HomepageUserDetailsPageState();
 }
 
-class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
+class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController accountNumberController = TextEditingController();
   final TextEditingController bankCodeController = TextEditingController();
+  final TextEditingController dobController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+  }
+
+  void _validatePhoneNumber(String value) {
+    // Kiểm tra nếu đầu vào có ký tự không phải số
+    if (value.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(value)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter only numbers")),
+      );
+    }
   }
 
   @override
@@ -43,15 +54,12 @@ class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
               )
             : null,
       ),
-      drawer: isSmallScreen ? const Sidebar() : null,
       body: Row(
         children: [
-          if (!isSmallScreen) const Sidebar(),  
-
           Expanded(
             child: Column(
               children: [
-                const HeaderWidget(),
+                //const HeaderWidget(),
                 _buildContent(fontSize, padding), // Truyền fontSize và padding
               ],
             ),
@@ -71,7 +79,7 @@ class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
           children: [
             const Center(
               child: Text(
-                'Enter Your Bank Account Details',
+                'Tell us about yourself',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -82,18 +90,8 @@ class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
             const Divider(color: Colors.black),
 
             const SizedBox(height: 10),
-            Text(
-              'Recipient bank details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF00274D),
-              ),
-            ),
-
-            const SizedBox(height: 10),
             const Text(
-              'Full name of the account holder',
+              'Full legal first and middlde name',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -132,7 +130,7 @@ class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Bank code',
+              'Full legal last name',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -172,7 +170,7 @@ class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
             const SizedBox(height: 10),
 
             const Text(
-              'Account number',
+              'Date of Birth',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -181,10 +179,23 @@ class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
             ),
             const SizedBox(height: 10),
             TextField(
-              controller: accountNumberController,
+              controller: dobController,
+              readOnly: true,
+              onTap: () async {
+                DateTime? selectedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (selectedDate != null) {
+                  dobController.text =
+                      "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+                }
+              },
               decoration: InputDecoration(
-                labelText: 'Enter your text',
-                hintText: 'Type something...',
+                labelText: 'Select your date of birth',
+                hintText: 'YYYY-MM-DD',
                 labelStyle: TextStyle(fontSize: fontSize),
                 hintStyle:
                     TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
@@ -198,12 +209,44 @@ class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
                   borderSide: const BorderSide(color: Colors.blue, width: 2.0),
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                errorBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+            const SizedBox(height: 20),
+
+            const Text(
+              'Phone Number',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              onChanged: (value) {
+                _validatePhoneNumber(
+                    value); // Truyền trực tiếp giá trị của input
+              },
+              decoration: InputDecoration(
+                labelText: 'Enter your phone number',
+                hintText: 'e.g. +123456789',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
                   borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
@@ -216,7 +259,7 @@ class _ExchangeDetailsPageState extends State<ExchangeDetailsPage> {
                 onPressed: () {
                   // Hành động khi bấm nút Continue
                   debugPrint('Continue pressed');
-                  Navigator.pushNamed(context, Routes.address);
+                  Navigator.pushNamed(context, Routes.addressDetails);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6200EE), // Màu tím nổi bật

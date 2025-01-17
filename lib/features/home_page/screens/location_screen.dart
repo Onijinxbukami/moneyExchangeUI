@@ -67,6 +67,7 @@ class _LocationFormState extends State<LocationForm> {
   @override
   void initState() {
     super.initState();
+    filteredOutlets = outlets.take(5).toList();
   }
 
   void filterOutlets(String query) {
@@ -85,99 +86,72 @@ class _LocationFormState extends State<LocationForm> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    final bool isSmallScreen = screenWidth < 600;
-    final double padding = isSmallScreen ? 12.0 : 16.0;
-    final double fontSize = isSmallScreen ? 14.0 : 18.0;
+    return Padding(
+      padding: const EdgeInsets.all(16), // Padding xung quanh nội dung
+      child: Column(
+        children: [
+          // Label text
+          const Text(
+            'Search address or postcode',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF00274D),
+            ),
+          ),
+          const SizedBox(height: 10),
 
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 1), // Thêm border
-          borderRadius: BorderRadius.circular(12), // Bo góc cho border
-          color: Colors.white, // Màu nền cho container
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Label text
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: const Text(
-                'Search address or postcode',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF00274D),
-                ),
+          // TextField tìm kiếm
+          TextField(
+            controller: locationController,
+            onChanged: filterOutlets,
+            decoration: InputDecoration(
+              labelText: 'Enter your text',
+              hintText: 'Type something...',
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              enabledBorder: OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                borderRadius: BorderRadius.circular(12.0),
               ),
             ),
-            const SizedBox(height: 10), // Khoảng cách sau Label
+          ),
+          const SizedBox(height: 20),
 
-            // TextField tìm kiếm
-            TextField(
-              controller: locationController,
-              onChanged: filterOutlets, // Lọc kết quả khi người dùng nhập
-              decoration: InputDecoration(
-                labelText: 'Enter your text',
-                hintText: 'Type something...',
-                labelStyle: TextStyle(fontSize: fontSize),
-                hintStyle:
-                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
-                contentPadding: EdgeInsets.symmetric(
-                    vertical: padding, horizontal: padding),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-              ),
-              style: TextStyle(fontSize: fontSize),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Danh sách các địa điểm gợi ý
-            if (filteredOutlets.isNotEmpty)
-              SizedBox(
-                height: 250, // Giới hạn chiều cao danh sách gợi ý
-                child: ListView.builder(
-                  itemCount: filteredOutlets.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(filteredOutlets[index]['name']!),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(filteredOutlets[index]['address']!),
-                          SizedBox(
-                              height: 5), // Khoảng cách giữa address và tỷ giá
-                          Text(
-                            '${filteredOutlets[index]['rate']}',
-                            style: TextStyle(color: Colors.blue),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-           
-          ],
-        ),
+          // Danh sách gợi ý
+          Expanded(
+            child: filteredOutlets.isNotEmpty
+                ? ListView.builder(
+                    itemCount: filteredOutlets.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(filteredOutlets[index]['name']!),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(filteredOutlets[index]['address']!),
+                            const SizedBox(height: 5),
+                            Text(
+                              filteredOutlets[index]['rate']!,
+                              style: const TextStyle(color: Colors.blue),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  )
+                : const Center(
+                    child: Text(
+                      'No results found.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }

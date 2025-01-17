@@ -39,7 +39,7 @@ class _SignupPageState extends State<SignupPage> {
         ) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng nhập đầy đủ thông tin'),
+          content: Text('Please fill in all the information'),
           backgroundColor: Colors.red,
         ),
       );
@@ -77,17 +77,8 @@ class _SignupPageState extends State<SignupPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, Routes.homepage);
-                },
-                child: Image.asset(
-                  'assets/images/logo.png', // Đường dẫn tới logo của bạn
-                  height: 20, // Độ cao của logo
-                  fit: BoxFit.contain,
-                ),
-              ),
+
+
 
               Row(
                 children: [

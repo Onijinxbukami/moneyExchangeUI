@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/user_profile/screens/payment_settings_screen.dart';
-
 import 'package:flutter_application_1/features/user_profile/screens/security_settings_screen.dart';
 import 'package:flutter_application_1/features/user_profile/screens/sideBar_screens.dart';
-import 'package:flutter_application_1/features/user_profile/screens/selectionButton.dart';
 import 'package:flutter_application_1/features/user_profile/screens/notification_setting_screen.dart';
 import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
 
@@ -15,18 +13,21 @@ class UserProfilePage extends StatefulWidget {
   _UserProfilePageState createState() => _UserProfilePageState();
 }
 
-class _UserProfilePageState extends State<UserProfilePage> {
-  String? selectedButton;
+class _UserProfilePageState extends State<UserProfilePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  // Function to handle button press and toggle selection
-  void _onButtonPressed(String buttonLabel) {
-    setState(() {
-      if (selectedButton == buttonLabel) {
-        selectedButton = null;
-      } else {
-        selectedButton = buttonLabel;
-      }
-    });
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,22 +40,39 @@ class _UserProfilePageState extends State<UserProfilePage> {
         backgroundColor: const Color(0xFF6610F2),
         leading: isMobile
             ? IconButton(
-                icon: Icon(Icons.menu),
+                icon: const Icon(Icons.menu),
                 onPressed: () {
                   _scaffoldKey.currentState?.openDrawer();
                 },
               )
             : null,
+        title: const Text('Welcome !!!'),
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          tabs: const [
+            Tab(icon: Icon(Icons.account_circle), text: 'Account'),
+            Tab(icon: Icon(Icons.security), text: 'Security'),
+            Tab(icon: Icon(Icons.payment), text: 'Payment'),
+            //Tab(icon: Icon(Icons.notifications), text: 'Notification'),
+          ],
+        ),
       ),
       drawer: isMobile ? Sidebar() : null,
       body: Row(
         children: [
           if (!isMobile) Sidebar(),
           Expanded(
-            child: Column(
+            child: TabBarView(
+              controller: _tabController,
               children: [
-                HeaderWidget(),
-                Expanded(child: _buildContent()),
+                _buildAccountSettings(),
+                const SecuritySettings(),
+                PaymentSettings(),
+                //const NotificationSetting(),
               ],
             ),
           ),
@@ -63,93 +81,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildProfileSection(), // Profile section
-          const SizedBox(height: 20),
-          if (selectedButton == 'Account') _buildAccountSettings(),
-          if (selectedButton == 'Security') const SecuritySettings(),
-          if (selectedButton == 'Payment') PaymentSettings(),
-          if (selectedButton == 'Notification') const NotificationSetting(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileSection() {
-    bool isMobile = MediaQuery.of(context).size.width < 600;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          height: isMobile
-              ? 60.0
-              : 80.0, // Điều chỉnh chiều cao cho phù hợp với thiết bị di động
-          child: ListView(
-            scrollDirection: Axis.horizontal, // Cuộn theo chiều ngang
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: 12.0), // Khoảng cách giữa các nút
-                child: OptionButton(
-                  icon: Icons.account_circle,
-                  label: 'Account',
-                  onPressed: () {
-                    _onButtonPressed('Account');
-                  },
-                  isSelected: selectedButton == 'Account',
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: 12.0), // Khoảng cách giữa các nút
-                child: OptionButton(
-                  icon: Icons.security,
-                  label: 'Security',
-                  onPressed: () {
-                    _onButtonPressed('Security');
-                  },
-                  isSelected: selectedButton == 'Security',
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: 12.0), // Khoảng cách giữa các nút
-                child: OptionButton(
-                  icon: Icons.payment,
-                  label: 'Payment',
-                  onPressed: () {
-                    _onButtonPressed('Payment');
-                  },
-                  isSelected: selectedButton == 'Payment',
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: 12.0), // Khoảng cách giữa các nút
-                child: OptionButton(
-                  icon: Icons.notifications,
-                  label: 'Notification',
-                  onPressed: () {
-                    _onButtonPressed('Notification');
-                  },
-                  isSelected: selectedButton == 'Notification',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-// Account settings form
+  // Account settings form
   Widget _buildAccountSettings() {
     return SingleChildScrollView(
       // Cho phép cuộn theo chiều dọc
@@ -201,7 +133,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-// Helper function for creating text fields
+  // Helper function for creating text fields
   Widget _buildTextField(String label, String hint,
       {bool obscureText = false}) {
     return Column(

@@ -49,16 +49,7 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Logo
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, Routes.homepage);
-                },
-                child: Image.asset(
-                  'assets/images/logo.png', // Đường dẫn tới logo của bạn
-                  height: 20, // Độ cao của logo
-                  fit: BoxFit.contain,
-                ),
-              ),
+
 
               Row(
                 children: [

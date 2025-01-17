@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
-import 'package:flutter_application_1/features/user_profile/screens/sideBar_screens.dart';
-import 'package:flutter_application_1/features/user_profile/screens/header_field.dart';
 
-class ExchangeAddressPage extends StatefulWidget {
-  const ExchangeAddressPage({super.key});
+
+class HomepageAddressPage extends StatefulWidget {
+  const HomepageAddressPage({super.key});
 
   @override
-  _ExchangeAddressPageState createState() => _ExchangeAddressPageState();
+  _HomepageAddressPageState createState() => _HomepageAddressPageState();
 }
 
-class _ExchangeAddressPageState extends State<ExchangeAddressPage> {
+class _HomepageAddressPageState extends State<HomepageAddressPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController locationController = TextEditingController();
   final List<String> locations = [
@@ -67,15 +66,15 @@ class _ExchangeAddressPageState extends State<ExchangeAddressPage> {
               )
             : null,
       ),
-      drawer: isSmallScreen ? const Sidebar() : null,
+
       body: Row(
         children: [
-          if (!isSmallScreen) const Sidebar(), // Sidebar cố định trên web
+
 
           Expanded(
             child: Column(
               children: [
-                     const HeaderWidget(), // Header section
+
                 _buildContent(fontSize, padding), // Truyền fontSize và padding
               ],
             ),
@@ -178,7 +177,7 @@ class _ExchangeAddressPageState extends State<ExchangeAddressPage> {
                 onPressed: () {
                   // Hành động khi bấm nút Continue
                   debugPrint('Continue pressed');
-                  Navigator.pushNamed(context, Routes.details);
+                  Navigator.pushNamed(context, Routes.userDetails);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6200EE), // Màu tím nổi bật
