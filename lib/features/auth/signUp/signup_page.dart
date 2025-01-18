@@ -77,10 +77,11 @@ class _SignupPageState extends State<SignupPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-
+              const SizedBox(),
 
 
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   // Dropdown ngôn ngữ
                   DropdownButton<String>(

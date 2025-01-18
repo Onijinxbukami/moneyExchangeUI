@@ -41,19 +41,21 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
         backgroundColor: lightColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF6610F2), // Màu nền của app bar
+          backgroundColor: const Color(0xFF6610F2), // App bar background color
           elevation: 0,
           toolbarHeight: 80,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo
+              // Placeholder for the logo or left-side content
+              const SizedBox(),
 
-
+              // Right-side content: Language dropdown and login button
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Dropdown ngôn ngữ
+                  // Language dropdown
                   DropdownButton<String>(
                     value: _selectedLanguage,
                     dropdownColor: Colors.white,
@@ -64,9 +66,9 @@ class _LoginPageState extends State<LoginPage> {
                             child: Row(
                               children: [
                                 Image.asset(
-                                  'assets/images/lang.png', // Đường dẫn tới icon của bạn
-                                  height: 20, // Độ cao của icon
-                                  width: 20, // Độ rộng của icon
+                                  'assets/images/lang.png', // Path to the icon
+                                  height: 20, // Icon height
+                                  width: 20, // Icon width
                                   fit: BoxFit.contain,
                                   color: Colors.white,
                                 ),
@@ -88,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(width: 16),
 
-                  // Nút LOGIN
+                  // Login button
                   GestureDetector(
                     onTap: () {
                       Navigator.pushNamed(context, Routes.signup);
