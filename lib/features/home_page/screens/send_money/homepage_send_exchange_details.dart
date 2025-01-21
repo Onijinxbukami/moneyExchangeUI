@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
-
+import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
+import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
+import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
 
 class HomepageMoneyExchangeDetailsPage extends StatefulWidget {
   const HomepageMoneyExchangeDetailsPage({super.key});
   @override
   // ignore: library_private_types_in_public_api
-  _HomepageMoneyExchangeDetailsPageState createState() => _HomepageMoneyExchangeDetailsPageState();
+  _HomepageMoneyExchangeDetailsPageState createState() =>
+      _HomepageMoneyExchangeDetailsPageState();
 }
 
-class _HomepageMoneyExchangeDetailsPageState extends State<HomepageMoneyExchangeDetailsPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+class _HomepageMoneyExchangeDetailsPageState
+    extends State<HomepageMoneyExchangeDetailsPage> {
+
   final TextEditingController youSendController = TextEditingController();
   final TextEditingController recipientGetsController = TextEditingController();
   String selectedDeliveryMethod =
@@ -23,30 +27,130 @@ class _HomepageMoneyExchangeDetailsPageState extends State<HomepageMoneyExchange
     'Mobile Wallet'
   ];
   final List<String> partnerBanks = ['HSBC', 'Standard Chartered', 'Citibank'];
+  String _selectedLanguage = 'EN';
 
-@override
-Widget build(BuildContext context) {
-  bool isMobile = MediaQuery.of(context).size.width < 600;
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    final bool isSmallScreen =
+        screenWidth < 600; // Kiểm tra chiều rộng màn hình
 
-  return Scaffold(
-    key: _scaffoldKey,
-    appBar: AppBar(
-      backgroundColor: const Color(0xFF6610F2),
-      leading: isMobile
-          ? IconButton(
-              icon: Icon(Icons.menu),
-              onPressed: () {
-                _scaffoldKey.currentState?.openDrawer();
-              },
-            )
-          : null,
-    ),
-    body: SingleChildScrollView( // Thay Expanded bằng SingleChildScrollView
-      child: _buildContent(),
-    ),
-  );
-}
+    final double padding = isSmallScreen ? 12.0 : 16.0;
+    final double fontSize = isSmallScreen ? 14.0 : 18.0;
 
+    return DefaultTabController(
+      length: 3,
+      initialIndex: 1,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF6610F2),
+          title: _buildHeader(),
+        ),
+        body: Column(
+          children: [
+            const SizedBox(height: 20),
+            ProgressStepper(
+              steps: const [
+                "Amount",
+                "You",
+                "Recipient",
+                "Review",
+                "Pay",
+              ],
+              currentStep: 0, // Giá trị bước hiện tại
+              backgroundColor: Colors.grey[300]!,
+              progressColor: Colors.blue,
+              height: isSmallScreen ? 8 : 10,
+            ),
+            SizedBox(height: isSmallScreen ? 16 : 24),
+
+            // TabBar phía trên nội dung chính
+
+            const SizedBox(height: 16),
+
+            // Phần nội dung cuộn chính
+            Expanded(
+              child: TabBarView(
+                children: [
+                  LocationForm(),
+                  _buildContent(fontSize, padding), // Nội dung cho "Near me"
+
+                  SettingForm(),  // Nội dung cho "Setting"
+                ],
+              ),
+            ),
+
+            // TabBar phía dưới nội dung chính
+            Container(
+              color: const Color(0xFF5732C6),
+              child: const TabBar(
+                indicatorColor: Colors.white,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.grey,
+                tabs: [
+                  Tab(text: 'Near me', icon: Icon(Icons.notifications)),
+                  Tab(text: 'Send', icon: Icon(Icons.security)),
+                  Tab(text: 'Setting', icon: Icon(Icons.new_releases)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      color: const Color(0xFF6610F2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween, // Canh đều giữa Dropdown và Login
+        children: [
+          // Dropdown chọn ngôn ngữ
+          DropdownButton<String>(
+            value: _selectedLanguage,
+            dropdownColor: Colors.white,
+            items: ['EN', 'BN', 'ES', 'NL']
+                .map(
+                  (lang) => DropdownMenuItem(
+                    value: lang,
+                    child: Text(
+                      lang,
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedLanguage = value!;
+              });
+            },
+          ),
+          // Nút Login
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, Routes.login);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'LOGIN',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget midHeader() {
     bool isMobile = MediaQuery.of(context).size.width < 600;
@@ -266,44 +370,53 @@ Widget build(BuildContext context) {
                 const SizedBox(
                     height: 30), // Khoảng cách giữa dropdown và nút Continue
                 Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Hành động khi bấm nút Continue
-                      debugPrint('Continue pressed');
-                      Navigator.pushNamed(context, Routes.bankAccountDetails);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          const Color(0xFF6200EE), // Màu tím nổi bật
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 60, vertical: 30), // Padding nhỏ hơn
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(20), // Bo tròn góc nút
-                      ),
-                      elevation: 6, // Hiệu ứng đổ bóng
-                      // ignore: deprecated_member_use
-                      shadowColor: Colors.grey.withOpacity(0.5), // Màu bóng nhẹ
+                    child: ElevatedButton(
+                  onPressed: () {
+                    debugPrint('Continue pressed');
+                    Navigator.pushNamed(context, Routes.userDetails);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Continue Pressed!")),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6200EE),
+                    padding: EdgeInsets.symmetric(
+                      horizontal:
+                          MediaQuery.of(context).size.width < 600 ? 40 : 80,
+                      vertical:
+                          MediaQuery.of(context).size.width < 600 ? 12 : 16,
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'Continue',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.2,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
+                    minimumSize: Size(
+                      double.infinity,
+                      MediaQuery.of(context).size.width < 600 ? 48 : 56,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    elevation: 6,
+                    shadowColor: Colors.grey.withOpacity(0.5),
                   ),
-                ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.arrow_forward,
+                          color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Continue",
+                        style: TextStyle(
+                          fontSize:
+                              MediaQuery.of(context).size.width < 600 ? 16 : 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
               ],
             ),
           ),
@@ -335,16 +448,18 @@ Widget build(BuildContext context) {
     );
   }
 
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          midHeader(),
-          const SizedBox(height: 20),
-          // Now works correctly
-        ],
+  Widget _buildContent(double fontSize, double padding) {
+    return Expanded(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(padding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            midHeader(),
+            const SizedBox(height: 20),
+            // Thêm các widget khác tại đây nếu cần
+          ],
+        ),
       ),
     );
   }
