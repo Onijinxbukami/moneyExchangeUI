@@ -20,38 +20,6 @@ class Sidebar extends StatelessWidget {
             },
             isSelected: _selectedItem == 'Dashboard',
           ),
-          _buildSidebarItem(
-            icon: Icons.person,
-            title: 'Transaction History',
-            onTap: () {
-              Navigator.pushNamed(context, Routes.history);
-            },
-            isSelected: _selectedItem == 'Transaction',
-          ),
-          _buildSidebarItem(
-            icon: Icons.money,
-            title: 'Deposite',
-            onTap: () {
-              Navigator.pushNamed(context, Routes.deposite);
-            },
-            isSelected: _selectedItem == 'Deposite',
-          ),
-          _buildSidebarItem(
-            icon: Icons.expand,
-            title: 'Exchange',
-            onTap: () {
-              Navigator.pushNamed(context, Routes.moneyexchange);
-            },
-            isSelected: _selectedItem == 'Exchange',
-          ),
-          _buildSidebarItem(
-            icon: Icons.money_off,
-            title: 'Withdraw Money',
-            onTap: () {
-              _onItemTap('Withdraw Money');
-            },
-            isSelected: _selectedItem == 'Withdraw Money',
-          ),
           const Divider(color: Colors.black),
           _buildSidebarItem(
             icon: Icons.settings,
