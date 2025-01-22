@@ -122,7 +122,7 @@ class _LocationFormState extends State<LocationForm> {
           ),
           const SizedBox(height: 20),
 
-          // Danh sách gợi ý
+
           Expanded(
             child: filteredOutlets.isNotEmpty
                 ? ListView.builder(
