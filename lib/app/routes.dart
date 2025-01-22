@@ -6,11 +6,7 @@ import 'package:flutter_application_1/features/home_page/screens/send_money/home
 import 'package:flutter_application_1/features/home_page/screens/send_money/homepage_send_exchange_details.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/homepage_send_user_details.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/hompage_send_address_details.dart';
-import 'package:flutter_application_1/features/money_exchange/screens/exchange_details.dart';
-import 'package:flutter_application_1/features/user_profile/user_profile_page.dart';
-import 'package:flutter_application_1/features/money_exchange/money_exchange_page.dart';
 
-import 'package:flutter_application_1/features/money_exchange/screens/exchange_address.dart';
 import 'package:flutter_application_1/features/home_page/home_page.dart';
 import 'package:flutter_application_1/features/auth/foget_password/forget_password_page.dart';
 
@@ -26,11 +22,7 @@ class Routes {
   static const String bankAccountDetails = '/hompagebankaccountdetails';
   static const String addressDetails = '/hompageaddressdetails';
   static const String userDetails = '/homepageuserdetail';
-  //userprofile
-  static const String userprofile = '/userprofile';
-  static const String address = '/address';
-  static const String details = '/details';
-  static const String moneyexchange = '/moneyexchange';
+
 
 
 
@@ -48,12 +40,8 @@ class Routes {
       login: (context) => LoginPage(),
       signup: (context) => const SignupPage(),
       forgetpassword: (context) => ForgetPasswordPage(),
-      //money exchange
-      moneyexchange: (context) => const MoneyExchangePage(),
-      address: (context) => const ExchangeAddressPage(),
-      details: (context) => const ExchangeDetailsPage(),
-      //userprofile
-      userprofile: (context) => const UserProfilePage(),
+
+
       
     };
   }

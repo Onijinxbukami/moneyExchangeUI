@@ -74,7 +74,7 @@ class _SignupPageState extends State<SignupPage> {
           elevation: 0,
           toolbarHeight: 80,
           title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
 
@@ -124,7 +124,7 @@ class _SignupPageState extends State<SignupPage> {
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                          horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.white),
                         borderRadius: BorderRadius.circular(8),
@@ -175,6 +175,7 @@ class _SignupPageState extends State<SignupPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Title
+                        const SizedBox(height: 16),
                         const Center(
                           child: Text(
                             "Sign Up",

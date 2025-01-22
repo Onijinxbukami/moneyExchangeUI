@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> {
           DropdownButton<String>(
             value: _selectedLanguage,
             dropdownColor: Colors.white,
-            items: ['EN', 'BN', 'ES', 'NL']
+            items: ['EN', 'VN']
                 .map(
                   (lang) => DropdownMenuItem(
                     value: lang,

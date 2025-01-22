@@ -43,7 +43,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
         elevation: 0,
         toolbarHeight: 80,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
 
