@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SettingForm extends StatefulWidget {
   const SettingForm({super.key});
@@ -13,7 +16,7 @@ class _SettingFormState extends State<SettingForm> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  final TextEditingController _nationalityController = TextEditingController();
   final TextEditingController _identificationNumberController =
       TextEditingController();
   final TextEditingController _passportNumberController =
@@ -21,7 +24,25 @@ class _SettingFormState extends State<SettingForm> {
   final TextEditingController _bankCodeController = TextEditingController();
   final TextEditingController _bankNameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-
+  Uint8List? _idFrontPhoto;
+  Uint8List? _idRearPhoto;
+  Uint8List? _passportPhoto;
+  final ImagePicker _picker = ImagePicker();
+  bool _showIdentificationField = false;
+  bool _showPassportField = false;
+  final List<Map<String, String>> nationalities = [
+    {"name": "American"},
+    {"name": "British"},
+    {"name": "Canadian"},
+    {"name": "Chinese"},
+    {"name": "French"},
+    {"name": "German"},
+    {"name": "Indian"},
+    {"name": "Japanese"},
+    {"name": "Korean"},
+    {"name": "Vietnamese"},
+  ];
+  List<Map<String, String>> filteredNationalities = [];
 
   @override
   void dispose() {
@@ -30,12 +51,82 @@ class _SettingFormState extends State<SettingForm> {
     _phoneNumberController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-
+    _nationalityController.dispose();
     _identificationNumberController.dispose();
     _passportNumberController.dispose();
     _bankCodeController.dispose();
     _bankNameController.dispose();
     super.dispose();
+  }
+
+  void filterNationalities(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredNationalities = [];
+      } else {
+        filteredNationalities = nationalities
+            .where((nationality) => nationality['name']!
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+    if (filteredNationalities.isNotEmpty) {
+      _showNationalityDialog();
+    }
+  }
+
+  void _showNationalityDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Nationality'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: filteredNationalities.map((nationality) {
+              return ListTile(
+                title: Text(nationality['name']!),
+                onTap: () {
+                  setState(() {
+                    _nationalityController.text = nationality['name']!;
+                    filteredNationalities = [];
+                  });
+                  Navigator.of(context).pop(); // Close dialog
+                },
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImage(String photoType) async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final Uint8List imageBytes = await pickedFile.readAsBytes();
+
+      setState(() {
+        if (photoType == 'idFront') {
+          _idFrontPhoto = imageBytes;
+        } else if (photoType == 'idRear') {
+          _idRearPhoto = imageBytes;
+        } else if (photoType == 'passport') {
+          _passportPhoto = imageBytes;
+        }
+      });
+    }
   }
 
   @override
@@ -161,15 +252,62 @@ class _SettingFormState extends State<SettingForm> {
               'Enter your First Name',
               controller: _firstNameController,
             ),
-            _buildTextField(
-              'Identification Number',
-              'Enter your Identification Number',
+            _buildConditionalTextField(
+              label: 'Identification Number',
+              hint: 'Enter your Identification Number',
+              isVisible: _showIdentificationField,
+              onCheckboxChanged: (bool? value) {
+                setState(() {
+                  _showIdentificationField = value ?? false;
+                });
+              },
               controller: _identificationNumberController,
             ),
-            _buildTextField(
-              'Passport Number',
-              'Enter your Passport Number',
+            _buildConditionalTextField(
+              label: 'Passport Number',
+              hint: 'Enter your Passport Number',
+              isVisible: _showPassportField,
+              onCheckboxChanged: (bool? value) {
+                setState(() {
+                  _showPassportField = value ?? false;
+                });
+              },
               controller: _passportNumberController,
+            ),
+            _buildPhotoUploader(
+              title: 'ID Front Photo',
+              photoBytes: _idFrontPhoto,
+              photoType: 'idFront',
+            ),
+            _buildPhotoUploader(
+              title: 'ID Rear Photo',
+              photoBytes: _idRearPhoto,
+              photoType: 'idRear',
+            ),
+            _buildPhotoUploader(
+              title: 'Passport Photo',
+              photoBytes: _passportPhoto,
+              photoType: 'passport',
+            ),
+            const Text('Nationality',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _nationalityController,
+              onChanged: (value) {
+                print('TextField value: $value'); // Debug log
+                filterNationalities(value); // Gọi hàm lọc
+              },
+              decoration: InputDecoration(
+                hintText: 'Enter your Nationality',
+                fillColor: Colors.white,
+                filled: true,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              ),
+              style: const TextStyle(fontSize: 14),
             ),
             _buildTextField(
               'Address',
@@ -313,6 +451,60 @@ class _SettingFormState extends State<SettingForm> {
     );
   }
 
+  Widget _buildConditionalTextField({
+    required String label,
+    required String hint,
+    required bool isVisible,
+    required ValueChanged<bool?> onCheckboxChanged,
+    TextEditingController? controller,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Switch(
+              value: isVisible,
+              onChanged: (value) {
+                onCheckboxChanged(value);
+              },
+              activeColor: Colors.blueAccent,
+            ),
+          ],
+        ),
+        if (isVisible) ...[
+          const SizedBox(height: 10),
+          TextFormField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: hint,
+              fillColor: Colors.grey.shade100,
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.blueAccent),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide:
+                    const BorderSide(color: Colors.blueAccent, width: 2),
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            ),
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ],
+    );
+  }
+
   Widget _buildTextField(
     String label,
     String hint, {
@@ -339,6 +531,99 @@ class _SettingFormState extends State<SettingForm> {
           ),
           validator: validator,
         ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoUploader({
+    required String title,
+    required Uint8List? photoBytes,
+    required String photoType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'Edit') {
+                  _pickImage(photoType);
+                } else if (value == 'Remove') {
+                  setState(() {
+                    if (photoType == 'idFront') {
+                      _idFrontPhoto = null;
+                    } else if (photoType == 'idRear') {
+                      _idRearPhoto = null;
+                    } else if (photoType == 'passport') {
+                      _passportPhoto = null;
+                    }
+                  });
+                }
+              },
+              icon: Icon(
+                photoBytes == null ? Icons.upload_file : Icons.more_vert,
+                color: photoBytes == null ? Colors.blue : Colors.green,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              color: Colors.white,
+              elevation: 4,
+              itemBuilder: (context) => [
+                if (photoBytes != null)
+                  PopupMenuItem(
+                    value: 'Edit',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.edit, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Edit Photo'),
+                      ],
+                    ),
+                  ),
+                if (photoBytes != null)
+                  PopupMenuItem(
+                    value: 'Remove',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.delete, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Remove Photo'),
+                      ],
+                    ),
+                  ),
+                if (photoBytes == null)
+                  PopupMenuItem(
+                    value: 'Edit',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.upload_file, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Upload Photo'),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        if (photoBytes != null)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(
+              photoBytes,
+              width: double.infinity,
+              height: 150,
+              fit: BoxFit.cover,
+            ),
+          ),
       ],
     );
   }
