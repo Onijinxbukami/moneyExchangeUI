@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
 import 'package:flutter_application_1/app/routes.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_application_1/shared/widgets/password_field.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
 import 'package:flutter_application_1/features/auth/signUp/signup_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -22,7 +25,7 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final ValidationService _validationService = ValidationService();
-  final bool _isLoading = false;
+  bool _isLoading = false;
   String? _userNameError;
   String? _phoneNumberError;
   String _selectedLanguage = 'EN';
@@ -49,6 +52,158 @@ class _SignupPageState extends State<SignupPage> {
     print('Email: ${_emailController.text}');
     print('Phone Number: ${_phoneNumberController.text}');
     print('Password: ${_passwordController.text}');
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Đăng ký tài khoản trên Firebase Authentication
+      final userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Lưu thông tin bổ sung vào Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'userId': userCredential.user!.uid,
+        'username': _userNameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phoneNumber': _phoneNumberController.text.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      print('User registered and data saved successfully');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration Successful'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Chuyển hướng tới trang chính hoặc đăng nhập tự động
+      Navigator.pushReplacementNamed(context, Routes.homepage);
+    } catch (e) {
+      print('Registration error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Registration failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleLogin() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all the information'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Hiển thị thông tin nhập vào trong console log
+    print('Username: ${_emailController.text}');
+    print('Password: ${_passwordController.text}');
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Đăng nhập bằng email và password qua Firebase Authentication
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Đăng nhập thành công, chuyển hướng đến trang chính
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login successful'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pushReplacementNamed(context, Routes.homepage);
+    } catch (e) {
+      // Xử lý lỗi đăng nhập
+      print('Login error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Bước 1: Đăng nhập tài khoản Google
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // Người dùng hủy đăng nhập
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Bước 2: Xác thực tài khoản Google
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Bước 3: Nhận thông tin đăng nhập từ Firebase
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Bước 4: Đăng nhập Firebase
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Thông báo thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Welcome, ${userCredential.user?.displayName}!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Xử lý lỗi đăng nhập
+      print('Google Sign-In Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google Sign-In Failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _validateUserName() {
@@ -77,9 +232,6 @@ class _SignupPageState extends State<SignupPage> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-
-
-
               Row(
                 children: [
                   // Dropdown ngôn ngữ
@@ -196,7 +348,7 @@ class _SignupPageState extends State<SignupPage> {
                         const SizedBox(height: inputSpacing),
                         TextField(
                           controller: _userNameController,
-                          obscureText: true,
+                          obscureText: false,
                           decoration: inputFieldDecoration.copyWith(
                             hintText: "Enter Your Username",
                             errorText: _userNameError,
@@ -302,7 +454,9 @@ class _SignupPageState extends State<SignupPage> {
                           children: [
                             Expanded(
                               child: GoogleSignInButton(
-                                onPressed: () {},
+                                onPressed: _isLoading
+                                    ? null
+                                    : _handleGoogleSignIn, 
                               ),
                             ),
                             const SizedBox(width: 16),

@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({super.key});
@@ -15,8 +17,7 @@ class ForgetPasswordPage extends StatefulWidget {
 
 class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
-
-  final bool _isLoading = false;
+   bool _isLoading = false;
   String _selectedLanguage = 'EN';
 
   Future<void> _handleLogin() async {
@@ -32,6 +33,59 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
 
     // Hiển thị thông tin nhập vào trong console log
     print('Username: ${_emailController.text}');
+  }
+
+Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Bước 1: Đăng nhập tài khoản Google
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // Người dùng hủy đăng nhập
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Bước 2: Xác thực tài khoản Google
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Bước 3: Nhận thông tin đăng nhập từ Firebase
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Bước 4: Đăng nhập Firebase
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Thông báo thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Welcome, ${userCredential.user?.displayName}!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Xử lý lỗi đăng nhập
+      print('Google Sign-In Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google Sign-In Failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -185,7 +239,9 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: GoogleSignInButton(onPressed: () {}),
+                                  child: GoogleSignInButton( onPressed: _isLoading
+                                    ? null
+                                    : _handleGoogleSignIn, ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
