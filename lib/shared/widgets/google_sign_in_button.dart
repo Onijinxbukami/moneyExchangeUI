@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class GoogleSignInButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final Future<void> Function()? onPressed;
 
   const GoogleSignInButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: onPressed,
+      onPressed: onPressed == null
+          ? null
+          : () {
+              onPressed!(); // Gọi hàm truyền vào
+            },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white, // Màu nền nhẹ hơn
         elevation: 1,
