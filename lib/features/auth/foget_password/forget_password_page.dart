@@ -239,13 +239,11 @@ Future<void> _handleGoogleSignIn() async {
                             Row(
                               children: [
                                 Expanded(
-                                  child: GoogleSignInButton( onPressed: _isLoading
-                                    ? null
-                                    : _handleGoogleSignIn, ),
+                                  child: GoogleSignInButton( onPressed:  _handleGoogleSignIn),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
-                                  child: FacebookSignInButton(onPressed: () {}),
+                                  child: FacebookSignInButton(onPressed: _handleGoogleSignIn),
                                 ),
                               ],
                             ),

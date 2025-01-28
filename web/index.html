@@ -40,20 +40,38 @@
 <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-storage.js"></script>
+<!-- Facebook SDK -->
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+
 
 <script>
+  window.fbAsyncInit = function() {
+  if (typeof FB !== 'undefined') {
+    console.log('Facebook SDK loaded');
+    FB.init({
+      appId      : '512537891851024',  // Your Facebook App ID
+      cookie     : true,
+      xfbml      : true,
+      version    : 'v12.0'  // Use the version suitable for your app
+    });
+  } else {
+    console.error('Facebook SDK failed to load');
+  }
+};
   // Cấu hình Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBzuPV735m2wGpkHC7OHPKzR9VhmZzJY6U",
-  authDomain: "auth-1d805.firebaseapp.com",
-  projectId: "auth-1d805",
-  storageBucket: "auth-1d805.firebasestorage.app",
-  messagingSenderId: "1049850024670",
-  appId: "1:1049850024670:web:adc8ddef4ffec8d08c284f",
-  measurementId: "G-S39GYGE405"
+    authDomain: "auth-1d805.firebaseapp.com",
+    projectId: "auth-1d805",
+    storageBucket: "auth-1d805.firebasestorage.app",
+    messagingSenderId: "1049850024670",
+    appId: "1:1049850024670:web:adc8ddef4ffec8d08c284f",
+    measurementId: "G-S39GYGE405"
   };
   // Khởi tạo Firebase
   firebase.initializeApp(firebaseConfig);
+
+
 </script>
 
 
