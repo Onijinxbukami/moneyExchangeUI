@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FacebookSignInButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final Future<void> Function()? onPressed;
 
   const FacebookSignInButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: onPressed,
+      onPressed: onPressed == null
+          ? null
+          : () {
+              onPressed!(); // Gọi hàm truyền vào
+            },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white, // Màu nền nhẹ hơn
         elevation: 1, // Giảm độ nổi
@@ -22,7 +26,7 @@ class FacebookSignInButton extends StatelessWidget {
       ),
       icon: const FaIcon(
         FontAwesomeIcons.facebook,
-        color: Colors.red,
+        color: Colors.blue, // Màu xanh đặc trưng của Facebook
         size: 28, // Tăng kích thước icon
       ),
       label: const Text(

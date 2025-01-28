@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_application_1/app/routes.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SettingForm extends StatefulWidget {
@@ -24,6 +27,8 @@ class _SettingFormState extends State<SettingForm> {
   final TextEditingController _bankCodeController = TextEditingController();
   final TextEditingController _bankNameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  final oldPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
   Uint8List? _idFrontPhoto;
   Uint8List? _idRearPhoto;
   Uint8List? _passportPhoto;
@@ -57,6 +62,143 @@ class _SettingFormState extends State<SettingForm> {
     _bankCodeController.dispose();
     _bankNameController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> updateUserInformation({
+    required String userId,
+    required String firstName,
+    required String lastName,
+    required String address,
+    required String nationality,
+  }) async {
+    try {
+      // Tham chiếu đến document của người dùng trong collection 'users'
+      DocumentReference userRef =
+          FirebaseFirestore.instance.collection('users').doc(userId);
+
+      // Cập nhật các trường thông tin
+      await userRef.update({
+        'firstName': firstName,
+        'lastName': lastName,
+        'address': address,
+        'nationality': nationality,
+      });
+
+      print('User information updated successfully');
+    } catch (e) {
+      print('Error updating user information: $e');
+    }
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Fetch data from Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        // If data exists, update controllers
+        if (userDoc.exists) {
+          final userData = userDoc.data();
+          setState(() {
+            _phoneNumberController.text = userData?['phoneNumber'] ?? '';
+            _emailController.text = userData?['email'] ?? '';
+            _firstNameController.text = userData?['firstName'] ?? '';
+            _lastNameController.text = userData?['lastName'] ?? '';
+            _addressController.text = userData?['address'] ?? '';
+            _nationalityController.text = userData?['nationality'] ?? '';
+          });
+        }
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
+  Future<void> changePassword({
+    required BuildContext context,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    if (oldPassword.isEmpty || newPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all fields'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Get current user
+      final user = FirebaseAuth.instance.currentUser;
+
+      // Use email and old password to reauthenticate
+      final credential = EmailAuthProvider.credential(
+        email: user!.email!,
+        password: oldPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      // Update the password
+      await user.updatePassword(newPassword);
+
+      // Optional: Update Firestore if needed
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'passwordUpdatedAt': FieldValue.serverTimestamp()});
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password updated successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password change failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut(); // Đăng xuất khỏi Firebase
+      print('User logged out successfully');
+
+      // Điều hướng về màn hình đăng nhập
+      Navigator.pushReplacementNamed(context, Routes.login);
+
+      // Hiển thị thông báo thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Logout successful'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print('Logout error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Logout failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void filterNationalities(String query) {
@@ -359,6 +501,7 @@ class _SettingFormState extends State<SettingForm> {
                     children: [
                       // Old Password TextField
                       TextField(
+                        controller: oldPasswordController,
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: 'Old Password',
@@ -368,6 +511,7 @@ class _SettingFormState extends State<SettingForm> {
                       const SizedBox(height: 16),
                       // New Password TextField
                       TextField(
+                        controller: newPasswordController,
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: 'New Password',
@@ -386,10 +530,18 @@ class _SettingFormState extends State<SettingForm> {
                     ),
                     // Submit button
                     ElevatedButton(
-                      onPressed: () {
-                        // Handle password change logic here
-                        Navigator.of(context)
-                            .pop(); // Close the dialog after submitting
+                      onPressed: () async {
+                        final oldPassword = oldPasswordController.text.trim();
+                        final newPassword = newPasswordController.text.trim();
+
+                        // Call changePassword function
+                        await changePassword(
+                          context: context,
+                          oldPassword: oldPassword,
+                          newPassword: newPassword,
+                        );
+
+                        Navigator.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4743C9),
@@ -428,7 +580,19 @@ class _SettingFormState extends State<SettingForm> {
         const SizedBox(height: 10),
         ElevatedButton(
           onPressed: () {
-            // Handle account update
+            String userId = FirebaseAuth.instance.currentUser!.uid;
+            String firstName = _firstNameController.text;
+            String lastName = _lastNameController.text;
+            String address = _addressController.text;
+            String nationality = _nationalityController.text;
+
+            updateUserInformation(
+              userId: userId,
+              firstName: firstName,
+              lastName: lastName,
+              address: address,
+              nationality: nationality,
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF4743C9),
@@ -440,6 +604,28 @@ class _SettingFormState extends State<SettingForm> {
           ),
           child: const Text(
             'Update',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () {
+            _handleLogout(context);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
+            minimumSize: const Size(double.infinity, 56),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+          child: const Text(
+            'Logout',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,

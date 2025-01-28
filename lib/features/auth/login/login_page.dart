@@ -6,6 +6,7 @@ import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart'
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/password_field.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
@@ -19,6 +20,10 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId:
+        '1049850024670-t352kp6332dnvv5k9p1edvuek64lljpf.apps.googleusercontent.com',
+  );
   bool _isLoading = false;
   String _selectedLanguage = 'EN';
 
@@ -74,55 +79,71 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleGoogleSignIn() async {
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
-      // Bước 1: Đăng nhập tài khoản Google
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        // Người dùng hủy đăng nhập
-        setState(() {
-          _isLoading = false;
-        });
-        return;
+      // Bắt đầu quá trình đăng nhập Google
+      GoogleSignInAccount? user = await _googleSignIn.signIn();
+
+      if (user != null) {
+        // Lấy token để đăng nhập với Firebase
+        final GoogleSignInAuthentication googleAuth = await user.authentication;
+
+        // Tạo một thông tin đăng nhập Firebase từ Google
+        final OAuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        // Đăng nhập vào Firebase với thông tin đăng nhập từ Google
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+
+        // Xử lý sau khi đăng nhập thành công
+        print("User signed in: ${user.displayName}");
+        print("Firebase User ID: ${userCredential.user?.uid}");
+
+        // Bạn có thể tiếp tục điều hướng đến màn hình chính hoặc làm gì đó sau khi đăng nhập thành công
       }
-
-      // Bước 2: Xác thực tài khoản Google
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Bước 3: Nhận thông tin đăng nhập từ Firebase
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Bước 4: Đăng nhập Firebase
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // Thông báo thành công
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Welcome, ${userCredential.user?.displayName}!'),
-          backgroundColor: Colors.green,
-        ),
-      );
     } catch (e) {
-      // Xử lý lỗi đăng nhập
-      print('Google Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Google Sign-In Failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      print("Google Sign-In Error: $e");
+    }
+  }
+
+  Future<void> _handleFacebookSignIn() async {
+    try {
+      // Đăng nhập với Facebook
+      final LoginResult loginResult = await FacebookAuth.instance.login();
+
+      if (loginResult.status == LoginStatus.success) {
+        // Lấy accessToken từ extension
+        final accessToken = loginResult.accessToken;
+        if (accessToken != null) {
+          // Sử dụng getter từ extension để lấy token
+          final String token = accessToken.token;
+
+          // Tạo thông tin đăng nhập từ token
+          final OAuthCredential facebookAuthCredential =
+              FacebookAuthProvider.credential(token);
+
+          // Đăng nhập vào Firebase với thông tin đăng nhập
+          final UserCredential userCredential = await FirebaseAuth.instance
+              .signInWithCredential(facebookAuthCredential);
+
+          // Lấy thông tin người dùng sau khi đăng nhập
+          final User? user = userCredential.user;
+          if (user != null) {
+            print("User signed in: ${user.displayName}");
+            print("Email: ${user.email}");
+          }
+        } else {
+          print("Access token is null.");
+        }
+      } else if (loginResult.status == LoginStatus.cancelled) {
+        print("Facebook sign-in cancelled.");
+      } else {
+        print("Facebook sign-in failed: ${loginResult.message}");
+      }
+    } catch (e) {
+      print("Facebook Sign-In Error: $e");
     }
   }
 
@@ -362,15 +383,14 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             Expanded(
                               child: GoogleSignInButton(
-                                onPressed: _isLoading
-                                    ? null
-                                    : _handleGoogleSignIn, // Chỉ tham chiếu hàm
+                                onPressed:
+                                    _handleGoogleSignIn, // Chỉ tham chiếu hàm
                               ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
                               child: FacebookSignInButton(
-                                onPressed: () {},
+                                onPressed: _handleFacebookSignIn,
                               ),
                             ),
                           ],
@@ -385,4 +405,8 @@ class _LoginPageState extends State<LoginPage> {
           },
         ));
   }
+}
+
+extension AccessTokenExtension on AccessToken {
+  String get token => this.token ?? '';
 }
