@@ -11,6 +11,10 @@ import 'package:flutter_application_1/shared/widgets/email_field.dart';
 import 'package:flutter_application_1/features/auth/signUp/signup_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:js' as js;
+import 'package:js/js_util.dart' as js_util;
+
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
@@ -29,6 +33,7 @@ class _SignupPageState extends State<SignupPage> {
   String? _userNameError;
   String? _phoneNumberError;
   String _selectedLanguage = 'EN';
+  bool _isFacebookSDKReady = false;
 
   Future<void> _handleRegister() async {
     // Kiểm tra các trường nhập liệu
@@ -203,6 +208,95 @@ class _SignupPageState extends State<SignupPage> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Đợi một chút để SDK Facebook có thể khởi tạo
+    Future.delayed(Duration(seconds: 3), () {
+      // Sử dụng js_util để lấy giá trị của facebookSDKReady từ JavaScript
+      bool? isSDKReady =
+          js_util.getProperty(js_util.globalThis, 'facebookSDKReady');
+
+      setState(() {
+        _isFacebookSDKReady = isSDKReady ?? false;
+      });
+      print("SDK ready status: $_isFacebookSDKReady");
+    });
+  }
+
+  void _handleFacebookSignIn() {
+    try {
+      // Kiểm tra nếu Facebook SDK đã sẵn sàng
+      if (js.context['FB'] == null || js.context['FB'].callMethod == null) {
+        print("Facebook SDK chưa sẵn sàng hoặc không thể gọi phương thức.");
+        return;
+      }
+
+      // Gọi FB.login
+      var fb = js.context['FB'];
+      fb.callMethod('login', [
+        js.allowInterop((response) {
+          print("Facebook login response: $response");
+
+          if (response is js.JsObject &&
+              response.hasProperty('status') &&
+              response['status'] == 'connected') {
+            final accessToken = response['authResponse']['accessToken'];
+            print("Facebook Access Token: $accessToken");
+
+            // Gọi Firebase Auth
+            _signInWithFirebase(accessToken);
+          } else {
+            print("Facebook login failed: ${response['status']}");
+          }
+        }),
+        {'scope': 'email,public_profile'}
+      ]);
+    } catch (e) {
+      print("Facebook Sign-In Error: $e");
+    }
+  }
+
+  void _signInWithFirebase(String accessToken) async {
+    try {
+      final OAuthCredential credential =
+          FacebookAuthProvider.credential(accessToken);
+
+      // Đăng nhập vào Firebase
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      User? firebaseUser = userCredential.user;
+
+      if (firebaseUser != null) {
+        final userRef = FirebaseFirestore.instance
+            .collection("users")
+            .doc(firebaseUser.uid);
+        DocumentSnapshot doc = await userRef.get();
+
+        if (!doc.exists) {
+          await userRef.set({
+            "uid": firebaseUser.uid,
+            "userName": firebaseUser.displayName,
+            "email": firebaseUser.email,
+            "photoUrl": firebaseUser.photoURL,
+            "createdAt": FieldValue.serverTimestamp(),
+          });
+        } else {
+          await userRef.update({
+            "userName": firebaseUser.displayName,
+            "photoUrl": firebaseUser.photoURL,
+          });
+        }
+
+        print("User signed in: ${firebaseUser.displayName}");
+        Navigator.pushReplacementNamed(context, Routes.homepage);
+      }
+    } catch (e) {
+      print("Error during Firebase sign-in: $e");
     }
   }
 
@@ -459,9 +553,14 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                             const SizedBox(width: 16),
                             Expanded(
-                              child: FacebookSignInButton(
-                                onPressed: _handleGoogleSignIn,
-                              ),
+                              child: FacebookSignInButton(onPressed: () async {
+                                if (!_isFacebookSDKReady) {
+                                  print(
+                                      "Facebook SDK chưa sẵn sàng, vui lòng thử lại sau.");
+                                  return;
+                                }
+                                _handleFacebookSignIn();
+                              }),
                             ),
                           ],
                         ),
