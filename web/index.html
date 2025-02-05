@@ -1,21 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
@@ -36,56 +22,85 @@
     // The value below is injected by flutter build, do not touch.
     const serviceWorkerVersion = null;
   </script>
-<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-storage.js"></script>
-<!-- Facebook SDK -->
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-storage.js"></script>
 
-<script>
-  window.fbAsyncInit = function() {
-  if (typeof FB !== 'undefined') {
-    console.log('Facebook SDK loaded');
-    FB.init({
-      appId      : '512537891851024',  // Your Facebook App ID
-      cookie     : true,
-      xfbml      : true,
-      version    : 'v12.0'  // Use the version suitable for your app
-    });
-  } else {
-    console.error('Facebook SDK failed to load');
-  }
-};
-  // Cấu hình Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyBzuPV735m2wGpkHC7OHPKzR9VhmZzJY6U",
-    authDomain: "auth-1d805.firebaseapp.com",
-    projectId: "auth-1d805",
-    storageBucket: "auth-1d805.firebasestorage.app",
-    messagingSenderId: "1049850024670",
-    appId: "1:1049850024670:web:adc8ddef4ffec8d08c284f",
-    measurementId: "G-S39GYGE405"
-  };
-  // Khởi tạo Firebase
-  firebase.initializeApp(firebaseConfig);
+  <script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '1138420431027567', // Thay thế bằng appId của bạn
+        cookie     : true,
+        xfbml      : true,
+        version    : 'v12.0'
+      });
+  
+      console.log("Facebook SDK đã khởi tạo thành công!");
+  
+      // Cập nhật trạng thái SDK đã sẵn sàng
+      window.facebookSDKReady = true;
+  
+      // Kiểm tra trạng thái đăng nhập của người dùng
+      FB.getLoginStatus(function(response) {
+        if (response.status === 'connected') {
+          console.log('User is already logged in');
+          // Đăng nhập Firebase với accessToken nếu người dùng đã đăng nhập
+          var accessToken = response.authResponse.accessToken;
+          // Gọi hàm Dart để xử lý đăng nhập Firebase với token
+          window.flutter_inappwebview.callHandler('facebookLogin', accessToken);
+        } else {
+          console.log('User is not logged in');
+          // Gọi FB.login để yêu cầu người dùng đăng nhập nếu chưa đăng nhập
+          FB.login(function(response) {
+            if (response.status === 'connected') {
+              console.log('Successfully logged in');
+              var accessToken = response.authResponse.accessToken;
+              // Gọi hàm Dart để xử lý đăng nhập Firebase với token
+              window.flutter_inappwebview.callHandler('facebookLogin', accessToken);
+            } else {
+              console.log('Login failed');
+            }
+          }, {scope: 'email,public_profile'});
+        }
+      });
+    };
+  
+    // Thêm mã tải SDK Facebook
+    (function(d, s, id){
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) {return;}
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
+  
 
+  <!-- Firebase Configuration -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzuPV735m2wGpkHC7OHPKzR9VhmZzJY6U",
+      authDomain: "auth-1d805.firebaseapp.com",
+      projectId: "auth-1d805",
+      storageBucket: "auth-1d805.firebasestorage.app",
+      messagingSenderId: "1049850024670",
+      appId: "1:1049850024670:web:adc8ddef4ffec8d08c284f",
+      measurementId: "G-S39GYGE405"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 
-</script>
-
-
-
-  <!-- This script adds the flutter initialization JS code -->
+  <!-- Flutter Initialization -->
   <script src="flutter.js" defer></script>
-
-
-
 </head>
+
 <body>
   <script>
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
+      // Download main.dart.js and initialize Flutter
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,

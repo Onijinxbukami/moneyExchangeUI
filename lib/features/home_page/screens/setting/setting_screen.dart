@@ -14,6 +14,7 @@ class SettingForm extends StatefulWidget {
 }
 
 class _SettingFormState extends State<SettingForm> {
+  final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
@@ -51,6 +52,7 @@ class _SettingFormState extends State<SettingForm> {
 
   @override
   void dispose() {
+    _userNameController.dispose();
     _lastNameController.dispose();
     _firstNameController.dispose();
     _phoneNumberController.dispose();
@@ -72,6 +74,7 @@ class _SettingFormState extends State<SettingForm> {
 
   Future<void> updateUserInformation({
     required String userId,
+    required String userName,
     required String firstName,
     required String lastName,
     required String address,
@@ -84,6 +87,7 @@ class _SettingFormState extends State<SettingForm> {
 
       // Cập nhật các trường thông tin
       await userRef.update({
+        'userName': userName,
         'firstName': firstName,
         'lastName': lastName,
         'address': address,
@@ -110,6 +114,7 @@ class _SettingFormState extends State<SettingForm> {
         if (userDoc.exists) {
           final userData = userDoc.data();
           setState(() {
+            _userNameController.text = userData?['userName'] ?? '';
             _phoneNumberController.text = userData?['phoneNumber'] ?? '';
             _emailController.text = userData?['email'] ?? '';
             _firstNameController.text = userData?['firstName'] ?? '';
@@ -385,6 +390,11 @@ class _SettingFormState extends State<SettingForm> {
           runSpacing: 10,
           children: [
             _buildTextField(
+              'User Name',
+              'Enter your Last Name',
+              controller: _userNameController,
+            ),
+            _buildTextField(
               'Last Name',
               'Enter your Last Name',
               controller: _lastNameController,
@@ -581,12 +591,14 @@ class _SettingFormState extends State<SettingForm> {
         ElevatedButton(
           onPressed: () {
             String userId = FirebaseAuth.instance.currentUser!.uid;
+            String userName = _userNameController.text;
             String firstName = _firstNameController.text;
             String lastName = _lastNameController.text;
             String address = _addressController.text;
             String nationality = _nationalityController.text;
 
             updateUserInformation(
+              userName: userName,
               userId: userId,
               firstName: firstName,
               lastName: lastName,

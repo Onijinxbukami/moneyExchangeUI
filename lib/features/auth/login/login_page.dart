@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
@@ -6,8 +7,12 @@ import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart'
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/password_field.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+
 import 'package:google_sign_in/google_sign_in.dart';
+
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:js' as js;
+import 'package:js/js_util.dart' as js_util;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
   );
   bool _isLoading = false;
   String _selectedLanguage = 'EN';
+  bool _isFacebookSDKReady = false;
 
   Future<void> _handleLogin() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -80,70 +86,143 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleGoogleSignIn() async {
     try {
-      // Bắt đầu quá trình đăng nhập Google
       GoogleSignInAccount? user = await _googleSignIn.signIn();
 
       if (user != null) {
-        // Lấy token để đăng nhập với Firebase
         final GoogleSignInAuthentication googleAuth = await user.authentication;
 
-        // Tạo một thông tin đăng nhập Firebase từ Google
         final OAuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
 
-        // Đăng nhập vào Firebase với thông tin đăng nhập từ Google
         UserCredential userCredential =
             await FirebaseAuth.instance.signInWithCredential(credential);
+        User? firebaseUser = userCredential.user;
 
-        // Xử lý sau khi đăng nhập thành công
-        print("User signed in: ${user.displayName}");
-        print("Firebase User ID: ${userCredential.user?.uid}");
+        if (firebaseUser != null) {
+          // Tham chiếu đến Firestore
+          final userRef = FirebaseFirestore.instance
+              .collection("users")
+              .doc(firebaseUser.uid);
 
-        // Bạn có thể tiếp tục điều hướng đến màn hình chính hoặc làm gì đó sau khi đăng nhập thành công
+          // Kiểm tra nếu người dùng đã tồn tại
+          DocumentSnapshot doc = await userRef.get();
+          if (!doc.exists) {
+            // Nếu chưa có, thêm người dùng vào Firestore
+            await userRef.set({
+              "uid": firebaseUser.uid,
+              "userName": firebaseUser.displayName,
+              "email": firebaseUser.email,
+              "photoUrl": firebaseUser.photoURL,
+              "createdAt": FieldValue.serverTimestamp(),
+            });
+          } else {
+            // Nếu đã tồn tại, có thể cập nhật thông tin mới
+            await userRef.update({
+              "userName": firebaseUser.displayName,
+              "photoUrl": firebaseUser.photoURL,
+            });
+          }
+
+          print("User signed in: ${firebaseUser.displayName}");
+          print("Firebase User ID: ${firebaseUser.uid}");
+
+          // Chuyển đến trang chính
+          Navigator.pushReplacementNamed(context, Routes.homepage);
+        }
       }
     } catch (e) {
       print("Google Sign-In Error: $e");
     }
   }
 
-  Future<void> _handleFacebookSignIn() async {
+  @override
+  void initState() {
+    super.initState();
+
+    // Đợi một chút để SDK Facebook có thể khởi tạo
+    Future.delayed(Duration(seconds: 3), () {
+      // Sử dụng js_util để lấy giá trị của facebookSDKReady từ JavaScript
+      bool? isSDKReady =
+          js_util.getProperty(js_util.globalThis, 'facebookSDKReady');
+
+      setState(() {
+        _isFacebookSDKReady = isSDKReady ?? false;
+      });
+      print("SDK ready status: $_isFacebookSDKReady");
+    });
+  }
+
+  void _handleFacebookSignIn() {
     try {
-      // Đăng nhập với Facebook
-      final LoginResult loginResult = await FacebookAuth.instance.login();
-
-      if (loginResult.status == LoginStatus.success) {
-        // Lấy accessToken từ extension
-        final accessToken = loginResult.accessToken;
-        if (accessToken != null) {
-          // Sử dụng getter từ extension để lấy token
-          final String token = accessToken.token;
-
-          // Tạo thông tin đăng nhập từ token
-          final OAuthCredential facebookAuthCredential =
-              FacebookAuthProvider.credential(token);
-
-          // Đăng nhập vào Firebase với thông tin đăng nhập
-          final UserCredential userCredential = await FirebaseAuth.instance
-              .signInWithCredential(facebookAuthCredential);
-
-          // Lấy thông tin người dùng sau khi đăng nhập
-          final User? user = userCredential.user;
-          if (user != null) {
-            print("User signed in: ${user.displayName}");
-            print("Email: ${user.email}");
-          }
-        } else {
-          print("Access token is null.");
-        }
-      } else if (loginResult.status == LoginStatus.cancelled) {
-        print("Facebook sign-in cancelled.");
-      } else {
-        print("Facebook sign-in failed: ${loginResult.message}");
+      // Kiểm tra nếu Facebook SDK đã sẵn sàng
+      if (js.context['FB'] == null || js.context['FB'].callMethod == null) {
+        print("Facebook SDK chưa sẵn sàng hoặc không thể gọi phương thức.");
+        return;
       }
+
+      // Gọi FB.login
+      var fb = js.context['FB'];
+      fb.callMethod('login', [
+        js.allowInterop((response) {
+          print("Facebook login response: $response");
+
+          if (response is js.JsObject &&
+              response.hasProperty('status') &&
+              response['status'] == 'connected') {
+            final accessToken = response['authResponse']['accessToken'];
+            print("Facebook Access Token: $accessToken");
+
+            // Gọi Firebase Auth
+            _signInWithFirebase(accessToken);
+          } else {
+            print("Facebook login failed: ${response['status']}");
+          }
+        }),
+        {'scope': 'email,public_profile'}
+      ]);
     } catch (e) {
       print("Facebook Sign-In Error: $e");
+    }
+  }
+
+  void _signInWithFirebase(String accessToken) async {
+    try {
+      final OAuthCredential credential =
+          FacebookAuthProvider.credential(accessToken);
+
+      // Đăng nhập vào Firebase
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      User? firebaseUser = userCredential.user;
+
+      if (firebaseUser != null) {
+        final userRef = FirebaseFirestore.instance
+            .collection("users")
+            .doc(firebaseUser.uid);
+        DocumentSnapshot doc = await userRef.get();
+
+        if (!doc.exists) {
+          await userRef.set({
+            "uid": firebaseUser.uid,
+            "userName": firebaseUser.displayName,
+            "email": firebaseUser.email,
+            "photoUrl": firebaseUser.photoURL,
+            "createdAt": FieldValue.serverTimestamp(),
+          });
+        } else {
+          await userRef.update({
+            "userName": firebaseUser.displayName,
+            "photoUrl": firebaseUser.photoURL,
+          });
+        }
+
+        print("User signed in: ${firebaseUser.displayName}");
+        Navigator.pushReplacementNamed(context, Routes.homepage);
+      }
+    } catch (e) {
+      print("Error during Firebase sign-in: $e");
     }
   }
 
@@ -389,9 +468,14 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             const SizedBox(width: 16),
                             Expanded(
-                              child: FacebookSignInButton(
-                                onPressed: _handleFacebookSignIn,
-                              ),
+                              child: FacebookSignInButton(onPressed: () async {
+                                if (!_isFacebookSDKReady) {
+                                  print(
+                                      "Facebook SDK chưa sẵn sàng, vui lòng thử lại sau.");
+                                  return;
+                                }
+                                _handleFacebookSignIn();
+                              }),
                             ),
                           ],
                         ),
@@ -405,8 +489,4 @@ class _LoginPageState extends State<LoginPage> {
           },
         ));
   }
-}
-
-extension AccessTokenExtension on AccessToken {
-  String get token => this.token ?? '';
 }
