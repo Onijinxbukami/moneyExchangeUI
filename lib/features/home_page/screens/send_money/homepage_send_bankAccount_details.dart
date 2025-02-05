@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
-import 'package:flutter_application_1/features/home_page/screens/send_money/send_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class HomepageBankAccountDetailsPage extends StatefulWidget {
   const HomepageBankAccountDetailsPage({super.key});
@@ -16,6 +17,11 @@ class HomepageBankAccountDetailsPage extends StatefulWidget {
 class _HomepageBankAccountDetailsPageState
     extends State<HomepageBankAccountDetailsPage> {
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController dobController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+
+  final TextEditingController accountNameController = TextEditingController();
   final TextEditingController accountNumberController = TextEditingController();
   final TextEditingController bankCodeController = TextEditingController();
 
@@ -63,6 +69,10 @@ class _HomepageBankAccountDetailsPageState
   ];
   List<Map<String, String>> filteredBankCode = [];
   String _selectedLanguage = 'EN';
+  Uint8List? _idFrontPhoto;
+  Uint8List? _idRearPhoto;
+  Uint8List? _passportPhoto;
+  final ImagePicker _picker = ImagePicker();
   @override
   void initState() {
     super.initState();
@@ -86,6 +96,34 @@ class _HomepageBankAccountDetailsPageState
             .toList();
       }
     });
+  }
+
+  void _validatePhoneNumber(String value) {
+    // Kiểm tra nếu đầu vào có ký tự không phải số
+    if (value.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(value)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter only numbers")),
+      );
+    }
+  }
+
+  Future<void> _pickImage(String photoType) async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final Uint8List imageBytes = await pickedFile.readAsBytes();
+
+      setState(() {
+        if (photoType == 'idFront') {
+          _idFrontPhoto = imageBytes;
+        } else if (photoType == 'idRear') {
+          _idRearPhoto = imageBytes;
+        } else if (photoType == 'passport') {
+          _passportPhoto = imageBytes;
+        }
+      });
+    }
   }
 
   @override
@@ -112,7 +150,7 @@ class _HomepageBankAccountDetailsPageState
             ProgressStepper(
               steps: const [
                 "Amount",
-                "You",
+                "Sender",
                 "Recipient",
                 "Review",
                 "Pay",
@@ -220,7 +258,7 @@ class _HomepageBankAccountDetailsPageState
           children: [
             const Center(
               child: Text(
-                'Enter Your Bank Account Details',
+                'Recipient Details',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -231,6 +269,188 @@ class _HomepageBankAccountDetailsPageState
             const Divider(color: Colors.black),
 
             const SizedBox(height: 10),
+            const Text(
+              'Full legal first and middlde name',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Enter your text',
+                hintText: 'Type something...',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              'Date of Birth',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: dobController,
+              readOnly: true,
+              onTap: () async {
+                DateTime? selectedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (selectedDate != null) {
+                  dobController.text =
+                      "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+                }
+              },
+              decoration: InputDecoration(
+                labelText: 'Select your date of birth',
+                hintText: 'YYYY-MM-DD',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+            const SizedBox(height: 20),
+
+            const Text(
+              'Phone Number',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              onChanged: (value) {
+                _validatePhoneNumber(
+                    value); // Truyền trực tiếp giá trị của input
+              },
+              decoration: InputDecoration(
+                labelText: 'Enter your phone number',
+                hintText: 'e.g. +123456789',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+            const SizedBox(height: 10),
+
+            const Text(
+              'Mail',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Enter your mail',
+                hintText: 'Type something...',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+
+            const SizedBox(height: 20),
+            _buildPhotoUploader(
+              title: 'ID Front Photo',
+              photoBytes: _idFrontPhoto,
+              photoType: 'idFront',
+            ),
+            _buildPhotoUploader(
+              title: 'ID Rear Photo',
+              photoBytes: _idRearPhoto,
+              photoType: 'idRear',
+            ),
+            _buildPhotoUploader(
+              title: 'Passport Photo',
+              photoBytes: _passportPhoto,
+              photoType: 'passport',
+            ),
+            const SizedBox(height: 10),
             Text(
               'Recipient bank details',
               style: TextStyle(
@@ -239,6 +459,7 @@ class _HomepageBankAccountDetailsPageState
                 color: Color(0xFF00274D),
               ),
             ),
+            const Divider(color: Colors.black),
 
             const SizedBox(height: 10),
             const Text(
@@ -251,7 +472,7 @@ class _HomepageBankAccountDetailsPageState
             ),
             const SizedBox(height: 10),
             TextField(
-              controller: nameController,
+              controller: accountNameController,
               decoration: InputDecoration(
                 labelText: 'Enter your text',
                 hintText: 'Type something...',
@@ -382,6 +603,16 @@ class _HomepageBankAccountDetailsPageState
                             const SizedBox(height: 5),
                           ],
                         ),
+                        onTap: () {
+                          // When an item is tapped, set the name into the TextField's controller
+                          setState(() {
+                            bankCodeController.text =
+                                bankCode['name'] ?? 'No Name';
+                            // Optionally, close the list by clearing filtered results
+                            filteredBankCode
+                                .clear(); // Clear the list or you can use visibility to hide the list
+                          });
+                        },
                       );
                     },
                   ),
@@ -451,6 +682,99 @@ class _HomepageBankAccountDetailsPageState
           const SizedBox(height: 10),
         ],
       ),
+    );
+  }
+
+  Widget _buildPhotoUploader({
+    required String title,
+    required Uint8List? photoBytes,
+    required String photoType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'Edit') {
+                  _pickImage(photoType);
+                } else if (value == 'Remove') {
+                  setState(() {
+                    if (photoType == 'idFront') {
+                      _idFrontPhoto = null;
+                    } else if (photoType == 'idRear') {
+                      _idRearPhoto = null;
+                    } else if (photoType == 'passport') {
+                      _passportPhoto = null;
+                    }
+                  });
+                }
+              },
+              icon: Icon(
+                photoBytes == null ? Icons.upload_file : Icons.more_vert,
+                color: photoBytes == null ? Colors.blue : Colors.green,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              color: Colors.white,
+              elevation: 4,
+              itemBuilder: (context) => [
+                if (photoBytes != null)
+                  PopupMenuItem(
+                    value: 'Edit',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.edit, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Edit Photo'),
+                      ],
+                    ),
+                  ),
+                if (photoBytes != null)
+                  PopupMenuItem(
+                    value: 'Remove',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.delete, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Remove Photo'),
+                      ],
+                    ),
+                  ),
+                if (photoBytes == null)
+                  PopupMenuItem(
+                    value: 'Edit',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.upload_file, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Upload Photo'),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        if (photoBytes != null)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(
+              photoBytes,
+              width: double.infinity,
+              height: 150,
+              fit: BoxFit.cover,
+            ),
+          ),
+      ],
     );
   }
 }

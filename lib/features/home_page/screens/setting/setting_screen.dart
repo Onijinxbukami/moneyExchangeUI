@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:js' as js;
 
 class SettingForm extends StatefulWidget {
   const SettingForm({super.key});
@@ -182,8 +183,23 @@ class _SettingFormState extends State<SettingForm> {
 
   Future<void> _handleLogout(BuildContext context) async {
     try {
-      await FirebaseAuth.instance.signOut(); // Đăng xuất khỏi Firebase
-      print('User logged out successfully');
+      var fb = js.context['FB'];
+
+      // Kiểm tra nếu Facebook SDK đã sẵn sàng
+      if (fb != null && fb.callMethod != null) {
+        print("Logging out from Facebook...");
+
+        // Gọi FB.logout() để đăng xuất khỏi Facebook
+        fb.callMethod('logout', [
+          js.allowInterop((response) {
+            print("User logged out from Facebook.");
+          })
+        ]);
+      }
+
+      // Đăng xuất khỏi Firebase
+      await FirebaseAuth.instance.signOut();
+      print('User logged out successfully from Firebase');
 
       // Điều hướng về màn hình đăng nhập
       Navigator.pushReplacementNamed(context, Routes.login);
