@@ -154,38 +154,83 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _handleFacebookSignIn() {
-    try {
-      // Kiểm tra nếu Facebook SDK đã sẵn sàng
-      if (js.context['FB'] == null || js.context['FB'].callMethod == null) {
-        print("Facebook SDK chưa sẵn sàng hoặc không thể gọi phương thức.");
-        return;
-      }
+void _handleFacebookSignIn() {
+  try {
+    var fb = js.context['FB'];
+    if (fb == null || fb.callMethod == null) {
+      print("Facebook SDK chưa sẵn sàng hoặc không thể gọi phương thức.");
+      return;
+    }
 
-      // Gọi FB.login
-      var fb = js.context['FB'];
-      fb.callMethod('login', [
-        js.allowInterop((response) {
-          print("Facebook login response: $response");
-
-          if (response is js.JsObject &&
-              response.hasProperty('status') &&
-              response['status'] == 'connected') {
-            final accessToken = response['authResponse']['accessToken'];
-            print("Facebook Access Token: $accessToken");
-
-            // Gọi Firebase Auth
+    // Kiểm tra trạng thái đăng nhập trước
+    fb.callMethod('getLoginStatus', [
+      js.allowInterop((response) {
+        if (response is js.JsObject &&
+            response.hasProperty('status') &&
+            response['status'] == 'connected' &&
+            response.hasProperty('authResponse')) {
+          final accessToken = response['authResponse']['accessToken'];
+          if (accessToken != null && accessToken.isNotEmpty) {
+            print("User already logged in, Access Token: $accessToken");
             _signInWithFirebase(accessToken);
           } else {
-            print("Facebook login failed: ${response['status']}");
+            print("User logged in but token is missing, retrying...");
+            _getAccessToken();
           }
-        }),
-        {'scope': 'email,public_profile'}
-      ]);
-    } catch (e) {
-      print("Facebook Sign-In Error: $e");
-    }
+        } else {
+          // Nếu chưa đăng nhập, gọi FB.login()
+          print("User not logged in, calling FB.login()");
+          fb.callMethod('login', [
+            js.allowInterop((loginResponse) {
+              if (loginResponse is js.JsObject &&
+                  loginResponse.hasProperty('status') &&
+                  loginResponse['status'] == 'connected' &&
+                  loginResponse.hasProperty('authResponse')) {
+                final loginAccessToken =
+                    loginResponse['authResponse']['accessToken'];
+                if (loginAccessToken != null && loginAccessToken.isNotEmpty) {
+                  print("Login successful, Access Token: $loginAccessToken");
+                  _signInWithFirebase(loginAccessToken);
+                } else {
+                  print("Login successful but no token, retrying...");
+                  _getAccessToken();
+                }
+              } else {
+                print("Facebook login failed: ${loginResponse['status']}");
+              }
+            }),
+            {'scope': 'email,public_profile'} // Thêm quyền truy cập email, profile
+          ]);
+        }
+      })
+    ]);
+  } catch (e) {
+    print("Facebook Sign-In Error: $e");
   }
+}
+
+void _getAccessToken() {
+  var fb = js.context['FB'];
+  fb.callMethod('getLoginStatus', [
+    js.allowInterop((response) {
+      if (response is js.JsObject &&
+          response.hasProperty('status') &&
+          response['status'] == 'connected' &&
+          response.hasProperty('authResponse')) {
+        final accessToken = response['authResponse']['accessToken'];
+        if (accessToken != null && accessToken.isNotEmpty) {
+          print("Retrieved Access Token: $accessToken");
+          _signInWithFirebase(accessToken);
+        } else {
+          print("Token still unavailable, retrying in 2 seconds...");
+          Future.delayed(Duration(seconds: 2), _getAccessToken);
+        }
+      } else {
+        print("User is not logged in after retry.");
+      }
+    })
+  ]);
+}
 
   void _signInWithFirebase(String accessToken) async {
     try {

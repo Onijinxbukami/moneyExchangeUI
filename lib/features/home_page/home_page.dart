@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
             labelColor: Colors.white,
             unselectedLabelColor: Colors.grey,
             tabs: [
-              Tab(text: 'Near me', icon: Icon(Icons.notifications)),
+              Tab(text: 'Withdrawals', icon: Icon(Icons.notifications)),
               Tab(text: 'Send', icon: Icon(Icons.security)),
               Tab(text: 'Setting', icon: Icon(Icons.new_releases)),
             ],

@@ -43,29 +43,18 @@
       // Cập nhật trạng thái SDK đã sẵn sàng
       window.facebookSDKReady = true;
   
-      // Kiểm tra trạng thái đăng nhập của người dùng
+
       FB.getLoginStatus(function(response) {
-        if (response.status === 'connected') {
-          console.log('User is already logged in');
-          // Đăng nhập Firebase với accessToken nếu người dùng đã đăng nhập
-          var accessToken = response.authResponse.accessToken;
-          // Gọi hàm Dart để xử lý đăng nhập Firebase với token
-          window.flutter_inappwebview.callHandler('facebookLogin', accessToken);
-        } else {
-          console.log('User is not logged in');
-          // Gọi FB.login để yêu cầu người dùng đăng nhập nếu chưa đăng nhập
-          FB.login(function(response) {
-            if (response.status === 'connected') {
-              console.log('Successfully logged in');
-              var accessToken = response.authResponse.accessToken;
-              // Gọi hàm Dart để xử lý đăng nhập Firebase với token
-              window.flutter_inappwebview.callHandler('facebookLogin', accessToken);
-            } else {
-              console.log('Login failed');
-            }
-          }, {scope: 'email,public_profile'});
-        }
-      });
+  if (response.status === 'connected') {
+    console.log('User is already logged in');
+    var accessToken = response.authResponse.accessToken;
+    window.flutter_inappwebview.callHandler('facebookLogin', accessToken);
+  } else {
+    console.log('User is not logged in');
+    // Không tự động gọi FB.login() ở đây, chỉ cập nhật trạng thái
+  }
+});
+
     };
   
     // Thêm mã tải SDK Facebook

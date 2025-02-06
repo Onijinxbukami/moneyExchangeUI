@@ -15,15 +15,82 @@ class HomepageUserDetailsPage extends StatefulWidget {
 
 class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController accountNumberController = TextEditingController();
-  final TextEditingController bankCodeController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+
+  final TextEditingController accountNameController = TextEditingController();
+  final TextEditingController accountNumberController = TextEditingController();
+  final TextEditingController bankCodeController = TextEditingController();
+
   String _selectedLanguage = 'EN';
+  final List<Map<String, String>> bankCodes = [
+    {
+      "code": "001",
+      "name": "Bank A",
+    },
+    {
+      "code": "002",
+      "name": "Bank B",
+    },
+    {
+      "code": "003",
+      "name": "Bank C",
+    },
+    {
+      "code": "004",
+      "name": "Bank D",
+    },
+    {
+      "code": "005",
+      "name": "Bank E",
+    },
+    {
+      "code": "006",
+      "name": "Bank F",
+    },
+    {
+      "code": "007",
+      "name": "Bank G",
+    },
+    {
+      "code": "008",
+      "name": "Bank H",
+    },
+    {
+      "code": "009",
+      "name": "Bank I",
+    },
+    {
+      "code": "010",
+      "name": "Bank J",
+    },
+  ];
+  List<Map<String, String>> filteredBankCode = [];
 
   @override
   void initState() {
     super.initState();
+  }
+
+  void filterdBankCode(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredBankCode = [];
+      } else {
+        filteredBankCode = bankCodes
+            .where((outlet) =>
+                (outlet['code'] != null &&
+                    outlet['code']!
+                        .toLowerCase()
+                        .contains(query.toLowerCase())) ||
+                (outlet['name'] != null &&
+                    outlet['name']!
+                        .toLowerCase()
+                        .contains(query.toLowerCase())))
+            .toList();
+      }
+    });
   }
 
   void _validatePhoneNumber(String value) {
@@ -59,7 +126,7 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
             ProgressStepper(
               steps: const [
                 "Amount",
-                "You",
+                "Sender",
                 "Recipient",
                 "Review",
                 "Pay",
@@ -80,8 +147,8 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
               child: TabBarView(
                 children: [
                   LocationForm(),
-                  _buildContent(fontSize, padding), // Nội dung cho "Near me"                 
-                  SettingForm(),  // Nội dung cho "Setting"
+                  _buildContent(fontSize, padding), // Nội dung cho "Near me"
+                  SettingForm(), // Nội dung cho "Setting"
                 ],
               ),
             ),
@@ -108,11 +175,11 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
 
   Widget _buildHeader() {
     return Container(
-      color: const Color(0xFF6610F2),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: const Color(0xFF6610F2), // Màu nền tím nhẹ
+      padding: const EdgeInsets.symmetric(
+          horizontal: 24, vertical: 16), // Khoảng cách lớn hơn
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // Canh đều giữa Dropdown và Login
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Dropdown chọn ngôn ngữ
           DropdownButton<String>(
@@ -124,7 +191,12 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
                     value: lang,
                     child: Text(
                       lang,
-                      style: const TextStyle(color: Colors.black),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight:
+                            FontWeight.w500, // Tăng độ dày chữ để dễ đọc hơn
+                        fontSize: 16, // Kích thước chữ dễ nhìn
+                      ),
                     ),
                   ),
                 )
@@ -141,14 +213,20 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
               Navigator.pushNamed(context, Routes.login);
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 12), // Khoảng cách lớn hơn
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius:
+                    BorderRadius.circular(12), // Đường viền tròn mềm mại hơn
               ),
               child: const Text(
                 'LOGIN',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, // Tăng độ đậm của chữ
+                  fontSize: 18, // Kích thước chữ lớn hơn, dễ nhìn
+                ),
               ),
             ),
           ),
@@ -216,45 +294,7 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
               ),
               style: TextStyle(fontSize: fontSize),
             ),
-            const SizedBox(height: 10),
-            const Text(
-              'Full legal last name',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF00274D),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: bankCodeController,
-              decoration: InputDecoration(
-                labelText: 'Enter your text',
-                hintText: 'Type something...',
-                labelStyle: TextStyle(fontSize: fontSize),
-                hintStyle:
-                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
-                contentPadding: EdgeInsets.symmetric(
-                    vertical: padding, horizontal: padding),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-              ),
-              style: TextStyle(fontSize: fontSize),
-            ),
+
             const SizedBox(height: 10),
 
             const Text(
@@ -340,53 +380,268 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
               ),
               style: TextStyle(fontSize: fontSize),
             ),
+            const SizedBox(height: 10),
 
-            const SizedBox(height: 40), // Khoảng cách giữa ListView và nút
-            Center(
-              child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, Routes.bankAccountDetails);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Continue Pressed!")),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6200EE),
-                padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width < 600 ? 40 : 80,
-                  vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
-                ),
-                minimumSize: Size(
-                  double.infinity,
-                  MediaQuery.of(context).size.width < 600 ? 48 : 56,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                elevation: 6,
-                shadowColor: Colors.grey.withOpacity(0.5),
+            const Text(
+              'Mail',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Enter your mail',
+                hintText: 'Type something...',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+
+            const SizedBox(height: 20), // Khoảng cách giữa ListView và nút
+            const Center(
+              child: Text(
+                'Bank Account Details',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF00274D),
+                ),
+              ),
+            ),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 10),
+
+            const Text(
+              'Account name',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: accountNameController,
+              decoration: InputDecoration(
+                labelText: 'Enter your text',
+                hintText: 'Type something...',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              'Account Number',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: accountNumberController,
+              decoration: InputDecoration(
+                labelText: 'Enter your text',
+                hintText: 'Type something...',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              'Bank code',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00274D),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: bankCodeController,
+              onChanged: filterdBankCode,
+              decoration: InputDecoration(
+                labelText: 'Enter your text',
+                hintText: 'Type something...',
+                labelStyle: TextStyle(fontSize: fontSize),
+                hintStyle:
+                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(
+                    vertical: padding, horizontal: padding),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+              style: TextStyle(fontSize: fontSize),
+            ),
+
+            const SizedBox(height: 20),
+            SingleChildScrollView(
+              child: Column(
                 children: [
-                  const Icon(Icons.arrow_forward,
-                      color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Continue",
-                    style: TextStyle(
-                      fontSize:
-                          MediaQuery.of(context).size.width < 600 ? 16 : 20,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      color: Colors.white,
-                    ),
+                  ListView.builder(
+                    shrinkWrap:
+                        true, // Make the ListView take up only the space it needs
+                    itemCount: filteredBankCode.length,
+                    itemBuilder: (context, index) {
+                      var bankCode = filteredBankCode[index];
+                      return ListTile(
+                        title: Text(bankCode['code'] ??
+                            'No Code'), // Fallback if 'code' is null
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(bankCode['name'] ??
+                                'No Name'), // Fallback if 'name' is null
+                            const SizedBox(height: 5),
+                          ],
+                        ),
+                        onTap: () {
+                          // When an item is tapped, set the name into the TextField's controller
+                          setState(() {
+                            bankCodeController.text =
+                                bankCode['name'] ?? 'No Name';
+                            // Optionally, close the list by clearing filtered results
+                            filteredBankCode
+                                .clear(); // Clear the list or you can use visibility to hide the list
+                          });
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, Routes.bankAccountDetails);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Continue Pressed!")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6200EE),
+                  padding: EdgeInsets.symmetric(
+                    horizontal:
+                        MediaQuery.of(context).size.width < 600 ? 40 : 80,
+                    vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                  ),
+                  minimumSize: Size(
+                    double.infinity,
+                    MediaQuery.of(context).size.width < 600 ? 48 : 56,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  elevation: 6,
+                  shadowColor: Colors.grey.withOpacity(0.5),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.arrow_forward,
+                        color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Continue",
+                      style: TextStyle(
+                        fontSize:
+                            MediaQuery.of(context).size.width < 600 ? 16 : 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
