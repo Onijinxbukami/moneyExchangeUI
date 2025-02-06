@@ -153,7 +153,7 @@ class _HomepageBankAccountDetailsPageState
                 "Sender",
                 "Recipient",
                 "Review",
-                "Pay",
+                "Success",
               ],
               currentStep: 2, // Giá trị bước hiện tại
               backgroundColor: Colors.grey[300]!,

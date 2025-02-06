@@ -3,8 +3,8 @@ import 'package:flutter_application_1/features/auth/login/login_page.dart';
 import 'package:flutter_application_1/features/auth/signUp/signup_page.dart';
 
 import 'package:flutter_application_1/features/home_page/screens/send_money/homepage_send_bankAccount_details.dart';
-import 'package:flutter_application_1/features/home_page/screens/send_money/homepage_send_exchange_details.dart';
-import 'package:flutter_application_1/features/home_page/screens/send_money/homepage_send_user_details.dart';
+import 'package:flutter_application_1/features/home_page/screens/send_money/homepage_send_sender_details.dart';
+import 'package:flutter_application_1/features/home_page/screens/send_money/homepage_send_succes.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/hompage_send_address_details.dart';
 
 import 'package:flutter_application_1/features/home_page/home_page.dart';
@@ -18,10 +18,11 @@ class Routes {
   static const String forgetpassword = '/forgetpassword';
   //homepage
   static const String homepage = '/homepage';
-  static const String exchangeDetails = '/homepagesenddetails';
   static const String bankAccountDetails = '/hompagebankaccountdetails';
   static const String addressDetails = '/hompageaddressdetails';
   static const String userDetails = '/homepageuserdetail';
+  static const String successDetails = '/homepagesuccess';
+
 
 
 
@@ -32,10 +33,10 @@ class Routes {
     return {
       //home 
       homepage: (context) => const HomePage(),
-      exchangeDetails: (context) => HomepageMoneyExchangeDetailsPage(),
       bankAccountDetails: (context) => HomepageBankAccountDetailsPage(),
       addressDetails: (context) => HomepageAddressPage(),
       userDetails: (context) => HomepageUserDetailsPage(),
+      successDetails: (context) => HomepageSuccessPage(),
       //auth
       login: (context) => LoginPage(),
       signup: (context) => const SignupPage(),
