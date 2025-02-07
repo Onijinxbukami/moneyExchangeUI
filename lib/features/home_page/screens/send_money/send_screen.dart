@@ -27,6 +27,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     "GBP": "https://flagcdn.com/w40/gb.png",
     "USD": "https://flagcdn.com/w40/us.png",
   };
+
   DropdownMenuItem<String> _buildDropdownItem(String currency) {
     return DropdownMenuItem(
       value: currency,
@@ -41,7 +42,6 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     );
   }
 
-  // Method to handle outlet change
   void _onOutletChanged(String? value) {
     setState(() {
       selectedOutlet = value!;
@@ -51,15 +51,13 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
   void _validateNumeric() {
     final input = _numericController.text;
-
-    // Check if the input contains only numbers (no letters or special characters)
     if (input.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(input)) {
       setState(() {
         _numericError = "Only numbers are allowed!";
       });
     } else {
       setState(() {
-        _numericError = null; // Clear error if the input is valid
+        _numericError = null;
       });
     }
   }
@@ -68,7 +66,6 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     final bool isSmallScreen = screenWidth < 600;
-
     final double padding = isSmallScreen ? 12.0 : 24.0;
     final double fontSize = isSmallScreen ? 14.0 : 18.0;
 
@@ -79,21 +76,20 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ProgressStepper(
-              steps: const [
-                "Amount",
-                "Sender",
-                "Recipient",
-                "Review",
-                "Success",
+              steps: ["Amount", "Sender", "Recipient", "Review", "Success"],
+              stepIcons: [
+                Icons.attach_money,
+                Icons.person,
+                Icons.people,
+                Icons.checklist,
+                Icons.verified
               ],
               currentStep: 0,
               backgroundColor: Colors.grey[300]!,
               progressColor: Colors.blue,
-              height: isSmallScreen ? 8 : 10,
+              height: 8,
             ),
-
             SizedBox(height: isSmallScreen ? 16 : 24),
-
             _buildInputSection(
               "Select Outlet",
               selectedOutlet,
@@ -101,10 +97,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
               isSmallScreen,
               fontSize,
             ),
-
             SizedBox(height: isSmallScreen ? 16 : 24),
-
-            // Numeric Field
             _buildCurrencyInputField(
               "You Send",
               fromCurrency,
@@ -116,10 +109,9 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
               },
               isSmallScreen,
               _numericController,
-              isSender: true, // Quan trọng để xác định trường gửi tiền
+              isSender: true,
             ),
             SizedBox(height: isSmallScreen ? 16 : 24),
-
             _buildCurrencyInputField(
               "Recipient gets",
               toCurrency,
@@ -132,69 +124,59 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
               isSmallScreen,
               _numericController,
             ),
-
             SizedBox(height: isSmallScreen ? 16 : 24),
-
-            // Send Money Info
             _buildSendInfo(isSmallScreen, fontSize),
             SizedBox(height: isSmallScreen ? 16 : 24),
-
-            // "Send" Button
             Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                      height: 30), // Khoảng cách giữa dropdown và nút Continue
+                  const SizedBox(height: 30),
                   Center(
-                      child: ElevatedButton(
-                    onPressed: () {
-                      debugPrint('Continue pressed');
-                      Navigator.pushNamed(context, Routes.userDetails);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Continue Pressed!")),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6200EE),
-                      padding: EdgeInsets.symmetric(
-                        horizontal:
-                            MediaQuery.of(context).size.width < 600 ? 40 : 80,
-                        vertical:
-                            MediaQuery.of(context).size.width < 600 ? 12 : 16,
-                      ),
-                      minimumSize: Size(
-                        double.infinity,
-                        MediaQuery.of(context).size.width < 600 ? 48 : 56,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      elevation: 6,
-                      shadowColor: Colors.grey.withOpacity(0.5),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontSize: MediaQuery.of(context).size.width < 600
-                                ? 16
-                                : 20,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                            color: Colors.white,
-                          ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        debugPrint('Continue pressed');
+                        Navigator.pushNamed(context, Routes.userDetails);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Continue Pressed!")),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6200EE),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth < 600 ? 40 : 80,
+                          vertical: screenWidth < 600 ? 12 : 16,
                         ),
-                      ],
+                        minimumSize: Size(
+                          double.infinity,
+                          screenWidth < 600 ? 48 : 56,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                        elevation: 3,
+                        shadowColor: Colors.grey.withOpacity(0.3),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.arrow_forward,
+                              color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Continue",
+                            style: TextStyle(
+                              fontSize: screenWidth < 600 ? 16 : 20,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.2,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  )),
+                  ),
                 ],
               ),
             ),
@@ -230,7 +212,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
           ),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.withOpacity(0.5)),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
@@ -269,7 +251,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.black, width: 1),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             color: Colors.white,
           ),
           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),

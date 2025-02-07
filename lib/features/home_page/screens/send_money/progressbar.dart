@@ -1,108 +1,134 @@
 import 'package:flutter/material.dart';
 
-class ProgressStepper extends StatefulWidget {
-  final List<String> steps; // Danh sách các bước
-  final int currentStep; // Bước hiện tại (0-based)
-  final Color backgroundColor; // Màu nền progress bar
-  final Color progressColor; // Màu phần hoàn thành
-  final double height; // Chiều cao progress bar
+class ProgressStepper extends StatelessWidget {
+  final List<String> steps;
+  final List<IconData>? stepIcons;
+  final int currentStep;
+  final Color backgroundColor;
+  final Color progressColor;
+  final double height;
 
   const ProgressStepper({
     Key? key,
     required this.steps,
     required this.currentStep,
+    this.stepIcons,
     this.backgroundColor = Colors.grey,
-    this.progressColor = const Color(0xFF4743C9),
-    this.height = 8.0,
+    this.progressColor = const Color(0xFF1D4ED8), // Màu xanh Apple
+    this.height = 6.0,
   }) : super(key: key);
 
   @override
-  _ProgressStepperState createState() => _ProgressStepperState();
-}
-
-class _ProgressStepperState extends State<ProgressStepper> {
-  @override
   Widget build(BuildContext context) {
-    double progress = (widget.currentStep + 1) / widget.steps.length;
     final screenWidth = MediaQuery.of(context).size.width;
+    double progress = (currentStep + 1) / steps.length;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Thanh tiến trình
-        Container(
-          height: widget.height,
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
+          height: height,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: widget.backgroundColor,
-            borderRadius: BorderRadius.circular(8),
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: progress, // Tỉ lệ tiến trình
-              backgroundColor: widget.backgroundColor,
-              valueColor: AlwaysStoppedAnimation<Color>(widget.progressColor),
-              minHeight: widget.height,
-            ),
+          child: Stack(
+            children: [
+              // Phần đã hoàn thành
+              FractionallySizedBox(
+                widthFactor: progress,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: progressColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
-        // Danh sách các bước
+        // Các bước
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: widget.steps.asMap().entries.map((entry) {
-            final index = entry.key;
-            final stepLabel = entry.value;
-            final isActive = index == widget.currentStep;
-            final isCompleted = index < widget.currentStep;
+          children: List.generate(steps.length, (index) {
+            final isActive = index == currentStep;
+            final isCompleted = index < currentStep;
+            final icon = stepIcons != null && index < stepIcons!.length
+                ? stepIcons![index]
+                : null; // Lấy icon tương ứng nếu có
 
             return Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Bước
-                  GestureDetector(
-                    onTap: isCompleted
-                        ? () {
-                            // Xử lý khi nhấn vào bước đã hoàn thành
-                          }
-                        : null,
-                    child: Container(
-                      width: screenWidth * 0.05, // Responsive kích thước
-                      height: screenWidth * 0.05,
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? widget.progressColor
-                            : (isCompleted ? Colors.green : widget.backgroundColor),
-                        shape: BoxShape.circle,
+                  // Vòng tròn bước + đường kết nối
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (index != 0)
+                        Positioned(
+                          left: -screenWidth * 0.05,
+                          right: 0,
+                          child: Container(
+                            height: 2,
+                            color:
+                                isCompleted ? progressColor : backgroundColor,
+                          ),
+                        ),
+                      GestureDetector(
+                        onTap: isCompleted
+                            ? () {
+                                // Handle tap trên bước đã hoàn thành
+                              }
+                            : null,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: isActive
+                              ? screenWidth * 0.08
+                              : screenWidth * 0.07,
+                          height: isActive
+                              ? screenWidth * 0.08
+                              : screenWidth * 0.07,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? progressColor
+                                : (isCompleted
+                                    ? Colors.green
+                                    : backgroundColor),
+                            shape: BoxShape.circle,
+                          ),
+                          child: icon != null
+                              ? Icon(icon, color: Colors.white, size: 18)
+                              : (isCompleted
+                                  ? const Icon(Icons.check,
+                                      color: Colors.white, size: 18)
+                                  : null),
+                        ),
                       ),
-                      child: isCompleted
-                          ? const Icon(Icons.check, color: Colors.white, size: 16)
-                          : null,
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  // Nhãn bước
+                  const SizedBox(height: 6),
+                  // Nhãn của bước
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      stepLabel,
+                      steps[index],
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: screenWidth * 0.03, // Responsive font size
-                        fontWeight: isActive
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: isActive
-                            ? Colors.black
-                            : Colors.grey[600],
+                        fontSize: screenWidth * 0.035,
+                        fontWeight:
+                            isActive ? FontWeight.w600 : FontWeight.normal,
+                        color: isActive ? Colors.black : Colors.grey[600],
                       ),
                     ),
                   ),
                 ],
               ),
             );
-          }).toList(),
+          }),
         ),
       ],
     );

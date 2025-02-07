@@ -7,31 +7,32 @@ import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
 import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
-class HomepageBankAccountDetailsPage extends StatefulWidget {
-  const HomepageBankAccountDetailsPage({super.key});
+class HomepageUserDetailsPage extends StatefulWidget {
+  const HomepageUserDetailsPage({super.key});
 
   @override
-  _HomepageBankAccountDetailsPageState createState() =>
-      _HomepageBankAccountDetailsPageState();
+  _HomepageUserDetailsPageState createState() =>
+      _HomepageUserDetailsPageState();
 }
 
-class _HomepageBankAccountDetailsPageState
-    extends State<HomepageBankAccountDetailsPage> {
+class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController dobController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController accountNameController = TextEditingController();
   final TextEditingController accountNumberController = TextEditingController();
   final TextEditingController bankCodeController = TextEditingController();
-
   bool _isGmailError = false;
   bool _isFullNameError = false;
   bool _isAccountNameError = false;
   bool _isAccountNumberError = false;
   bool _isBankCodeError = false;
 
+  String _selectedLanguage = 'EN';
   final List<Map<String, String>> bankCodes = [
     {
       "code": "001",
@@ -75,7 +76,10 @@ class _HomepageBankAccountDetailsPageState
     },
   ];
   List<Map<String, String>> filteredBankCode = [];
-  String _selectedLanguage = 'EN';
+  Uint8List? _idFrontPhoto;
+  Uint8List? _idRearPhoto;
+  Uint8List? _passportPhoto;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -108,6 +112,25 @@ class _HomepageBankAccountDetailsPageState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter only numbers")),
       );
+    }
+  }
+
+  Future<void> _pickImage(String photoType) async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final Uint8List imageBytes = await pickedFile.readAsBytes();
+
+      setState(() {
+        if (photoType == 'idFront') {
+          _idFrontPhoto = imageBytes;
+        } else if (photoType == 'idRear') {
+          _idRearPhoto = imageBytes;
+        } else if (photoType == 'passport') {
+          _passportPhoto = imageBytes;
+        }
+      });
     }
   }
 
@@ -161,7 +184,7 @@ ProgressStepper(
     Icons.checklist,
     Icons.verified
   ],
-  currentStep: 2,
+  currentStep: 1,
   backgroundColor: Colors.grey[300]!,
   progressColor: Colors.blue,
   height: 8,
@@ -355,7 +378,7 @@ ProgressStepper(
           children: [
             const Center(
               child: Text(
-                'Recipient Details',
+                'Tell us about yourself',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -470,7 +493,6 @@ ProgressStepper(
               },
               decoration: InputDecoration(
                 labelText: 'Select your date of birth',
-                hintText: 'YYYY-MM-DD',
                 labelStyle: TextStyle(fontSize: fontSize),
                 hintStyle:
                     TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
@@ -510,7 +532,6 @@ ProgressStepper(
               },
               decoration: InputDecoration(
                 labelText: 'Enter your phone number',
-                hintText: 'e.g. +123456789',
                 labelStyle: TextStyle(fontSize: fontSize),
                 hintStyle:
                     TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
@@ -601,19 +622,35 @@ ProgressStepper(
               ],
             ),
 
-            const SizedBox(height: 20),
-
-            Text(
-              'Bank details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF00274D),
+            _buildPhotoUploader(
+              title: 'ID Front Photo',
+              photoBytes: _idFrontPhoto,
+              photoType: 'idFront',
+            ),
+            _buildPhotoUploader(
+              title: 'ID Rear Photo',
+              photoBytes: _idRearPhoto,
+              photoType: 'idRear',
+            ),
+            _buildPhotoUploader(
+              title: 'Passport Photo',
+              photoBytes: _passportPhoto,
+              photoType: 'passport',
+            ),
+            const SizedBox(height: 20), // Khoảng cách giữa ListView và nút
+            const Center(
+              child: Text(
+                'Bank Details',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF00274D),
+                ),
               ),
             ),
             const Divider(color: Colors.black),
-
             const SizedBox(height: 10),
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -748,6 +785,7 @@ ProgressStepper(
                 ),
               ],
             ),
+
             const SizedBox(height: 10),
 
             Column(
@@ -857,8 +895,8 @@ ProgressStepper(
                 ),
               ],
             ),
+            SizedBox(height: isSmallScreen ? 16 : 24),
 
-            const SizedBox(height: 40), // Khoảng cách giữa ListView và nút
             Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -868,7 +906,7 @@ ProgressStepper(
                     child: ElevatedButton(
                       onPressed: () {
                         debugPrint('Continue pressed');
-                        Navigator.pushNamed(context, Routes.addressDetails);
+                        Navigator.pushNamed(context, Routes.bankAccountDetails);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Continue Pressed!")),
                         );
@@ -928,6 +966,99 @@ ProgressStepper(
           const SizedBox(height: 10),
         ],
       ),
+    );
+  }
+
+  Widget _buildPhotoUploader({
+    required String title,
+    required Uint8List? photoBytes,
+    required String photoType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'Edit') {
+                  _pickImage(photoType);
+                } else if (value == 'Remove') {
+                  setState(() {
+                    if (photoType == 'idFront') {
+                      _idFrontPhoto = null;
+                    } else if (photoType == 'idRear') {
+                      _idRearPhoto = null;
+                    } else if (photoType == 'passport') {
+                      _passportPhoto = null;
+                    }
+                  });
+                }
+              },
+              icon: Icon(
+                photoBytes == null ? Icons.upload_file : Icons.more_vert,
+                color: photoBytes == null ? Colors.blue : Colors.green,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              color: Colors.white,
+              elevation: 4,
+              itemBuilder: (context) => [
+                if (photoBytes != null)
+                  PopupMenuItem(
+                    value: 'Edit',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.edit, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Edit Photo'),
+                      ],
+                    ),
+                  ),
+                if (photoBytes != null)
+                  PopupMenuItem(
+                    value: 'Remove',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.delete, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Remove Photo'),
+                      ],
+                    ),
+                  ),
+                if (photoBytes == null)
+                  PopupMenuItem(
+                    value: 'Edit',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.upload_file, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Text('Upload Photo'),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        if (photoBytes != null)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(
+              photoBytes,
+              width: double.infinity,
+              height: 150,
+              fit: BoxFit.cover,
+            ),
+          ),
+      ],
     );
   }
 }

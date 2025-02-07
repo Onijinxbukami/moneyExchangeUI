@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
@@ -12,41 +15,79 @@ class HomepageAddressPage extends StatefulWidget {
 }
 
 class _HomepageAddressPageState extends State<HomepageAddressPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController locationController = TextEditingController();
-  final List<String> locations = [
-    'New York',
-    'Los Angeles',
-    'San Francisco',
-    'Chicago',
-    'Miami',
-    'Dallas',
-    'Austin',
-    'Boston',
-    'Denver',
-    'Seattle'
-  ];
-  List<String> filteredLocations = [];
+  String fromCurrency = "GBP";
+  String toCurrency = "USD";
   String _selectedLanguage = 'EN';
+  final TextEditingController sendNameController =
+      TextEditingController(text: "John Doe");
+  final TextEditingController sendDobController =
+      TextEditingController(text: "1990-01-01");
+  final TextEditingController sendPhoneController =
+      TextEditingController(text: "+123456789");
+  final TextEditingController sendEmailController =
+      TextEditingController(text: "johndoe@example.com");
+
+  final TextEditingController receiverNameController =
+      TextEditingController(text: "Doe Tech");
+  final TextEditingController receiverBankNumberController =
+      TextEditingController(text: "1234567890");
+  final TextEditingController receiverBankCodeController =
+      TextEditingController(text: "Bank A");
+
+  final TextEditingController outletController =
+      TextEditingController(text: "Outlet 1");
+  final TextEditingController senMoneyController =
+      TextEditingController(text: "100.000");
+  final TextEditingController receiverMoneyController =
+      TextEditingController(text: "200.000");
+
+  final TextEditingController rateController =
+      TextEditingController(text: "1,7");
+  final TextEditingController feesController =
+      TextEditingController(text: "10");
+  final TextEditingController getMoneyController =
+      TextEditingController(text: "200.000");
+
+  String? _numericError;
+  final TextEditingController _numericController = TextEditingController();
+
+  void _validateNumeric() {
+    final input = _numericController.text;
+
+    // Check if the input contains only numbers (no letters or special characters)
+    if (input.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(input)) {
+      setState(() {
+        _numericError = "Only numbers are allowed!";
+      });
+    } else {
+      setState(() {
+        _numericError = null; // Clear error if the input is valid
+      });
+    }
+  }
+
+  final Map<String, String> flagUrls = {
+    "GBP": "https://flagcdn.com/w40/gb.png",
+    "USD": "https://flagcdn.com/w40/us.png",
+  };
+  DropdownMenuItem<String> _buildDropdownItem(String currency) {
+    return DropdownMenuItem(
+      value: currency,
+      child: Row(
+        children: [
+          Image.network(flagUrls[currency]!,
+              width: 24, height: 16, fit: BoxFit.cover),
+          const SizedBox(width: 8),
+          Text(currency, style: TextStyle(fontSize: 16)),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    filteredLocations = locations.take(5).toList();
-  }
-
-  void filterLocations(String query) {
-    setState(() {
-      // Nếu ô tìm kiếm trống, không hiển thị gì cả
-      if (query.isEmpty) {
-        filteredLocations = [];
-      } else {
-        filteredLocations = locations
-            .where((location) =>
-                location.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
-    });
   }
 
   @override
@@ -63,41 +104,61 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
       initialIndex: 1,
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF6610F2),
-          title: _buildHeader(),
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(56),
+          child: Container(
+            color: const Color(0xFF6610F2), // Màu nền AppBar
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    const SizedBox(
+                        width: 8), // Khoảng cách giữa icon và tiêu đề
+                    Expanded(child: _buildHeader()), // Tiêu đề AppBar
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
         body: Column(
           children: [
             const SizedBox(height: 20),
             ProgressStepper(
-              steps: const [
-                "Amount",
-                "You",
-                "Recipient",
-                "Review",
-                "Pay",
+              steps: ["Amount", "Sender", "Recipient", "Review", "Success"],
+              stepIcons: [
+                Icons.attach_money,
+                Icons.person,
+                Icons.people,
+                Icons.checklist,
+                Icons.verified
               ],
-              currentStep: 3, // Giá trị bước hiện tại
+              currentStep: 3,
               backgroundColor: Colors.grey[300]!,
               progressColor: Colors.blue,
-              height: isSmallScreen ? 8 : 10,
+              height: 8,
             ),
             SizedBox(height: isSmallScreen ? 16 : 24),
 
             // TabBar phía trên nội dung chính
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
             // Phần nội dung cuộn chính
             Expanded(
               child: TabBarView(
                 children: [
-
                   LocationForm(),
                   _buildContent(fontSize, padding), // Nội dung cho "Near me"
-                 
-                  SettingForm(),  // Nội dung cho "Setting"
+
+                  SettingForm(), // Nội dung cho "Setting"
                 ],
               ),
             ),
@@ -110,9 +171,9 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey,
                 tabs: [
-                  Tab(text: 'Near me', icon: Icon(Icons.notifications)),
-                  Tab(text: 'Send', icon: Icon(Icons.security)),
-                  Tab(text: 'Setting', icon: Icon(Icons.new_releases)),
+                  Tab(text: 'Near me', icon: Icon(Icons.map)),
+                  Tab(text: 'Send', icon: Icon(Icons.send)),
+                  Tab(text: 'Setting', icon: Icon(Icons.settings)),
                 ],
               ),
             ),
@@ -124,49 +185,136 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
 
   Widget _buildHeader() {
     return Container(
-      color: const Color(0xFF6610F2),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: const Color(0xFF6610F2), // Màu tím nhạt theo phong cách Apple
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // Canh đều giữa Dropdown và Login
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Dropdown chọn ngôn ngữ
-          DropdownButton<String>(
-            value: _selectedLanguage,
-            dropdownColor: Colors.white,
-            items: ['EN', 'BN', 'ES', 'NL']
-                .map(
-                  (lang) => DropdownMenuItem(
-                    value: lang,
-                    child: Text(
-                      lang,
-                      style: const TextStyle(color: Colors.black),
+          // Language Dropdown với Cupertino Style
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  showCupertinoModalPopup(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CupertinoActionSheet(
+                        title: const Text("Select Language"),
+                        actions: ['EN', 'VN']
+                            .map(
+                              (lang) => CupertinoActionSheetAction(
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedLanguage = lang;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: Text(lang),
+                              ),
+                            )
+                            .toList(),
+                        cancelButton: CupertinoActionSheetAction(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Cancel"),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: Row(
+                  children: [
+                    Text(
+                      _selectedLanguage,
+                      style: const TextStyle(color: Colors.black, fontSize: 16),
                     ),
-                  ),
-                )
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedLanguage = value!;
-              });
-            },
-          ),
-          // Nút Login
-          GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, Routes.login);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'LOGIN',
-                style: TextStyle(color: Colors.white),
+                    const Icon(CupertinoIcons.chevron_down, size: 16),
+                  ],
+                ),
               ),
             ),
+          ),
+          const SizedBox(width: 16),
+
+          // StreamBuilder for User Authentication Status
+          StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CupertinoActivityIndicator(color: Colors.white);
+              }
+
+              if (snapshot.hasData) {
+                return FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(snapshot.data!.uid)
+                      .get(),
+                  builder: (context, userSnapshot) {
+                    if (userSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const CupertinoActivityIndicator(
+                          color: Colors.white);
+                    }
+
+                    if (userSnapshot.hasData) {
+                      final userData =
+                          userSnapshot.data!.data() as Map<String, dynamic>;
+                      return Row(
+                        children: [
+                          const Icon(CupertinoIcons.person_circle_fill,
+                              color: Colors.white, size: 28),
+                          const SizedBox(width: 8),
+                          Text(
+                            userData['username'] ?? 'User',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return const Text('Error',
+                        style: TextStyle(color: Colors.white));
+                  },
+                );
+              }
+
+              // Nếu chưa đăng nhập, hiển thị nút "Login" theo chuẩn Apple
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, Routes.login);
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'LOGIN',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -174,6 +322,10 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
   }
 
   Widget midHeader(double fontSize, double padding) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    final bool isSmallScreen = screenWidth < 600;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
@@ -181,135 +333,561 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
-              child: Text(
-                'Enter Your Address',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF00274D),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Center(
-              child: Text(
-                'You may need to provide proof of this',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF00274D),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Search address or postcode',
+            Text(
+              'Sender details',
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
                 color: Color(0xFF00274D),
               ),
             ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: locationController,
-              onChanged: filterLocations, // Lọc kết quả khi người dùng nhập
-              decoration: InputDecoration(
-                labelText: 'Enter your text',
-                hintText: 'Type something...',
-                labelStyle: TextStyle(fontSize: fontSize),
-                hintStyle:
-                    TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
-                contentPadding: EdgeInsets.symmetric(
-                    vertical: padding, horizontal: padding),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
-                  borderRadius: BorderRadius.circular(12.0),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 10),
+// Full Name Field
+            Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start, // Canh trái phần tiêu đề
+              children: [
+                // Full Name
+                Row(
+                  children: [
+                    const Text(
+                      'Full Name:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const SizedBox(width: 6),
+                        Text(
+                          'sendName', // Giá trị từ state hoặc API
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
-                  borderRadius: BorderRadius.circular(12.0),
+                const SizedBox(height: 20),
+
+                // Date of Birth
+                Row(
+                  children: [
+                    const Text(
+                      'Date of Birth:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const SizedBox(width: 6),
+                        Text(
+                          'sendDob', // Giá trị ngày sinh
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                errorBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red, width: 1.5),
-                  borderRadius: BorderRadius.circular(12.0),
+                const SizedBox(height: 20),
+
+                // Phone Number
+                Row(
+                  children: [
+                    const Text(
+                      'Phone Number:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const SizedBox(width: 6),
+                        Text(
+                          'sendPhone', // Giá trị số điện thoại
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.red, width: 2.0),
-                  borderRadius: BorderRadius.circular(12.0),
+                const SizedBox(height: 20),
+
+                // Email Address
+                Row(
+                  children: [
+                    const Text(
+                      'Email Address:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const SizedBox(width: 6),
+                        Text(
+                          'sendEmail', // Giá trị email
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-              style: TextStyle(fontSize: fontSize),
+              ],
             ),
             const SizedBox(height: 20),
-            // Danh sách địa điểm gợi ý
-            if (filteredLocations.isNotEmpty)
-              ListView.builder(
-                shrinkWrap: true, // Không cần chiếm toàn bộ chiều cao
-                itemCount:
-                    filteredLocations.length > 5 ? 5 : filteredLocations.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(filteredLocations[index]),
-                    onTap: () {
-                      // Xử lý khi người dùng chọn một địa điểm
-                      print('Selected: ${filteredLocations[index]}');
-                    },
-                  );
-                },
-              ),
 
-            const SizedBox(height: 40), // Khoảng cách giữa ListView và nút
-            Center(
-                child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, Routes.homepage);
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tiêu đề
+                const Text(
+                  'Recipient details',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF00274D),
+                  ),
+                ),
+                const Divider(color: Colors.black),
+                const SizedBox(height: 20),
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Continue Pressed!")),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6200EE),
-                padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width < 600 ? 40 : 80,
-                  vertical: MediaQuery.of(context).size.width < 600 ? 12 : 16,
+                // Recipient Name
+                Row(
+                  children: [
+                    const Text(
+                      'Full Name:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const SizedBox(width: 6),
+                        Text(
+                          'receiverName', // Giá trị tên người nhận
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                minimumSize: Size(
-                  double.infinity,
-                  MediaQuery.of(context).size.width < 600 ? 48 : 56,
+                const SizedBox(height: 20),
+
+                // Bank Number
+                Row(
+                  children: [
+                    const Text(
+                      'Bank Number:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const SizedBox(width: 6),
+                        Text(
+                          'receiverBankNumber', // Giá trị số tài khoản ngân hàng
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                const SizedBox(height: 20),
+
+                // Bank Code
+                Row(
+                  children: [
+                    const Text(
+                      'Bank Name:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const SizedBox(width: 6),
+                        Text(
+                          'receiverBankCode', // Giá trị mã ngân hàng
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                elevation: 6,
-                shadowColor: Colors.grey.withOpacity(0.5),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              'Transaction details',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF00274D),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+            ),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 20),
+// Outlet Field
+            Row(
+              children: [
+                const Text(
+                  'Outlet:',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF00274D),
+                  ),
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    const SizedBox(width: 6),
+                    Text(
+                      'outletValue', // Giá trị Outlet
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+// Send Money Field
+            Row(
+              children: [
+                // Lá cờ từ URL
+                Image.network(
+                  flagUrls[fromCurrency] ?? "", // Lấy URL từ Map
+                  width: 24,
+                  height: 16,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.flag, color: Colors.grey, size: 20);
+                  },
+                ),
+                const SizedBox(width: 8),
+
+                // Nhãn tiền tệ (USD, GBP, ...)
+                Text(
+                  fromCurrency,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+
+                const Spacer(),
+
+                // Số tiền gửi (căn phải)
+                Text(
+                  'sendMoneyValue', // Thay bằng giá trị thực tế
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+// Receiver Money Field
+            Row(
+              children: [
+                // Lá cờ từ URL
+                Image.network(
+                  flagUrls[toCurrency] ?? "",
+                  width: 24,
+                  height: 16,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.flag, color: Colors.grey, size: 20);
+                  },
+                ),
+                const SizedBox(width: 8),
+
+                // Nhãn tiền tệ
+                Text(
+                  toCurrency,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+
+                const Spacer(),
+
+                // Số tiền nhận (căn phải)
+                Text(
+                  'receiveMoneyValue', // Thay bằng giá trị thực tế
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: isSmallScreen ? 16 : 24),
+
+// Rate Field
+            Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start, // Canh trái phần tiêu đề
+              children: [
+                // Rate
+                Row(
+                  children: [
+                    const Text(
+                      'Rate:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(), // Đẩy 'rateValue' về bên phải
+                    Text(
+                      'rateValue', // Thay thế bằng giá trị thực tế
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Fees
+                Row(
+                  children: [
+                    const Text(
+                      'Fees:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'feesValue',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Receive Money
+                Row(
+                  children: [
+                    const Text(
+                      'Total:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00274D),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'receiveMoneyValue',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 40),
+            // Khoảng cách giữa ListView và nút
+            Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.arrow_forward,
-                      color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Continue",
-                    style: TextStyle(
-                      fontSize:
-                          MediaQuery.of(context).size.width < 600 ? 16 : 20,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      color: Colors.white,
+                  const SizedBox(height: 30),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        debugPrint('Continue pressed');
+                        Navigator.pushNamed(context, Routes.successDetails);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Continue Pressed!")),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF007AFF),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth < 600 ? 40 : 80,
+                          vertical: screenWidth < 600 ? 12 : 16,
+                        ),
+                        minimumSize: Size(
+                          double.infinity,
+                          screenWidth < 600 ? 48 : 56,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                        elevation: 3,
+                        shadowColor: Colors.grey.withOpacity(0.3),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.arrow_forward,
+                              color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Continue",
+                            style: TextStyle(
+                              fontSize: screenWidth < 600 ? 16 : 20,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.2,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCurrencyInputField(
+      String label,
+      String selectedValue,
+      ValueChanged<String?> onChanged,
+      bool isSmallScreen,
+      TextEditingController controller,
+      {bool isSender = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black, width: 1),
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              DropdownButton<String>(
+                value: selectedValue,
+                items: [
+                  _buildDropdownItem("GBP"),
+                  _buildDropdownItem("USD"),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    if (isSender) {
+                      fromCurrency = value!;
+                      toCurrency = (value == "USD") ? "GBP" : "USD";
+                    } else {
+                      toCurrency = value!;
+                      fromCurrency = (value == "USD") ? "GBP" : "USD";
+                    }
+                  });
+                },
+                underline: Container(),
+                icon: const Icon(Icons.arrow_drop_down),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) => _validateNumeric(),
+                  decoration: InputDecoration(
+                    hintText: "Enter amount",
+                    errorText: _numericError,
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
