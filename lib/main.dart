@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Khởi tạo EasyLocalization
+  await EasyLocalization.ensureInitialized();
 
-  // Khởi tạo Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('vi')],
+      path: 'assets/translations', // Thư mục chứa file JSON
+      fallbackLocale: const Locale('en'), // Ngôn ngữ mặc định
+      child: const MyApp(),
+    ),
   );
-
-  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -22,8 +29,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter App',
-      initialRoute: Routes.login, // Trang khởi động khi mở ứng dụng
+      initialRoute: Routes.homepage,
       routes: Routes.getRoutes(),
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale, // Ngôn ngữ hiện tại
     );
   }
 }

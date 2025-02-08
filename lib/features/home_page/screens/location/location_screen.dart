@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LocationForm extends StatefulWidget {
   const LocationForm({super.key});
@@ -35,31 +35,6 @@ class _LocationFormState extends State<LocationForm> {
       'name': 'Outlet 5',
       'address': '202 Pine St, Miami, FL',
       'rate': '1 USD = 1.7 SGD'
-    },
-    {
-      'name': 'Outlet 6',
-      'address': '303 Elm St, Houston, TX',
-      'rate': '1 USD = 1.7 SGD'
-    },
-    {
-      'name': 'Outlet 7',
-      'address': '404 Maple St, Phoenix, AZ',
-      'rate': '1 USD = 1.7 SGD'
-    },
-    {
-      'name': 'Outlet 8',
-      'address': '505 Cedar St, Philadelphia, PA',
-      'rate': '1 USD = 1.7 SGD'
-    },
-    {
-      'name': 'Outlet 9',
-      'address': '606 Birch St, San Antonio, TX',
-      'rate': '1 USD = 1.7 SGD'
-    },
-    {
-      'name': 'Outlet 10',
-      'address': '707 Walnut St, San Diego, CA',
-      'rate': '1 USD = 1.7 SGD'
     }
   ];
 
@@ -94,11 +69,11 @@ class _LocationFormState extends State<LocationForm> {
         child: Column(
           children: [
             // Label text
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                'Discover outlets near you ✨',
-                style: TextStyle(
+                tr('discover_outlets'), 
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: CupertinoColors.systemGrey,
@@ -110,7 +85,7 @@ class _LocationFormState extends State<LocationForm> {
             CupertinoSearchTextField(
               controller: locationController,
               onChanged: filterOutlets,
-              placeholder: "Enter your location or ZIP code 📍",
+              placeholder: tr('search_placeholder'), 
               style: const TextStyle(fontSize: 16),
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
             ),
@@ -156,10 +131,10 @@ class _LocationFormState extends State<LocationForm> {
                           );
                         },
                       )
-                    : const Center(
+                    : Center(
                         child: Text(
-                          'No results found.',
-                          style: TextStyle(
+                          tr('no_results'), 
+                          style: const TextStyle(
                               fontSize: 16, color: CupertinoColors.systemGrey),
                         ),
                       ),

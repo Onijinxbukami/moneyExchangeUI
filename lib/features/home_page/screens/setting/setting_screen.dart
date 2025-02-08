@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:image_picker/image_picker.dart';
@@ -88,7 +88,7 @@ class _SettingFormState extends State<SettingForm> {
 
       // Cập nhật các trường thông tin
       await userRef.update({
-        'userName': userName,
+        'username': userName,
         'firstName': firstName,
         'lastName': lastName,
         'address': address,
@@ -115,7 +115,7 @@ class _SettingFormState extends State<SettingForm> {
         if (userDoc.exists) {
           final userData = userDoc.data();
           setState(() {
-            _userNameController.text = userData?['userName'] ?? '';
+            _userNameController.text = userData?['username'] ?? '';
             _phoneNumberController.text = userData?['phoneNumber'] ?? '';
             _emailController.text = userData?['email'] ?? '';
             _firstNameController.text = userData?['firstName'] ?? '';
@@ -294,8 +294,6 @@ class _SettingFormState extends State<SettingForm> {
 
   @override
   Widget build(BuildContext context) {
-    bool isMobile = MediaQuery.of(context).size.width < 600;
-
     return DefaultTabController(
       length: 2, // Length of tabs
       child: Scaffold(
@@ -308,12 +306,8 @@ class _SettingFormState extends State<SettingForm> {
 
             bottom: TabBar(
               tabs: [
-                Tab(
-                  text: 'Account Details',
-                ),
-                Tab(
-                  text: 'Bank Details',
-                ),
+                Tab(text: tr('account_details')),
+                Tab(text: tr('bank_details')),
               ],
               indicatorColor: Colors.blue, // Indicator color for active tab
             ),
@@ -358,13 +352,13 @@ class _SettingFormState extends State<SettingForm> {
           runSpacing: 10,
           children: [
             _buildTextField(
-              'Bank Code',
-              'Enter your Bank Code',
+              tr('bank_code'),
+              tr('enter_bank_code'),
               controller: _bankCodeController,
             ),
             _buildTextField(
-              'Bank Name',
-              'Enter your Bank Name',
+              tr('bank_name'),
+              tr('enter_bank_name'),
               controller: _bankNameController,
             ),
           ],
@@ -382,8 +376,8 @@ class _SettingFormState extends State<SettingForm> {
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          child: const Text(
-            'Update',
+          child: Text(
+            tr('update'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -406,23 +400,23 @@ class _SettingFormState extends State<SettingForm> {
           runSpacing: 10,
           children: [
             _buildTextField(
-              'User Name',
-              'Enter your Last Name',
+              tr('user_name'),
+              tr('enter_username'),
               controller: _userNameController,
             ),
             _buildTextField(
-              'Last Name',
-              'Enter your Last Name',
+              tr('last_name'),
+              tr('enter_last_name'),
               controller: _lastNameController,
             ),
             _buildTextField(
-              'First Name',
-              'Enter your First Name',
+              tr('first_name'),
+              tr('enter_first_name'),
               controller: _firstNameController,
             ),
             _buildConditionalTextField(
-              label: 'Identification Number',
-              hint: 'Enter your Identification Number',
+              label: tr('identification_number'),
+              hint: tr('enter_identification_number'),
               isVisible: _showIdentificationField,
               onCheckboxChanged: (bool? value) {
                 setState(() {
@@ -432,8 +426,8 @@ class _SettingFormState extends State<SettingForm> {
               controller: _identificationNumberController,
             ),
             _buildConditionalTextField(
-              label: 'Passport Number',
-              hint: 'Enter your Passport Number',
+              label: tr('passport_number'),
+              hint: tr('enter_passport_number'),
               isVisible: _showPassportField,
               onCheckboxChanged: (bool? value) {
                 setState(() {
@@ -443,31 +437,31 @@ class _SettingFormState extends State<SettingForm> {
               controller: _passportNumberController,
             ),
             _buildPhotoUploader(
-              title: 'ID Front Photo',
+              title: tr('id_front_photo'),
               photoBytes: _idFrontPhoto,
               photoType: 'idFront',
             ),
             _buildPhotoUploader(
-              title: 'ID Rear Photo',
+              title: tr('id_rear_photo'),
               photoBytes: _idRearPhoto,
               photoType: 'idRear',
             ),
             _buildPhotoUploader(
-              title: 'Passport Photo',
+              title: tr('passport_photo'),
               photoBytes: _passportPhoto,
               photoType: 'passport',
             ),
-            const Text('Nationality',
+            Text(tr('nationality'),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             TextField(
               controller: _nationalityController,
               onChanged: (value) {
-                print('TextField value: $value'); // Debug log
+                //print('TextField value: $value'); // Debug log
                 filterNationalities(value); // Gọi hàm lọc
               },
               decoration: InputDecoration(
-                hintText: 'Enter your Nationality',
+                hintText: tr('enter_nationality'),
                 fillColor: Colors.white,
                 filled: true,
                 border:
@@ -478,35 +472,35 @@ class _SettingFormState extends State<SettingForm> {
               style: const TextStyle(fontSize: 14),
             ),
             _buildTextField(
-              'Address',
-              'Enter your Address',
+              tr('address'),
+              tr('enter_address'),
               controller: _addressController,
             ),
             _buildTextField(
-              'Phone Number',
-              'Enter your Phone Number',
+              tr('phone_number'),
+              tr('enter_phone_number'),
               controller: _phoneNumberController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Phone Number is required';
+                  return tr('phone_number_required');
                 }
                 if (!RegExp(r'^\d+$').hasMatch(value)) {
-                  return 'Phone Number must contain only digits';
+                  return tr('phone_number_invalid');
                 }
                 return null;
               },
             ),
             _buildTextField(
-              'Email',
-              'Enter your Email',
+              tr('email'),
+              tr('enter_email'),
               controller: _emailController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Email is required';
+                  return tr('email_required');
                 }
                 final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
                 if (!emailRegex.hasMatch(value)) {
-                  return 'Enter a valid email address';
+                  return tr('email_invalid');
                 }
                 return null;
               },
@@ -521,7 +515,7 @@ class _SettingFormState extends State<SettingForm> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: const Text('Change Password'),
+                  title:  Text(tr('change_password')),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -529,9 +523,9 @@ class _SettingFormState extends State<SettingForm> {
                       TextField(
                         controller: oldPasswordController,
                         obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Old Password',
-                          hintText: 'Enter your old password',
+                        decoration:  InputDecoration(
+                          labelText: tr('old_password'),
+                          hintText: tr('enter_old_password'),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -539,9 +533,9 @@ class _SettingFormState extends State<SettingForm> {
                       TextField(
                         controller: newPasswordController,
                         obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'New Password',
-                          hintText: 'Enter your new password',
+                        decoration:  InputDecoration(
+                          labelText: tr('new_password'),
+                          hintText: tr('enter_new_password'),
                         ),
                       ),
                     ],
@@ -552,7 +546,7 @@ class _SettingFormState extends State<SettingForm> {
                       onPressed: () {
                         Navigator.of(context).pop(); // Close the dialog
                       },
-                      child: const Text('Cancel'),
+                      child: Text(tr('cancel')),
                     ),
                     // Submit button
                     ElevatedButton(
@@ -572,8 +566,7 @@ class _SettingFormState extends State<SettingForm> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4743C9),
                       ),
-                      child: const Text(
-                        'Change Password',
+                      child:  Text(tr('change_password'),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.white,
@@ -594,8 +587,8 @@ class _SettingFormState extends State<SettingForm> {
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          child: const Text(
-            'Change Password',
+          child: Text(
+            tr('change_password'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -630,8 +623,8 @@ class _SettingFormState extends State<SettingForm> {
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          child: const Text(
-            'Update',
+          child: Text(
+            tr('update'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -652,8 +645,8 @@ class _SettingFormState extends State<SettingForm> {
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          child: const Text(
-            'Logout',
+          child: Text(
+            tr('logout'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -794,10 +787,10 @@ class _SettingFormState extends State<SettingForm> {
                   PopupMenuItem(
                     value: 'Edit',
                     child: Row(
-                      children: const [
+                      children:  [
                         Icon(Icons.edit, color: Colors.blue),
                         SizedBox(width: 8),
-                        Text('Edit Photo'),
+                        Text(tr('edit_photo')),
                       ],
                     ),
                   ),
@@ -805,10 +798,10 @@ class _SettingFormState extends State<SettingForm> {
                   PopupMenuItem(
                     value: 'Remove',
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(Icons.delete, color: Colors.red),
                         SizedBox(width: 8),
-                        Text('Remove Photo'),
+                        Text(tr('remove_photo')),
                       ],
                     ),
                   ),
@@ -816,10 +809,10 @@ class _SettingFormState extends State<SettingForm> {
                   PopupMenuItem(
                     value: 'Edit',
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(Icons.upload_file, color: Colors.blue),
                         SizedBox(width: 8),
-                        Text('Upload Photo'),
+                        Text(tr('upload_photo')),
                       ],
                     ),
                   ),
