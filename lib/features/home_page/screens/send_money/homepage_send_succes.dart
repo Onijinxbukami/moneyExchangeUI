@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_application_1/app/routes.dart';
@@ -34,14 +35,14 @@ class HomepageSuccessPage extends StatelessWidget {
             ),
             Container(
               color: const Color(0xFF5732C6),
-              child: const TabBar(
+              child: TabBar(
                 indicatorColor: Colors.white,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey,
                 tabs: [
-                  Tab(text: 'Near me', icon: Icon(Icons.location_on)),
-                  Tab(text: 'Success', icon: Icon(Icons.check_circle)),
-                  Tab(text: 'Details', icon: Icon(Icons.receipt)),
+                  Tab(text: tr('near_me'), icon: const Icon(Icons.map)),
+                  Tab(text: tr('send'), icon: const Icon(Icons.send)),
+                  Tab(text: tr('setting'), icon: const Icon(Icons.settings)),
                 ],
               ),
             ),
@@ -64,8 +65,8 @@ class HomepageSuccessPage extends StatelessWidget {
             color: CupertinoColors.activeGreen,
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Transaction Approved!',
+          Text(
+            tr('transaction_approved'),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -74,7 +75,7 @@ class HomepageSuccessPage extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Your transaction has been successfully processed.',
+            tr('transaction_success'),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
@@ -86,27 +87,28 @@ class HomepageSuccessPage extends StatelessWidget {
 
           // Displaying the formatted current time
           Text(
-            'Received at: ${DateTime.now().toLocal().toString().substring(0, 19)}', // Formatting date and time
-            style: TextStyle(
+            '${tr('received_at')} ${DateTime.now().toLocal().toString().substring(0, 19)}',
+            style: const TextStyle(
               fontSize: 16,
               color: Colors.black,
               fontWeight: FontWeight.w500,
             ),
           ),
           Text(
-            'Ticket id: a18929830203', // Formatting date and time
-            style: TextStyle(
+            '${tr('ticket_id')} a18929830203',
+            style: const TextStyle(
               fontSize: 16,
               color: Colors.black,
               fontWeight: FontWeight.w500,
             ),
           ),
+
           const SizedBox(height: 30),
           CupertinoButton.filled(
             onPressed: () {
               Navigator.pushNamed(context, Routes.homepage);
             },
-            child: const Text('Done'),
+            child: Text(tr('done')),
           ),
           const Spacer(),
         ],

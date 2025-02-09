@@ -76,7 +76,32 @@
     "fees": "Phí",
     "total_pay": "Tổng cộng",
     "enter_amount": "Nhập số tiền",
-    "continue": "Tiếp tục"
+    "continue": "Tiếp tục",
     
+    "user_infor": "Thông tin người gửi",
+    "full_name": "Họ và tên đầy đủ",
+    "full_name_hint": "Nhập họ và tên đầy đủ theo pháp lý",
+    "full_name_required": "Họ và tên là bắt buộc",
+    "account_name": "Tên tài khoản",
+    "account_name_hint": "Nhập tên tài khoản",
+    "account_name_required": "Tên tài khoản là bắt buộc",
+    
+    "account_number": "Số tài khoản",
+    "account_number_hint": "Nhập số tài khoản",
+    "account_number_required": "Số tài khoản là bắt buộc",
+
+    "date_of_birth": "Ngày sinh",
+    "select_date_of_birth": "Chọn ngày sinh của bạn",
+    "transaction_details": "Chi tiết giao dịch",
+    "outlet": "Điểm giao dịch",
+    "rate": "Tỷ giá",
+    "total": "Tổng cộng",
+    
+    "recipient_details": "Chi tiết người nhận",
+    "transaction_approved": "Giao dịch đã được phê duyệt!",
+    "transaction_success": "Giao dịch của bạn đã được xử lý thành công.",
+    "received_at": "Nhận lúc:",
+    "ticket_id": "Mã giao dịch:",
+    "done": "Hoàn tất"
   }
   

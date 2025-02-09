@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +107,7 @@ class _HomepageBankAccountDetailsPageState
     // Kiểm tra nếu đầu vào có ký tự không phải số
     if (value.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(value)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter only numbers")),
+         SnackBar(content: Text(tr('phone_number_invalid'))),
       );
     }
   }
@@ -152,20 +153,26 @@ class _HomepageBankAccountDetailsPageState
         body: Column(
           children: [
             const SizedBox(height: 20),
-ProgressStepper(
-  steps: ["Amount", "Sender", "Recipient", "Review", "Success"],
-  stepIcons: [
-    Icons.attach_money,
-    Icons.person,
-    Icons.people,
-    Icons.checklist,
-    Icons.verified
-  ],
-  currentStep: 2,
-  backgroundColor: Colors.grey[300]!,
-  progressColor: Colors.blue,
-  height: 8,
-),
+            ProgressStepper(
+              steps: [
+                tr('amount'),
+                tr('sender'),
+                tr('recipient'),
+                tr('review'),
+                tr('success'),
+              ],
+              stepIcons: [
+                Icons.attach_money,
+                Icons.person,
+                Icons.people,
+                Icons.checklist,
+                Icons.verified
+              ],
+              currentStep: 2,
+              backgroundColor: Colors.grey[300]!,
+              progressColor: Colors.blue,
+              height: 8,
+            ),
             SizedBox(height: isSmallScreen ? 16 : 24),
 
             // TabBar phía trên nội dung chính
@@ -186,14 +193,14 @@ ProgressStepper(
             // TabBar phía dưới nội dung chính
             Container(
               color: const Color(0xFF5732C6),
-              child: const TabBar(
+              child: TabBar(
                 indicatorColor: Colors.white,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey,
                 tabs: [
-                  Tab(text: 'Near me', icon: Icon(Icons.map)),
-              Tab(text: 'Send', icon: Icon(Icons.send)),
-              Tab(text: 'Setting', icon: Icon(Icons.settings)),
+                  Tab(text: tr('near_me'), icon: const Icon(Icons.map)),
+                  Tab(text: tr('send'), icon: const Icon(Icons.send)),
+                  Tab(text: tr('setting'), icon: const Icon(Icons.settings)),
                 ],
               ),
             ),
@@ -205,7 +212,7 @@ ProgressStepper(
 
   Widget _buildHeader() {
     return Container(
-      color: const Color(0xFF6610F2), // Màu tím nhạt theo phong cách Apple
+      color: const Color(0xFF6610F2),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -233,23 +240,26 @@ ProgressStepper(
                     context: context,
                     builder: (BuildContext context) {
                       return CupertinoActionSheet(
-                        title: const Text("Select Language"),
-                        actions: ['EN', 'VN']
-                            .map(
-                              (lang) => CupertinoActionSheetAction(
-                                onPressed: () {
-                                  setState(() {
-                                    _selectedLanguage = lang;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                child: Text(lang),
-                              ),
-                            )
-                            .toList(),
+                        title: Text(tr("select_language")),
+                        actions: [
+                          CupertinoActionSheetAction(
+                            onPressed: () {
+                              context.setLocale(const Locale('en'));
+                              Navigator.pop(context);
+                            },
+                            child: const Text("English"),
+                          ),
+                          CupertinoActionSheetAction(
+                            onPressed: () {
+                              context.setLocale(const Locale('vi'));
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Tiếng Việt"),
+                          ),
+                        ],
                         cancelButton: CupertinoActionSheetAction(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text("Cancel"),
+                          child: Text(tr("cancel")),
                         ),
                       );
                     },
@@ -258,7 +268,7 @@ ProgressStepper(
                 child: Row(
                   children: [
                     Text(
-                      _selectedLanguage,
+                      context.locale.languageCode.toUpperCase(),
                       style: const TextStyle(color: Colors.black, fontSize: 16),
                     ),
                     const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -269,7 +279,6 @@ ProgressStepper(
           ),
           const SizedBox(width: 16),
 
-          // StreamBuilder for User Authentication Status
           StreamBuilder<User?>(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (context, snapshot) {
@@ -301,10 +310,9 @@ ProgressStepper(
                           Text(
                             userData['username'] ?? 'User',
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16),
                           ),
                         ],
                       );
@@ -316,7 +324,7 @@ ProgressStepper(
                 );
               }
 
-              // Nếu chưa đăng nhập, hiển thị nút "Login" theo chuẩn Apple
+              //return Text(tr('login'), style: const TextStyle(color: Colors.white));
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, Routes.login);
@@ -328,9 +336,9 @@ ProgressStepper(
                     border: Border.all(color: Colors.white),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'LOGIN',
-                    style: TextStyle(color: Colors.white),
+                  child: Text(
+                    tr('login'),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               );
@@ -353,9 +361,9 @@ ProgressStepper(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
+            Center(
               child: Text(
-                'Recipient Details',
+                tr('recipient_details'),
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -370,8 +378,8 @@ ProgressStepper(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 RichText(
-                  text: const TextSpan(
-                    text: 'Full legal first and middle name ',
+                  text: TextSpan(
+                    text: tr('full_name'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -392,7 +400,7 @@ ProgressStepper(
                 TextField(
                   controller: nameController,
                   decoration: InputDecoration(
-                    hintText: 'Enter your full legal name',
+                    hintText: tr('full_name_hint'),
                     labelStyle: const TextStyle(fontSize: 14),
                     hintStyle:
                         const TextStyle(fontSize: 12, color: Colors.grey),
@@ -419,7 +427,7 @@ ProgressStepper(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     errorText:
-                        _isFullNameError ? 'Full name is required' : null,
+                        _isFullNameError ? tr('full_name_required') : null,
                   ),
                   style: const TextStyle(fontSize: 14),
                   onTapOutside: (_) {
@@ -444,8 +452,8 @@ ProgressStepper(
 
             const SizedBox(height: 10),
 
-            const Text(
-              'Date of Birth',
+            Text(
+              tr('date_of_birth'),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -469,8 +477,7 @@ ProgressStepper(
                 }
               },
               decoration: InputDecoration(
-                labelText: 'Select your date of birth',
-                hintText: 'YYYY-MM-DD',
+                labelText: tr('select_date_of_birth'),
                 labelStyle: TextStyle(fontSize: fontSize),
                 hintStyle:
                     TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
@@ -489,8 +496,8 @@ ProgressStepper(
             ),
             const SizedBox(height: 20),
 
-            const Text(
-              'Phone Number',
+            Text(
+              tr('phone_number'),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -509,8 +516,7 @@ ProgressStepper(
                     value); // Truyền trực tiếp giá trị của input
               },
               decoration: InputDecoration(
-                labelText: 'Enter your phone number',
-                hintText: 'e.g. +123456789',
+                labelText:  tr('enter_phone_number'),
                 labelStyle: TextStyle(fontSize: fontSize),
                 hintStyle:
                     TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
@@ -533,8 +539,8 @@ ProgressStepper(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 RichText(
-                  text: const TextSpan(
-                    text: 'Email ',
+                  text: TextSpan(
+                    text: tr('email'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -555,7 +561,7 @@ ProgressStepper(
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
-                    hintText: 'Enter your email',
+                    hintText: tr('enter_email'),
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 12.0, horizontal: 16.0),
                     enabledBorder: OutlineInputBorder(
@@ -578,7 +584,7 @@ ProgressStepper(
                           const BorderSide(color: Colors.red, width: 2.0),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    errorText: _isGmailError ? 'Email is required' : null,
+                    errorText: _isGmailError ?  tr('email_required') : null,
                   ),
                   style: const TextStyle(fontSize: 14),
                   onTapOutside: (_) {
@@ -604,7 +610,7 @@ ProgressStepper(
             const SizedBox(height: 20),
 
             Text(
-              'Bank details',
+                tr('bank_details'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -619,8 +625,8 @@ ProgressStepper(
               children: [
                 // Account Name
                 RichText(
-                  text: const TextSpan(
-                    text: 'Account name ',
+                  text: TextSpan(
+                    text: tr('account_name'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -641,7 +647,7 @@ ProgressStepper(
                 TextField(
                   controller: accountNameController,
                   decoration: InputDecoration(
-                    hintText: 'Enter your account name',
+                    hintText: tr('account_name_hint'),
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 12.0, horizontal: 16.0),
                     enabledBorder: OutlineInputBorder(
@@ -665,7 +671,7 @@ ProgressStepper(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     errorText:
-                        _isAccountNameError ? 'Account name is required' : null,
+                        _isAccountNameError ? tr('account_name_required') : null,
                   ),
                   style: const TextStyle(fontSize: 14),
                   onTapOutside: (_) {
@@ -684,8 +690,9 @@ ProgressStepper(
 
                 // Account Number
                 RichText(
-                  text: const TextSpan(
-                    text: 'Account Number ',
+                  text: TextSpan(
+                    text: tr('account_number'),
+
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -706,7 +713,7 @@ ProgressStepper(
                 TextField(
                   controller: accountNumberController,
                   decoration: InputDecoration(
-                    hintText: 'Enter your account number',
+                    hintText: tr('account_number_hint'),
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 12.0, horizontal: 16.0),
                     enabledBorder: OutlineInputBorder(
@@ -730,7 +737,7 @@ ProgressStepper(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     errorText: _isAccountNumberError
-                        ? 'Account number is required'
+                        ? tr('account_name_required')
                         : null,
                   ),
                   style: const TextStyle(fontSize: 14),
@@ -755,8 +762,8 @@ ProgressStepper(
               children: [
                 // Label với dấu * yêu cầu nhập
                 RichText(
-                  text: const TextSpan(
-                    text: 'Bank name ',
+                  text: TextSpan(
+                    text: tr('bank_name'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -785,7 +792,7 @@ ProgressStepper(
                     }
                   },
                   decoration: InputDecoration(
-                    hintText: 'Enter bank name',
+                    hintText: tr('enter_bank_name'),
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 12.0, horizontal: 16.0),
                     enabledBorder: OutlineInputBorder(
@@ -809,7 +816,7 @@ ProgressStepper(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     errorText:
-                        _isBankCodeError ? 'Bank name is required' : null,
+                        _isBankCodeError ? tr('bank_name_required') : null,
                   ),
                   style: const TextStyle(fontSize: 14),
                   onTapOutside: (_) {
@@ -897,7 +904,7 @@ ProgressStepper(
                               color: Colors.white, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            "Continue",
+                             tr('continue'),
                             style: TextStyle(
                               fontSize: screenWidth < 600 ? 16 : 20,
                               fontWeight: FontWeight.w600,
