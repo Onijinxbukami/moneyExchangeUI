@@ -30,7 +30,7 @@ class FacebookSignInButton extends StatelessWidget {
         size: 28, // Tăng kích thước icon
       ),
       label: const Text(
-        "Sign in with Facebook",
+        "Facebook sign in",
         style: TextStyle(
           fontSize: 18, // Tăng kích thước chữ
           fontWeight: FontWeight.w600, // Font đậm hơn chút

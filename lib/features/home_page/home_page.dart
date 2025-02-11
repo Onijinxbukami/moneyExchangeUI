@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/send_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
@@ -15,8 +16,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _selectedLanguage = 'EN';
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -30,29 +29,23 @@ class _HomePageState extends State<HomePage> {
         body: TabBarView(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 0),
-              child: LocationForm(),
-            ),
+                padding: const EdgeInsets.only(top: 0), child: LocationForm()),
             Padding(
-              padding: const EdgeInsets.only(top: 0),
-              child: SendMoneyForm(),
-            ),
+                padding: const EdgeInsets.only(top: 0), child: SendMoneyForm()),
             Padding(
-              padding: const EdgeInsets.only(top: 0),
-              child: SettingForm(),
-            ),
+                padding: const EdgeInsets.only(top: 0), child: SettingForm()),
           ],
         ),
         bottomNavigationBar: Container(
           color: const Color(0xFF5732C6),
-          child: const TabBar(
+          child: TabBar(
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.grey,
             tabs: [
-              Tab(text: 'Near me', icon: Icon(Icons.map)),
-              Tab(text: 'Send', icon: Icon(Icons.send)),
-              Tab(text: 'Setting', icon: Icon(Icons.settings)),
+              Tab(text: tr('near_me'), icon: const Icon(Icons.map)),
+              Tab(text: tr('send'), icon: const Icon(Icons.send)),
+              Tab(text: tr('setting'), icon: const Icon(Icons.settings)),
             ],
           ),
         ),
@@ -62,7 +55,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHeader() {
     return Container(
-      color: const Color(0xFF6610F2), // Màu tím nhạt theo phong cách Apple
+      color: const Color(0xFF6610F2),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -90,23 +83,26 @@ class _HomePageState extends State<HomePage> {
                     context: context,
                     builder: (BuildContext context) {
                       return CupertinoActionSheet(
-                        title: const Text("Select Language"),
-                        actions: ['EN', 'VN']
-                            .map(
-                              (lang) => CupertinoActionSheetAction(
-                                onPressed: () {
-                                  setState(() {
-                                    _selectedLanguage = lang;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                child: Text(lang),
-                              ),
-                            )
-                            .toList(),
+                        title: Text(tr("select_language")),
+                        actions: [
+                          CupertinoActionSheetAction(
+                            onPressed: () {
+                              context.setLocale(const Locale('en'));
+                              Navigator.pop(context);
+                            },
+                            child: const Text("English"),
+                          ),
+                          CupertinoActionSheetAction(
+                            onPressed: () {
+                              context.setLocale(const Locale('vi'));
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Tiếng Việt"),
+                          ),
+                        ],
                         cancelButton: CupertinoActionSheetAction(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text("Cancel"),
+                          child:  Text(tr("cancel")),
                         ),
                       );
                     },
@@ -115,7 +111,7 @@ class _HomePageState extends State<HomePage> {
                 child: Row(
                   children: [
                     Text(
-                      _selectedLanguage,
+                      context.locale.languageCode.toUpperCase(),
                       style: const TextStyle(color: Colors.black, fontSize: 16),
                     ),
                     const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -126,7 +122,6 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(width: 16),
 
-          // StreamBuilder for User Authentication Status
           StreamBuilder<User?>(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (context, snapshot) {
@@ -158,10 +153,9 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             userData['username'] ?? 'User',
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16),
                           ),
                         ],
                       );
@@ -173,24 +167,23 @@ class _HomePageState extends State<HomePage> {
                 );
               }
 
-              // Nếu chưa đăng nhập, hiển thị nút "Login" theo chuẩn Apple
+              //return Text(tr('login'), style: const TextStyle(color: Colors.white));
               return GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, Routes.login);
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'LOGIN',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              );
+                  onTap: () {
+                    Navigator.pushNamed(context, Routes.login);
+                  },
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      tr('login'),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),);
             },
           ),
         ],

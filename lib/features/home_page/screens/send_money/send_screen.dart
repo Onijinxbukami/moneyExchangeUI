@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
@@ -76,7 +77,13 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ProgressStepper(
-              steps: ["Amount", "Sender", "Recipient", "Review", "Success"],
+              steps: [
+                tr('amount'),
+                tr('sender'),
+                tr('recipient'),
+                tr('review'),
+                tr('success'),
+              ],
               stepIcons: [
                 Icons.attach_money,
                 Icons.person,
@@ -91,7 +98,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             ),
             SizedBox(height: isSmallScreen ? 16 : 24),
             _buildInputSection(
-              "Select Outlet",
+              tr('select_outlet'),
               selectedOutlet,
               _onOutletChanged,
               isSmallScreen,
@@ -99,7 +106,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             ),
             SizedBox(height: isSmallScreen ? 16 : 24),
             _buildCurrencyInputField(
-              "You Send",
+              tr('you_send'),
               fromCurrency,
               (value) {
                 setState(() {
@@ -113,7 +120,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             ),
             SizedBox(height: isSmallScreen ? 16 : 24),
             _buildCurrencyInputField(
-              "Recipient gets",
+              tr('recipient_gets'),
               toCurrency,
               (value) {
                 setState(() {
@@ -135,11 +142,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        debugPrint('Continue pressed');
                         Navigator.pushNamed(context, Routes.userDetails);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Continue Pressed!")),
-                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6200EE),
@@ -165,7 +168,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                               color: Colors.white, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            "Continue",
+                            tr('continue'),
                             style: TextStyle(
                               fontSize: screenWidth < 600 ? 16 : 20,
                               fontWeight: FontWeight.w600,
@@ -284,7 +287,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   keyboardType: TextInputType.number,
                   onChanged: (value) => _validateNumeric(),
                   decoration: InputDecoration(
-                    hintText: "Enter amount",
+                    hintText: tr('enter_amount'),
                     errorText: _numericError,
                     border: InputBorder.none,
                   ),
@@ -302,14 +305,14 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildInfoRow(
-          "Exchange Rate",
+          tr('exchange_rate'),
           exchangeRate,
           tooltip:
-              "The exchange rate represents the rate of exchange you will receive when sending your money.",
+              tr('exchange_rate_tooltip'),
           fontSize: fontSize,
         ),
-        _buildInfoRow("Fees", "2.00 GBP", fontSize: fontSize),
-        _buildInfoRow("Recipient receives", "549.24",
+        _buildInfoRow(tr('fees'), "2.00 GBP", fontSize: fontSize),
+        _buildInfoRow(tr('total_pay'), "549.24",
             isRecipient: true, fontSize: fontSize),
       ],
     );

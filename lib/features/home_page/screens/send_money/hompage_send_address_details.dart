@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -132,7 +133,13 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
           children: [
             const SizedBox(height: 20),
             ProgressStepper(
-              steps: ["Amount", "Sender", "Recipient", "Review", "Success"],
+              steps: [
+                tr('amount'),
+                tr('sender'),
+                tr('recipient'),
+                tr('review'),
+                tr('success'),
+              ],
               stepIcons: [
                 Icons.attach_money,
                 Icons.person,
@@ -166,14 +173,14 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
             // TabBar phía dưới nội dung chính
             Container(
               color: const Color(0xFF5732C6),
-              child: const TabBar(
+              child: TabBar(
                 indicatorColor: Colors.white,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey,
                 tabs: [
-                  Tab(text: 'Near me', icon: Icon(Icons.map)),
-                  Tab(text: 'Send', icon: Icon(Icons.send)),
-                  Tab(text: 'Setting', icon: Icon(Icons.settings)),
+                  Tab(text: tr('near_me'), icon: const Icon(Icons.map)),
+                  Tab(text: tr('send'), icon: const Icon(Icons.send)),
+                  Tab(text: tr('setting'), icon: const Icon(Icons.settings)),
                 ],
               ),
             ),
@@ -185,7 +192,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
 
   Widget _buildHeader() {
     return Container(
-      color: const Color(0xFF6610F2), // Màu tím nhạt theo phong cách Apple
+      color: const Color(0xFF6610F2),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -213,23 +220,26 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                     context: context,
                     builder: (BuildContext context) {
                       return CupertinoActionSheet(
-                        title: const Text("Select Language"),
-                        actions: ['EN', 'VN']
-                            .map(
-                              (lang) => CupertinoActionSheetAction(
-                                onPressed: () {
-                                  setState(() {
-                                    _selectedLanguage = lang;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                child: Text(lang),
-                              ),
-                            )
-                            .toList(),
+                        title: Text(tr("select_language")),
+                        actions: [
+                          CupertinoActionSheetAction(
+                            onPressed: () {
+                              context.setLocale(const Locale('en'));
+                              Navigator.pop(context);
+                            },
+                            child: const Text("English"),
+                          ),
+                          CupertinoActionSheetAction(
+                            onPressed: () {
+                              context.setLocale(const Locale('vi'));
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Tiếng Việt"),
+                          ),
+                        ],
                         cancelButton: CupertinoActionSheetAction(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text("Cancel"),
+                          child: Text(tr("cancel")),
                         ),
                       );
                     },
@@ -238,7 +248,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 child: Row(
                   children: [
                     Text(
-                      _selectedLanguage,
+                      context.locale.languageCode.toUpperCase(),
                       style: const TextStyle(color: Colors.black, fontSize: 16),
                     ),
                     const Icon(CupertinoIcons.chevron_down, size: 16),
@@ -249,7 +259,6 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
           ),
           const SizedBox(width: 16),
 
-          // StreamBuilder for User Authentication Status
           StreamBuilder<User?>(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (context, snapshot) {
@@ -281,10 +290,9 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                           Text(
                             userData['username'] ?? 'User',
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16),
                           ),
                         ],
                       );
@@ -296,7 +304,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 );
               }
 
-              // Nếu chưa đăng nhập, hiển thị nút "Login" theo chuẩn Apple
+              //return Text(tr('login'), style: const TextStyle(color: Colors.white));
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, Routes.login);
@@ -308,9 +316,9 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                     border: Border.all(color: Colors.white),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'LOGIN',
-                    style: TextStyle(color: Colors.white),
+                  child: Text(
+                    tr('login'),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               );
@@ -334,7 +342,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Sender details',
+              tr('user_infor'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -380,8 +388,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Date of Birth
                 Row(
                   children: [
-                    const Text(
-                      'Date of Birth:',
+                    Text(
+                      tr('date_of_birth'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -409,8 +417,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Phone Number
                 Row(
                   children: [
-                    const Text(
-                      'Phone Number:',
+                    Text(
+                      tr('phone_number'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -438,8 +446,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Email Address
                 Row(
                   children: [
-                    const Text(
-                      'Email Address:',
+                    Text(
+                      tr('email'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -470,8 +478,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Tiêu đề
-                const Text(
-                  'Recipient details',
+                Text(
+                  tr('recipient_details'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -484,8 +492,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Recipient Name
                 Row(
                   children: [
-                    const Text(
-                      'Full Name:',
+                    Text(
+                      tr('full_name'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -513,8 +521,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Bank Number
                 Row(
                   children: [
-                    const Text(
-                      'Bank Number:',
+                    Text(
+                      tr('account_number'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -542,8 +550,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Bank Code
                 Row(
                   children: [
-                    const Text(
-                      'Bank Name:',
+                    Text(
+                      tr('bank_name'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -572,7 +580,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
             const SizedBox(height: 20),
 
             Text(
-              'Transaction details',
+              tr('transaction_details'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -584,8 +592,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
 // Outlet Field
             Row(
               children: [
-                const Text(
-                  'Outlet:',
+                Text(
+                  tr('outlet'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -698,8 +706,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Rate
                 Row(
                   children: [
-                    const Text(
-                      'Rate:',
+                    Text(
+                      tr('rate'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -722,8 +730,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Fees
                 Row(
                   children: [
-                    const Text(
-                      'Fees:',
+                    Text(
+                      tr('fees'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -746,8 +754,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Receive Money
                 Row(
                   children: [
-                    const Text(
-                      'Total:',
+                    Text(
+                      tr('total_pay'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
