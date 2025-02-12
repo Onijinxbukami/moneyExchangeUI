@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
 import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dart';
@@ -154,15 +156,65 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-void _handleFacebookSignIn() {
-  try {
-    var fb = js.context['FB'];
-    if (fb == null || fb.callMethod == null) {
-      print("Facebook SDK chưa sẵn sàng hoặc không thể gọi phương thức.");
-      return;
-    }
+  void _handleFacebookSignIn() {
+    try {
+      var fb = js.context['FB'];
+      if (fb == null || fb.callMethod == null) {
+        print("Facebook SDK chưa sẵn sàng hoặc không thể gọi phương thức.");
+        return;
+      }
 
-    // Kiểm tra trạng thái đăng nhập trước
+      // Kiểm tra trạng thái đăng nhập trước
+      fb.callMethod('getLoginStatus', [
+        js.allowInterop((response) {
+          if (response is js.JsObject &&
+              response.hasProperty('status') &&
+              response['status'] == 'connected' &&
+              response.hasProperty('authResponse')) {
+            final accessToken = response['authResponse']['accessToken'];
+            if (accessToken != null && accessToken.isNotEmpty) {
+              print("User already logged in, Access Token: $accessToken");
+              _signInWithFirebase(accessToken);
+            } else {
+              print("User logged in but token is missing, retrying...");
+              _getAccessToken();
+            }
+          } else {
+            // Nếu chưa đăng nhập, gọi FB.login()
+            print("User not logged in, calling FB.login()");
+            fb.callMethod('login', [
+              js.allowInterop((loginResponse) {
+                if (loginResponse is js.JsObject &&
+                    loginResponse.hasProperty('status') &&
+                    loginResponse['status'] == 'connected' &&
+                    loginResponse.hasProperty('authResponse')) {
+                  final loginAccessToken =
+                      loginResponse['authResponse']['accessToken'];
+                  if (loginAccessToken != null && loginAccessToken.isNotEmpty) {
+                    print("Login successful, Access Token: $loginAccessToken");
+                    _signInWithFirebase(loginAccessToken);
+                  } else {
+                    print("Login successful but no token, retrying...");
+                    _getAccessToken();
+                  }
+                } else {
+                  print("Facebook login failed: ${loginResponse['status']}");
+                }
+              }),
+              {
+                'scope': 'email,public_profile'
+              } // Thêm quyền truy cập email, profile
+            ]);
+          }
+        })
+      ]);
+    } catch (e) {
+      print("Facebook Sign-In Error: $e");
+    }
+  }
+
+  void _getAccessToken() {
+    var fb = js.context['FB'];
     fb.callMethod('getLoginStatus', [
       js.allowInterop((response) {
         if (response is js.JsObject &&
@@ -171,66 +223,18 @@ void _handleFacebookSignIn() {
             response.hasProperty('authResponse')) {
           final accessToken = response['authResponse']['accessToken'];
           if (accessToken != null && accessToken.isNotEmpty) {
-            print("User already logged in, Access Token: $accessToken");
+            print("Retrieved Access Token: $accessToken");
             _signInWithFirebase(accessToken);
           } else {
-            print("User logged in but token is missing, retrying...");
-            _getAccessToken();
+            print("Token still unavailable, retrying in 2 seconds...");
+            Future.delayed(Duration(seconds: 2), _getAccessToken);
           }
         } else {
-          // Nếu chưa đăng nhập, gọi FB.login()
-          print("User not logged in, calling FB.login()");
-          fb.callMethod('login', [
-            js.allowInterop((loginResponse) {
-              if (loginResponse is js.JsObject &&
-                  loginResponse.hasProperty('status') &&
-                  loginResponse['status'] == 'connected' &&
-                  loginResponse.hasProperty('authResponse')) {
-                final loginAccessToken =
-                    loginResponse['authResponse']['accessToken'];
-                if (loginAccessToken != null && loginAccessToken.isNotEmpty) {
-                  print("Login successful, Access Token: $loginAccessToken");
-                  _signInWithFirebase(loginAccessToken);
-                } else {
-                  print("Login successful but no token, retrying...");
-                  _getAccessToken();
-                }
-              } else {
-                print("Facebook login failed: ${loginResponse['status']}");
-              }
-            }),
-            {'scope': 'email,public_profile'} // Thêm quyền truy cập email, profile
-          ]);
+          print("User is not logged in after retry.");
         }
       })
     ]);
-  } catch (e) {
-    print("Facebook Sign-In Error: $e");
   }
-}
-
-void _getAccessToken() {
-  var fb = js.context['FB'];
-  fb.callMethod('getLoginStatus', [
-    js.allowInterop((response) {
-      if (response is js.JsObject &&
-          response.hasProperty('status') &&
-          response['status'] == 'connected' &&
-          response.hasProperty('authResponse')) {
-        final accessToken = response['authResponse']['accessToken'];
-        if (accessToken != null && accessToken.isNotEmpty) {
-          print("Retrieved Access Token: $accessToken");
-          _signInWithFirebase(accessToken);
-        } else {
-          print("Token still unavailable, retrying in 2 seconds...");
-          Future.delayed(Duration(seconds: 2), _getAccessToken);
-        }
-      } else {
-        print("User is not logged in after retry.");
-      }
-    })
-  ]);
-}
 
   void _signInWithFirebase(String accessToken) async {
     try {
@@ -275,77 +279,105 @@ void _getAccessToken() {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: lightColor,
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF6610F2), // Màu nền của app bar
-          elevation: 0,
-          toolbarHeight: 80,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Logo
+ appBar: AppBar(
+  backgroundColor: const Color(0xFF6610F2), // Màu nền của app bar
+  elevation: 0,
+  toolbarHeight: 80,
+  title: Row(
+    children: [
+      // Nút back ở bên trái
+      IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
 
-              Row(
-                children: [
-                  // Dropdown ngôn ngữ
-                  DropdownButton<String>(
-                    value: _selectedLanguage,
-                    dropdownColor: Colors.white,
-                    items: ['EN', 'BN', 'ES', 'NL']
-                        .map(
-                          (lang) => DropdownMenuItem(
-                            value: lang,
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/lang.png', // Đường dẫn tới icon của bạn
-                                  height: 20, // Độ cao của icon
-                                  width: 20, // Độ rộng của icon
-                                  fit: BoxFit.contain,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  lang,
-                                  style: const TextStyle(color: Colors.black),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedLanguage = value!;
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 16),
+      const Spacer(), // Đẩy các phần tử còn lại về bên phải
 
-                  // Nút LOGIN
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, Routes.signup);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white),
-                        borderRadius: BorderRadius.circular(8),
+      // Nút chọn ngôn ngữ
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 6,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              showCupertinoModalPopup(
+                context: context,
+                builder: (BuildContext context) {
+                  return CupertinoActionSheet(
+                    title: Text(tr("select_language")),
+                    actions: [
+                      CupertinoActionSheetAction(
+                        onPressed: () {
+                          context.setLocale(const Locale('en'));
+                          Navigator.pop(context);
+                        },
+                        child: const Text("English"),
                       ),
-                      child: const Text(
-                        'SIGN UP',
-                        style: TextStyle(color: Colors.white),
+                      CupertinoActionSheetAction(
+                        onPressed: () {
+                          context.setLocale(const Locale('vi'));
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Tiếng Việt"),
                       ),
+                    ],
+                    cancelButton: CupertinoActionSheetAction(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(tr("cancel")),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-              ),
-            ],
+                  );
+                },
+              );
+            },
+            child: Row(
+              children: [
+                Text(
+                  context.locale.languageCode.toUpperCase(),
+                  style: const TextStyle(color: Colors.black, fontSize: 16),
+                ),
+                const Icon(CupertinoIcons.chevron_down, size: 16),
+              ],
+            ),
           ),
         ),
+      ),
+
+      const SizedBox(width: 16),
+
+      // Nút login
+      GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, Routes.signup);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            tr('login'),
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
         body: LayoutBuilder(
           builder: (context, constraints) {
             final screenWidth = constraints.maxWidth;
