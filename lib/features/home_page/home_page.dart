@@ -151,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.white, size: 28),
                           const SizedBox(width: 8),
                           Text(
-                            userData['username'] ?? 'User',
+                            userData['userName'] ?? 'User',
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,

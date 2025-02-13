@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/constants.dart';
 import 'package:flutter_application_1/app/routes.dart';
@@ -76,7 +78,7 @@ class _SignupPageState extends State<SignupPage> {
           .doc(userCredential.user!.uid)
           .set({
         'userId': userCredential.user!.uid,
-        'username': _userNameController.text.trim(),
+        'userName': _userNameController.text.trim(),
         'email': _emailController.text.trim(),
         'phoneNumber': _phoneNumberController.text.trim(),
         'createdAt': FieldValue.serverTimestamp(),
@@ -323,66 +325,97 @@ class _SignupPageState extends State<SignupPage> {
           elevation: 0,
           toolbarHeight: 80,
           title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  // Dropdown ngôn ngữ
-                  DropdownButton<String>(
-                    value: _selectedLanguage,
-                    dropdownColor: Colors.white,
-                    items: ['EN', 'BN', 'ES', 'NL']
-                        .map(
-                          (lang) => DropdownMenuItem(
-                            value: lang,
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/lang.png', // Đường dẫn tới icon của bạn
-                                  height: 20, // Độ cao của icon
-                                  width: 20, // Độ rộng của icon
-                                  fit: BoxFit.contain,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  lang,
-                                  style: const TextStyle(color: Colors.black),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedLanguage = value!;
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 16),
+              // Nút back ở bên trái
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
 
-                  // Nút LOGIN
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, Routes.login);
+              const Spacer(), // Đẩy các phần tử còn lại về bên phải
+
+              // Nút chọn ngôn ngữ
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      showCupertinoModalPopup(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CupertinoActionSheet(
+                            title: Text(tr("select_language")),
+                            actions: [
+                              CupertinoActionSheetAction(
+                                onPressed: () {
+                                  context.setLocale(const Locale('en'));
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("English"),
+                              ),
+                              CupertinoActionSheetAction(
+                                onPressed: () {
+                                  context.setLocale(const Locale('vi'));
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("Tiếng Việt"),
+                              ),
+                            ],
+                            cancelButton: CupertinoActionSheetAction(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(tr("cancel")),
+                            ),
+                          );
+                        },
+                      );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        'LOGIN',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                    child: Row(
+                      children: [
+                        Text(
+                          context.locale.languageCode.toUpperCase(),
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 16),
+                        ),
+                        const Icon(CupertinoIcons.chevron_down, size: 16),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                ],
+                ),
+              ),
+
+              const SizedBox(width: 16),
+
+              // Nút login
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, Routes.login);
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    tr('login'),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
             ],
           ),

@@ -88,7 +88,7 @@ class _SettingFormState extends State<SettingForm> {
 
       // Cập nhật các trường thông tin
       await userRef.update({
-        'username': userName,
+        'userName': userName,
         'firstName': firstName,
         'lastName': lastName,
         'address': address,
@@ -115,7 +115,7 @@ class _SettingFormState extends State<SettingForm> {
         if (userDoc.exists) {
           final userData = userDoc.data();
           setState(() {
-            _userNameController.text = userData?['username'] ?? '';
+            _userNameController.text = userData?['userName'] ?? '';
             _phoneNumberController.text = userData?['phoneNumber'] ?? '';
             _emailController.text = userData?['email'] ?? '';
             _firstNameController.text = userData?['firstName'] ?? '';
