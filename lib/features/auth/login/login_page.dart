@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     clientId:
-        '1049850024670-t352kp6332dnvv5k9p1edvuek64lljpf.apps.googleusercontent.com',
+        '1045583437831-435og125lq6kn1ifiq5l8j4ni3fjndi2.apps.googleusercontent.com',
   );
   bool _isLoading = false;
   String _selectedLanguage = 'EN';
