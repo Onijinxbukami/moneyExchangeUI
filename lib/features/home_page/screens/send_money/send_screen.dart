@@ -26,10 +26,9 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   String searchKeyword = '';
 
   List<DropdownMenuItem<String>> _outletItems = [];
-  List<DropdownMenuItem<String>> _currencyItems = [];
+  List<Map<String, String>> _outletDisplayList = [];
   List<String> currencyCodes = [];
   List<Map<String, String>> _currencyDisplayList = [];
-  List<Map<String, String>> filteredCurrencyList = [];
 
   final TextEditingController _numericController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
@@ -175,7 +174,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   @override
   void initState() {
     super.initState();
-    _loadOutlets();
+    fetchOutlets();
     fetchCurrencyCodes();
   }
 
@@ -519,76 +518,29 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     }
   }
 
-  void _loadOutlets() async {
-    List<Map<String, dynamic>> outlets = await fetchOutlets();
-
-    await fetchCurrencyCodes();
-
-    setState(() {
-      _outletItems = outlets.map<DropdownMenuItem<String>>((outlet) {
-        return DropdownMenuItem<String>(
-          value: outlet['outletId'],
-          child: Text(outlet['outletName']),
-        );
-      }).toList();
-
-      if (_outletItems.isNotEmpty &&
-          (selectedOutlet == null || selectedOutlet!.isEmpty)) {
-        selectedOutlet = _outletItems.first.value;
-
-        _fetchOutletData(selectedOutlet!);
-      }
-
-      if (_currencyItems.isNotEmpty &&
-          (selectedCurrency == null || selectedCurrency!.isEmpty)) {
-        selectedCurrency = _currencyItems.first.value;
-      }
-    });
-  }
-
-  Future<void> _fetchOutletData(String outletId) async {
+  Future<void> fetchOutlets() async {
     try {
-      DocumentSnapshot outletDoc = await FirebaseFirestore.instance
-          .collection('outlets')
-          .doc(outletId) // 🔹 Dùng document ID, không phải 'outletId' trong doc
-          .get();
-
-      if (outletDoc.exists) {
-        final outletData = outletDoc.data() as Map<String, dynamic>;
-
-        setState(() {
-          selectedOutlet = outletId; // 🔹 Gán ID thay vì tên để tránh lỗi
-        });
-      } else {
-        print("❌ Outlet not found for ID: $outletId");
-      }
-    } catch (e) {
-      debugPrint("⚠️ Error fetching outlet data: $e");
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> fetchOutlets() async {
-    try {
-      QuerySnapshot outletSnapshot =
+      QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('outlets').get();
 
-      if (outletSnapshot.docs.isEmpty) {
+      if (querySnapshot.docs.isEmpty) {
         print("❌ No outlets found in Firestore.");
+        return;
       }
 
-      List<Map<String, dynamic>> outlets = outletSnapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>?;
-
+      List<Map<String, String>> outletList = querySnapshot.docs.map((doc) {
+        var data = doc.data() as Map<String, dynamic>;
         return {
           'outletId': doc.id, // 🔹 Dùng document ID
-          'outletName': data?['outletName'] ?? "Unnamed Outlet",
+          'outletName': data['outletName']?.toString() ?? "Unnamed Outlet",
         };
       }).toList();
 
-      return outlets;
-    } catch (e, stackTrace) {
-      debugPrint("⚠️ Error fetching outlets: $e\nStackTrace: $stackTrace");
-      return [];
+      setState(() {
+        _outletDisplayList = outletList;
+      });
+    } catch (e) {
+      print("⚠️ Error fetching outlets: $e");
     }
   }
 
@@ -610,7 +562,6 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
       setState(() {
         _currencyDisplayList = currencyList;
-        filteredCurrencyList = List.from(currencyList);
       });
     } catch (e) {
       print("⚠️ Error fetching currency codes: $e");
@@ -621,7 +572,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     try {
       // Truy vấn outletRate có outletId khớp
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('outletRate')
+          .collection('outletRates')
           .where('outletId', isEqualTo: outletId)
           .get();
 
@@ -665,51 +616,115 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
   void _showOutletPicker(BuildContext context) {
     TextEditingController searchController = TextEditingController();
+    List<Map<String, String>> filteredOutletList =
+        List.from(_outletDisplayList);
 
-    showCupertinoModalPopup(
+    showModalBottomSheet(
       context: context,
-      builder: (_) => Container(
-        height: 250,
-        color: Colors.white,
-        child: Column(
-          children: [
-            Container(
-              height: 200,
-              child: CupertinoPicker(
-                itemExtent: 40,
-                onSelectedItemChanged: (index) {
-                  setState(() {
-                    selectedOutlet = _outletItems[index].value!;
-                  });
-
-                  // 🔹 Gọi hàm fetchOutletRates khi chọn Outlet
-                  fetchOutletRates(selectedOutlet!);
-                },
-                children: _outletItems.map((item) {
-                  if (item.child is Text) {
-                    return Text((item.child as Text).data ?? "No Name");
-                  } else {
-                    return Text("Invalid Item");
-                  }
-                }).toList(),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(tr('cancel'), style: TextStyle(fontSize: 18)),
-            ),
-          ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
         ),
       ),
+      builder: (_) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setStateModal) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Container(
+              height: 400,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'Select Outlet',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search outlet...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setStateModal(() {
+                          String searchKeyword = value.toLowerCase();
+                          filteredOutletList = _outletDisplayList.where((item) {
+                            final outletName =
+                                item['outletName']!.toLowerCase();
+                            return outletName.contains(searchKeyword);
+                          }).toList();
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Expanded(
+                    child: filteredOutletList.isNotEmpty
+                        ? ListView.builder(
+                            itemCount: filteredOutletList.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredOutletList[index];
+                              final outletName = item['outletName']!;
+                              return ListTile(
+                                title: Text(
+                                  outletName,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    selectedOutlet = item['outletId']!;
+                                  });
+                                  print("🔄 Selected Outlet: $selectedOutlet");
+                                  Navigator.pop(context);
+
+                                  // 🔹 Gọi hàm fetchOutletRates khi chọn Outlet
+                                  fetchOutletRates(selectedOutlet!);
+                                },
+                              );
+                            },
+                          )
+                        : Center(
+                            child: Text(
+                              "No matching outlets.",
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('Cancel', style: TextStyle(fontSize: 18)),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
-
-
-    
   }
 
   void _showCurrencyPicker(BuildContext context, bool isSender) {
     TextEditingController searchController = TextEditingController();
 
+    List<Map<String, String>> filteredCurrencyList =
+        List.from(_currencyDisplayList);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -853,6 +868,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                 setState(() {
                   fromCurrency = value!;
                   print("🔄 Updated fromCurrency: $fromCurrency");
+                  print("🪙 Current fromCurrency: $fromCurrency");
                 });
               },
               isSmallScreen,
@@ -890,14 +906,14 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      selectedOutlet != null
-                          ? (_outletItems
-                                      .firstWhere((item) =>
-                                          item.value == selectedOutlet)
-                                      .child as Text)
-                                  .data ??
-                              "Chọn Outlet"
-                          : "Chọn Outlet",
+                      selectedOutlet != null && selectedOutlet!.isNotEmpty
+                          ? _outletDisplayList.firstWhere(
+                                  (item) => item['outletId'] == selectedOutlet,
+                                  orElse: () => {
+                                        'outletName': 'Select Outlet'
+                                      })['outletName'] ??
+                              "Select Outlet"
+                          : "Select Outlet",
                       style: TextStyle(fontSize: 16),
                     ),
                     Icon(Icons.arrow_drop_down, color: Colors.black54),
@@ -1036,7 +1052,9 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
         ),
         _buildInfoRow(
           tr('fees'),
-          sendRate != null ? "$sendRate $fromCurrency" : "Loading...",
+          (fromCurrency != null && fromCurrency.isNotEmpty)
+              ? "$sendRate $fromCurrency"
+              : "Loading...",
           fontSize: fontSize,
         ),
         _buildInfoRow(
