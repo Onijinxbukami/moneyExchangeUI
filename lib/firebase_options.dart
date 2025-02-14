@@ -41,48 +41,50 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBzuPV735m2wGpkHC7OHPKzR9VhmZzJY6U',
-    appId: '1:1049850024670:web:adc8ddef4ffec8d08c284f',
-    messagingSenderId: '1049850024670',
-    projectId: 'auth-1d805',
-    authDomain: 'auth-1d805.firebaseapp.com',
-    storageBucket: 'auth-1d805.firebasestorage.app',
-    measurementId: 'G-S39GYGE405',
+    apiKey: 'AIzaSyDU98BQTD0XpBRXWcGsuvkO4qqYx3EbHRU',
+    appId: '1:1045583437831:web:740ba6db06460e448a4aa2',
+    messagingSenderId: '1045583437831',
+    projectId: 'biz4x-remittance',
+    authDomain: 'biz4x-remittance.firebaseapp.com',
+    storageBucket: 'biz4x-remittance.firebasestorage.app',
+    measurementId: 'G-40LT8Y4CMS',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBelSNXqqkBjDVOL2QRjVBEaqb0E3H67LE',
-    appId: '1:1049850024670:android:d0243c5c541eeb7b8c284f',
-    messagingSenderId: '1049850024670',
-    projectId: 'auth-1d805',
-    storageBucket: 'auth-1d805.firebasestorage.app',
+    apiKey: 'AIzaSyD6K2mvRqZAAvq0VMA0jf_-QbyGWA4rUSc',
+    appId: '1:1045583437831:android:c5f2638d558d4c9f8a4aa2',
+    messagingSenderId: '1045583437831',
+    projectId: 'biz4x-remittance',
+    storageBucket: 'biz4x-remittance.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC_RCcG5AnXi_0XrmlpYiMc6Q4adAYNOJE',
-    appId: '1:1049850024670:ios:24e6139a0f20eb098c284f',
-    messagingSenderId: '1049850024670',
-    projectId: 'auth-1d805',
-    storageBucket: 'auth-1d805.firebasestorage.app',
+    apiKey: 'AIzaSyB9uv9kSBOAqGCUuuFlh6pWrrQMw7xWIZI',
+    appId: '1:1045583437831:ios:16dabfc2f872e4c48a4aa2',
+    messagingSenderId: '1045583437831',
+    projectId: 'biz4x-remittance',
+    storageBucket: 'biz4x-remittance.firebasestorage.app',
+    iosClientId: '1045583437831-fqtai7l7i936fih3olmn3ko47584j8rf.apps.googleusercontent.com',
     iosBundleId: 'com.example.flutterApplication1',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyC_RCcG5AnXi_0XrmlpYiMc6Q4adAYNOJE',
-    appId: '1:1049850024670:ios:24e6139a0f20eb098c284f',
-    messagingSenderId: '1049850024670',
-    projectId: 'auth-1d805',
-    storageBucket: 'auth-1d805.firebasestorage.app',
+    apiKey: 'AIzaSyB9uv9kSBOAqGCUuuFlh6pWrrQMw7xWIZI',
+    appId: '1:1045583437831:ios:16dabfc2f872e4c48a4aa2',
+    messagingSenderId: '1045583437831',
+    projectId: 'biz4x-remittance',
+    storageBucket: 'biz4x-remittance.firebasestorage.app',
+    iosClientId: '1045583437831-fqtai7l7i936fih3olmn3ko47584j8rf.apps.googleusercontent.com',
     iosBundleId: 'com.example.flutterApplication1',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBzuPV735m2wGpkHC7OHPKzR9VhmZzJY6U',
-    appId: '1:1049850024670:web:08143366d45f9f048c284f',
-    messagingSenderId: '1049850024670',
-    projectId: 'auth-1d805',
-    authDomain: 'auth-1d805.firebaseapp.com',
-    storageBucket: 'auth-1d805.firebasestorage.app',
-    measurementId: 'G-0VWVWW4B0J',
+    apiKey: 'AIzaSyDU98BQTD0XpBRXWcGsuvkO4qqYx3EbHRU',
+    appId: '1:1045583437831:web:1a2dee60adc833a68a4aa2',
+    messagingSenderId: '1045583437831',
+    projectId: 'biz4x-remittance',
+    authDomain: 'biz4x-remittance.firebaseapp.com',
+    storageBucket: 'biz4x-remittance.firebasestorage.app',
+    measurementId: 'G-HTD36HVFYX',
   );
 }

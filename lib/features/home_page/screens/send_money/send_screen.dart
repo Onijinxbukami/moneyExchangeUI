@@ -23,14 +23,154 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   String? localCurrency;
   String? foreignCurrency;
   String? selectedCurrency;
+  String searchKeyword = '';
 
   List<DropdownMenuItem<String>> _outletItems = [];
   List<DropdownMenuItem<String>> _currencyItems = [];
   List<String> currencyCodes = [];
   List<Map<String, String>> _currencyDisplayList = [];
+  List<Map<String, String>> filteredCurrencyList = [];
 
   final TextEditingController _numericController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
+  Map<String, String> currencyToCountryCode = {
+    'USD': 'us',
+    'EUR': 'eu',
+    'JPY': 'jp',
+    'GBP': 'gb',
+    'AUD': 'au',
+    'CAD': 'ca',
+    'CHF': 'ch',
+    'CNY': 'cn',
+    'SEK': 'se',
+    'NZD': 'nz',
+    'VND': 'vn',
+    'THB': 'th',
+    'SGD': 'sg',
+    'MXN': 'mx',
+    'BRL': 'br',
+    'ZAR': 'za',
+    'RUB': 'ru',
+    'INR': 'in',
+    'KRW': 'kr',
+    'HKD': 'hk',
+    'MYR': 'my',
+    'PHP': 'ph',
+    'IDR': 'id',
+    'TRY': 'tr',
+    'PLN': 'pl',
+    'HUF': 'hu',
+    'CZK': 'cz',
+    'DKK': 'dk',
+    'NOK': 'no',
+    'ILS': 'il',
+    'SAR': 'sa',
+    'AED': 'ae',
+    'EGP': 'eg',
+    'ARS': 'ar',
+    'CLP': 'cl',
+    'COP': 'co',
+    'PEN': 'pe',
+    'PKR': 'pk',
+    'BDT': 'bd',
+    'LKR': 'lk',
+    'KWD': 'kw',
+    'BHD': 'bh',
+    'OMR': 'om',
+    'QAR': 'qa',
+    'JOD': 'jo',
+    'XOF': 'bj',
+    'XAF': 'cm',
+    'XCD': 'ag',
+    'XPF': 'pf',
+    'MAD': 'ma',
+    'DZD': 'dz',
+    'TND': 'tn',
+    'LBP': 'lb',
+    'JMD': 'jm',
+    'TTD': 'tt',
+    'NGN': 'ng',
+    'GHS': 'gh',
+    'KES': 'ke',
+    'UGX': 'ug',
+    'TZS': 'tz',
+    'ETB': 'et',
+    'ZMW': 'zm',
+    'MZN': 'mz',
+    'BWP': 'bw',
+    'NAD': 'na',
+    'SCR': 'sc',
+    'MUR': 'mu',
+    'BBD': 'bb',
+    'BSD': 'bs',
+    'FJD': 'fj',
+    'SBD': 'sb',
+    'PGK': 'pg',
+    'TOP': 'to',
+    'WST': 'ws',
+    'KZT': 'kz',
+    'UZS': 'uz',
+    'TJS': 'tj',
+    'KGS': 'kg',
+    'MMK': 'mm',
+    'LAK': 'la',
+    'KHR': 'kh',
+    'MNT': 'mn',
+    'NPR': 'np',
+    'BND': 'bn',
+    'XAU': 'xau',
+    'XAG': 'xag',
+    'XPT': 'xpt',
+    'XPD': 'xpd',
+    'HTG': 'ht', // Haitian Gourde
+    'LRD': 'lr', // Liberian Dollar
+    'BIF': 'bi', // Burundian Franc
+    'IQD': 'iq', // Iraqi Dinar
+    'MGA': 'mg', // Malagasy Ariary
+    'LSL': 'ls', // Lesotho Loti
+    'AFA': 'af', // Afghan Afghani (cũ, thay bằng AFN)
+    'CVE': 'cv', // Cape Verdean Escudo
+    'BGN': 'bg', // Bulgarian Lev
+    'LYD': 'ly', // Libyan Dinar
+    'AWG': 'aw', // Aruban Florin
+    'HRK': 'hr', // Croatian Kuna (đã đổi sang EUR từ 2023)
+    'BZD': 'bz', // Belize Dollar
+    'HNL': 'hn', // Honduran Lempira
+    'MVR': 'mv', // Maldivian Rufiyaa
+    'GYD': 'gy', // Guyanese Dollar
+    'SVC': 'sv', // Salvadoran Colón
+    'ISK': 'is', // Icelandic Króna
+    'GNF': 'gn', // Guinean Franc
+    'IRR': 'ir', // Iranian Rial
+    'KYD': 'ky', // Cayman Islands Dollar
+    'DJF': 'dj', // Djiboutian Franc
+    'MWK': 'mw', // Malawian Kwacha
+    'BOB': 'bo', // Bolivian Boliviano
+    'LTL': 'lt', // Lithuanian Litas (đã đổi sang EUR)
+    'AMD': 'am', // Armenian Dram
+    'CRC': 'cr', // Costa Rican Colón
+    'KMF': 'km', // Comorian Franc
+    'AOR': 'ao', // Angolan Kwanza (cũ, thay bằng AOA)
+    'ALL': 'al', // Albanian Lek
+    'ERN': 'er', // Eritrean Nakfa
+    'EEK': 'ee', // Estonian Kroon (đã đổi sang EUR)
+    'GMD': 'gm', // Gambian Dalasi
+    'GIP': 'gi', // Gibraltar Pound
+    'CUP': 'cu', // Cuban Peso
+    'BMD': 'bm', // Bermudian Dollar
+    'FKP': 'fk', // Falkland Islands Pound
+    'CDF': 'cd', // Congolese Franc
+    'LVL': 'lv', // Latvian Lats (đã đổi sang EUR)
+    'MKD': 'mk', // Macedonian Denar
+    'GTQ': 'gt', // Guatemalan Quetzal
+    'AZN': 'az', // Azerbaijani Manat
+    'DOP': 'do', // Dominican Peso
+    'BYN': 'by', // Belarusian Ruble
+    'GEL': 'ge', // Georgian Lari
+    'BTN': 'bt', // Bhutanese Ngultrum
+    'MOP': 'mo', // Macanese Pataca
+  };
+
   String? _numericError;
   @override
   void initState() {
@@ -39,17 +179,352 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     fetchCurrencyCodes();
   }
 
-  void _loadOutlets() async {
-    // Fetch dữ liệu outlets
-    List<Map<String, dynamic>> outlets = await fetchOutlets();
-    print("📋 Available Outlets in Dropdown: $outlets");
+  void addOutletRates() async {
+    CollectionReference outletRates =
+        FirebaseFirestore.instance.collection('outletRates');
 
-    // Fetch dữ liệu currencyCodes
+    List<Map<String, dynamic>> ratesData = [
+      {
+        'buyRate': 25000,
+        'foreignCurrency': 'EUR',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_1',
+        'sellRate': 25150,
+        'sendRate': 25200
+      },
+      {
+        'buyRate': 23000,
+        'foreignCurrency': 'USD',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_2',
+        'sellRate': 23150,
+        'sendRate': 23200
+      },
+      {
+        'buyRate': 180,
+        'foreignCurrency': 'JPY',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_3',
+        'sellRate': 181,
+        'sendRate': 182
+      },
+      {
+        'buyRate': 31000,
+        'foreignCurrency': 'GBP',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_4',
+        'sellRate': 31150,
+        'sendRate': 31200
+      },
+      {
+        'buyRate': 1500,
+        'foreignCurrency': 'KRW',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_5',
+        'sellRate': 1510,
+        'sendRate': 1520
+      },
+      {
+        'buyRate': 27000,
+        'foreignCurrency': 'AUD',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_6',
+        'sellRate': 27150,
+        'sendRate': 27200
+      },
+      {
+        'buyRate': 6000,
+        'foreignCurrency': 'CNY',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_7',
+        'sellRate': 6050,
+        'sendRate': 6100
+      },
+      {
+        'buyRate': 3500,
+        'foreignCurrency': 'SGD',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_8',
+        'sellRate': 3550,
+        'sendRate': 3600
+      },
+      {
+        'buyRate': 3000,
+        'foreignCurrency': 'HKD',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_9',
+        'sellRate': 3050,
+        'sendRate': 3100
+      },
+      {
+        'buyRate': 500,
+        'foreignCurrency': 'THB',
+        'localCurrency': 'VND',
+        'outletId': '3kf82kd91s',
+        'outletRateId': 'rate_3kf82kd91s_10',
+        'sellRate': 510,
+        'sendRate': 520
+      }
+    ];
+
+    for (var rate in ratesData) {
+      await outletRates.add(rate);
+      print(
+          "✅ Added outletRate: ${rate['foreignCurrency']} - ${rate['localCurrency']}");
+    }
+  }
+
+  void addOutlets() async {
+    CollectionReference outlets =
+        FirebaseFirestore.instance.collection('outlets');
+
+    List<Map<String, dynamic>> outletData = [
+      {
+        'outletAddress': '123 Đường ABC, Hà Nội',
+        'outletCode': 'OUT123',
+        'outletId': '1a2b3c4d5e',
+        'outletName': 'Outlet ABC'
+      },
+      {
+        'outletAddress': '456 Đường XYZ, Hà Nội',
+        'outletCode': 'OUT456',
+        'outletId': '3hfu29sjd92',
+        'outletName': 'Outlet XYZ'
+      },
+      {
+        'outletAddress': '789 Đường PQR, TP.HCM',
+        'outletCode': 'OUT789',
+        'outletId': '9df8s7a6g5',
+        'outletName': 'Outlet PQR'
+      },
+      {
+        'outletAddress': '101 Đường LMN, Đà Nẵng',
+        'outletCode': 'OUT101',
+        'outletId': '8fj29dk30s',
+        'outletName': 'Outlet LMN'
+      },
+      {
+        'outletAddress': '202 Đường UVW, Cần Thơ',
+        'outletCode': 'OUT202',
+        'outletId': '4hf8s6a2g1',
+        'outletName': 'Outlet UVW'
+      },
+      {
+        'outletAddress': '303 Đường STU, Hải Phòng',
+        'outletCode': 'OUT303',
+        'outletId': '5js92kdj38',
+        'outletName': 'Outlet STU'
+      },
+      {
+        'outletAddress': '404 Đường GHI, Nha Trang',
+        'outletCode': 'OUT404',
+        'outletId': '2jsk8d92hd',
+        'outletName': 'Outlet GHI'
+      },
+      {
+        'outletAddress': '505 Đường MNO, Vũng Tàu',
+        'outletCode': 'OUT505',
+        'outletId': '3kf82kd91s',
+        'outletName': 'Outlet MNO'
+      },
+      {
+        'outletAddress': '606 Đường DEF, Huế',
+        'outletCode': 'OUT606',
+        'outletId': '9fj47sjd92',
+        'outletName': 'Outlet DEF'
+      },
+      {
+        'outletAddress': '707 Đường ABC, Biên Hòa',
+        'outletCode': 'OUT707',
+        'outletId': '8dj39skd72',
+        'outletName': 'Outlet ABC Biên Hòa'
+      },
+      {
+        'outletAddress': '808 Đường XYZ, Buôn Ma Thuột',
+        'outletCode': 'OUT808',
+        'outletId': '6dj38skd91',
+        'outletName': 'Outlet XYZ Buôn Ma Thuột'
+      },
+      {
+        'outletAddress': '909 Đường PQR, Quy Nhơn',
+        'outletCode': 'OUT909',
+        'outletId': '1kd83js92d',
+        'outletName': 'Outlet PQR Quy Nhơn'
+      },
+      {
+        'outletAddress': '010 Đường LMN, Phú Quốc',
+        'outletCode': 'OUT010',
+        'outletId': '3jd83ks92d',
+        'outletName': 'Outlet LMN Phú Quốc'
+      },
+      {
+        'outletAddress': '111 Đường UVW, Đà Lạt',
+        'outletCode': 'OUT111',
+        'outletId': '4ks92jd83f',
+        'outletName': 'Outlet UVW Đà Lạt'
+      },
+      {
+        'outletAddress': '222 Đường STU, Thanh Hóa',
+        'outletCode': 'OUT222',
+        'outletId': '5hd92ks83d',
+        'outletName': 'Outlet STU Thanh Hóa'
+      },
+      {
+        'outletAddress': '333 Đường GHI, Thái Nguyên',
+        'outletCode': 'OUT333',
+        'outletId': '6jd83ks92d',
+        'outletName': 'Outlet GHI Thái Nguyên'
+      },
+      {
+        'outletAddress': '444 Đường MNO, Nam Định',
+        'outletCode': 'OUT444',
+        'outletId': '7ks92jd83f',
+        'outletName': 'Outlet MNO Nam Định'
+      },
+      {
+        'outletAddress': '555 Đường DEF, Vinh',
+        'outletCode': 'OUT555',
+        'outletId': '8hd92ks83d',
+        'outletName': 'Outlet DEF Vinh'
+      },
+      {
+        'outletAddress': '666 Đường ABC, Hạ Long',
+        'outletCode': 'OUT666',
+        'outletId': '9jd83ks92d',
+        'outletName': 'Outlet ABC Hạ Long'
+      },
+      {
+        'outletAddress': '777 Đường XYZ, Long Xuyên',
+        'outletCode': 'OUT777',
+        'outletId': '0ks92jd83f',
+        'outletName': 'Outlet XYZ Long Xuyên'
+      }
+    ];
+
+    for (var data in outletData) {
+      await outlets.add(data);
+      print(
+          "✅ Added outlet: ${data['outletName']} at ${data['outletAddress']}");
+    }
+  }
+
+  void addCurrencyCodes() async {
+    CollectionReference currencyCodes =
+        FirebaseFirestore.instance.collection('currencyCodes');
+
+    List<Map<String, dynamic>> currencyData = [
+      {'country': 'Afghanistan', 'currencyCode': 'AFA'},
+      {'country': 'Albania', 'currencyCode': 'ALL'},
+      {'country': 'Algeria', 'currencyCode': 'DZD'},
+      {'country': 'Angola', 'currencyCode': 'AOR'},
+      {'country': 'Argentina', 'currencyCode': 'ARS'},
+      {'country': 'Armenia', 'currencyCode': 'AMD'},
+      {'country': 'Aruba', 'currencyCode': 'AWG'},
+      {'country': 'Australia', 'currencyCode': 'AUD'},
+      {'country': 'Azerbaijan', 'currencyCode': 'AZN'},
+      {'country': 'Bahamas', 'currencyCode': 'BSD'},
+      {'country': 'Bahrain', 'currencyCode': 'BHD'},
+      {'country': 'Bangladesh', 'currencyCode': 'BDT'},
+      {'country': 'Barbados', 'currencyCode': 'BBD'},
+      {'country': 'Belarus', 'currencyCode': 'BYN'},
+      {'country': 'Belize', 'currencyCode': 'BZD'},
+      {'country': 'Bermuda', 'currencyCode': 'BMD'},
+      {'country': 'Bhutan', 'currencyCode': 'BTN'},
+      {'country': 'Bolivia', 'currencyCode': 'BOB'},
+      {'country': 'Botswana', 'currencyCode': 'BWP'},
+      {'country': 'Brazil', 'currencyCode': 'BRL'},
+      {'country': 'United Kingdom', 'currencyCode': 'GBP'},
+      {'country': 'Brunei', 'currencyCode': 'BND'},
+      {'country': 'Bulgaria', 'currencyCode': 'BGN'},
+      {'country': 'Burundi', 'currencyCode': 'BIF'},
+      {'country': 'Cambodia', 'currencyCode': 'KHR'},
+      {'country': 'Canada', 'currencyCode': 'CAD'},
+      {'country': 'Cape Verde', 'currencyCode': 'CVE'},
+      {'country': 'Cayman Islands', 'currencyCode': 'KYD'},
+      {'country': 'Chile', 'currencyCode': 'CLP'},
+      {'country': 'China', 'currencyCode': 'CNY'},
+      {'country': 'Colombia', 'currencyCode': 'COP'},
+      {'country': 'Comoros', 'currencyCode': 'KMF'},
+      {'country': 'Congo', 'currencyCode': 'CDF'},
+      {'country': 'Costa Rica', 'currencyCode': 'CRC'},
+      {'country': 'Croatia', 'currencyCode': 'HRK'},
+      {'country': 'Cuba', 'currencyCode': 'CUP'},
+      {'country': 'Czech Republic', 'currencyCode': 'CZK'},
+      {'country': 'Denmark', 'currencyCode': 'DKK'},
+      {'country': 'Djibouti', 'currencyCode': 'DJF'},
+      {'country': 'Dominican Republic', 'currencyCode': 'DOP'},
+      {'country': 'East Caribbean', 'currencyCode': 'XCD'},
+      {'country': 'Egypt', 'currencyCode': 'EGP'},
+      {'country': 'El Salvador', 'currencyCode': 'SVC'},
+      {'country': 'Eritrea', 'currencyCode': 'ERN'},
+      {'country': 'Estonia', 'currencyCode': 'EEK'},
+      {'country': 'Ethiopia', 'currencyCode': 'ETB'},
+      {'country': 'Eurozone', 'currencyCode': 'EUR'},
+      {'country': 'Falkland Islands', 'currencyCode': 'FKP'},
+      {'country': 'Fiji', 'currencyCode': 'FJD'},
+      {'country': 'Gambia', 'currencyCode': 'GMD'},
+      {'country': 'Georgia', 'currencyCode': 'GEL'},
+      {'country': 'Ghana', 'currencyCode': 'GHS'},
+      {'country': 'Gibraltar', 'currencyCode': 'GIP'},
+      {'country': 'Guatemala', 'currencyCode': 'GTQ'},
+      {'country': 'Guinea', 'currencyCode': 'GNF'},
+      {'country': 'Guyana', 'currencyCode': 'GYD'},
+      {'country': 'Haiti', 'currencyCode': 'HTG'},
+      {'country': 'Honduras', 'currencyCode': 'HNL'},
+      {'country': 'Hong Kong', 'currencyCode': 'HKD'},
+      {'country': 'Hungary', 'currencyCode': 'HUF'},
+      {'country': 'Iceland', 'currencyCode': 'ISK'},
+      {'country': 'India', 'currencyCode': 'INR'},
+      {'country': 'Indonesia', 'currencyCode': 'IDR'},
+      {'country': 'Iran', 'currencyCode': 'IRR'},
+      {'country': 'Iraq', 'currencyCode': 'IQD'},
+      {'country': 'Israel', 'currencyCode': 'ILS'},
+      {'country': 'Jamaica', 'currencyCode': 'JMD'},
+      {'country': 'Japan', 'currencyCode': 'JPY'},
+      {'country': 'Jordan', 'currencyCode': 'JOD'},
+      {'country': 'Kazakhstan', 'currencyCode': 'KZT'},
+      {'country': 'Kenya', 'currencyCode': 'KES'},
+      {'country': 'Kuwait', 'currencyCode': 'KWD'},
+      {'country': 'Kyrgyzstan', 'currencyCode': 'KGS'},
+      {'country': 'Laos', 'currencyCode': 'LAK'},
+      {'country': 'Latvia', 'currencyCode': 'LVL'},
+      {'country': 'Lebanon', 'currencyCode': 'LBP'},
+      {'country': 'Lesotho', 'currencyCode': 'LSL'},
+      {'country': 'Liberia', 'currencyCode': 'LRD'},
+      {'country': 'Libya', 'currencyCode': 'LYD'},
+      {'country': 'Lithuania', 'currencyCode': 'LTL'},
+      {'country': 'Macau', 'currencyCode': 'MOP'},
+      {'country': 'Macedonia', 'currencyCode': 'MKD'},
+      {'country': 'Madagascar', 'currencyCode': 'MGA'},
+      {'country': 'Malawi', 'currencyCode': 'MWK'},
+      {'country': 'Malaysia', 'currencyCode': 'MYR'},
+      {'country': 'Maldives', 'currencyCode': 'MVR'},
+      {'country': 'Vietnam', 'currencyCode': 'VND'},
+      {'country': 'United States', 'currencyCode': 'USD'},
+      // Thêm các quốc gia còn lại ở đây nếu cần
+    ];
+
+    for (var data in currencyData) {
+      await currencyCodes.add(data);
+      print("✅ Added currency code for ${data['country']}");
+    }
+  }
+
+  void _loadOutlets() async {
+    List<Map<String, dynamic>> outlets = await fetchOutlets();
+
     await fetchCurrencyCodes();
-    print("💱 Available Currency Codes: $currencyCodes");
 
     setState(() {
-      // Tạo Dropdown items cho Outlets
       _outletItems = outlets.map<DropdownMenuItem<String>>((outlet) {
         return DropdownMenuItem<String>(
           value: outlet['outletId'],
@@ -60,17 +535,13 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
       if (_outletItems.isNotEmpty &&
           (selectedOutlet == null || selectedOutlet!.isEmpty)) {
         selectedOutlet = _outletItems.first.value;
-        print("🔹 Default selected outlet ID: $selectedOutlet");
 
-        // Fetch dữ liệu Outlet đã chọn
         _fetchOutletData(selectedOutlet!);
       }
 
-      // Đặt giá trị mặc định cho Currency nếu chưa chọn
       if (_currencyItems.isNotEmpty &&
           (selectedCurrency == null || selectedCurrency!.isEmpty)) {
         selectedCurrency = _currencyItems.first.value;
-        print("🔹 Default selected currency: $selectedCurrency");
       }
     });
   }
@@ -85,8 +556,6 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
       if (outletDoc.exists) {
         final outletData = outletDoc.data() as Map<String, dynamic>;
 
-        print("✅ Fetched outlet: ${outletData['outletName']}");
-
         setState(() {
           selectedOutlet = outletId; // 🔹 Gán ID thay vì tên để tránh lỗi
         });
@@ -100,8 +569,6 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
   Future<List<Map<String, dynamic>>> fetchOutlets() async {
     try {
-      print("📡 Fetching outlets from Firestore...");
-
       QuerySnapshot outletSnapshot =
           await FirebaseFirestore.instance.collection('outlets').get();
 
@@ -111,9 +578,6 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
       List<Map<String, dynamic>> outlets = outletSnapshot.docs.map((doc) {
         var data = doc.data() as Map<String, dynamic>?;
-
-        // 🔹 Dùng document ID thay vì 'outletId' bên trong document
-        print("✅ Fetched outlet: ${doc.id} - ${data?['outletName']}");
 
         return {
           'outletId': doc.id, // 🔹 Dùng document ID
@@ -130,18 +594,13 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
   Future<void> fetchCurrencyCodes() async {
     try {
-      print("📡 Fetching currency codes...");
-
-      // Truy vấn tất cả dữ liệu từ collection currencyCodes
       QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('currencyCodes').get();
 
       if (querySnapshot.docs.isEmpty) {
-        print("❌ No currency codes found.");
         return;
       }
 
-      // Chuyển đổi dữ liệu thành List<Map<String, String>> với toString()
       List<Map<String, String>> currencyList = querySnapshot.docs.map((doc) {
         return {
           'currencyCode': doc['currencyCode'].toString(),
@@ -149,27 +608,10 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
         };
       }).toList();
 
-      print("✅ Fetched ${currencyList.length} currency codes.");
-      print("🔎 Data: $currencyList");
-
-      // Cập nhật DropdownMenuItem cho _currencyItems
       setState(() {
         _currencyDisplayList = currencyList;
-        _currencyItems = currencyList.map((item) {
-          String displayText =
-              "${item['currencyCode']} - ${item['country']}"; // Hiển thị khi mở Dropdown
-          return DropdownMenuItem<String>(
-            value: item['currencyCode'],
-            child: Text(displayText),
-          );
-        }).toList();
+        filteredCurrencyList = List.from(currencyList);
       });
-      if (_currencyItems.isNotEmpty &&
-          (fromCurrency == null || fromCurrency.isEmpty)) {
-        fromCurrency = _currencyItems.first.value!;
-        print("🔄 Default fromCurrency: $fromCurrency");
-      }
-      fetchOutletRates(fromCurrency);
     } catch (e) {
       print("⚠️ Error fetching currency codes: $e");
     }
@@ -177,8 +619,6 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
   Future<void> fetchOutletRates(String outletId) async {
     try {
-      print("📡 Fetching outlet rates for outletId: $outletId...");
-
       // Truy vấn outletRate có outletId khớp
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('outletRate')
@@ -224,6 +664,8 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   }
 
   void _showOutletPicker(BuildContext context) {
+    TextEditingController searchController = TextEditingController();
+
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
@@ -260,46 +702,112 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
         ),
       ),
     );
+
+
+    
   }
 
   void _showCurrencyPicker(BuildContext context, bool isSender) {
-    showCupertinoModalPopup(
+    TextEditingController searchController = TextEditingController();
+
+    showModalBottomSheet(
       context: context,
-      builder: (_) => Container(
-        height: 250,
-        color: Colors.white,
-        child: Column(
-          children: [
-            Container(
-              height: 200,
-              child: CupertinoPicker(
-                itemExtent: 40,
-                onSelectedItemChanged: (index) {
-                  setState(() {
-                    // Chỉ lưu currencyCode sau khi chọn
-                    if (isSender) {
-                      fromCurrency =
-                          _currencyDisplayList[index]['currencyCode']!;
-                    } else {
-                      toCurrency = _currencyDisplayList[index]['currencyCode']!;
-                    }
-                  });
-                  print(
-                      "🔄 Selected Currency: ${isSender ? fromCurrency : toCurrency}");
-                },
-                children: _currencyDisplayList.map((item) {
-                  // Hiển thị cả currencyCode và country trong Picker
-                  return Text("${item['currencyCode']} - ${item['country']}");
-                }).toList(),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(tr('cancel'), style: TextStyle(fontSize: 18)),
-            ),
-          ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
         ),
       ),
+      builder: (_) => StatefulBuilder(
+          builder: (BuildContext context, StateSetter setStateModal) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Container(
+            height: 400,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Select Currency',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search currency...',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      setStateModal(() {
+                        searchKeyword = value.toLowerCase();
+                        filteredCurrencyList =
+                            _currencyDisplayList.where((item) {
+                          final currencyCode =
+                              item['currencyCode']!.toLowerCase();
+                          return currencyCode.contains(searchKeyword);
+                        }).toList();
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredCurrencyList.length,
+                    itemBuilder: (context, index) {
+                      final item = filteredCurrencyList[index];
+                      final currencyCode = item['currencyCode']!;
+                      final countryCode = currencyToCountryCode[currencyCode] ??
+                          'UN'; // UN: Unknown
+
+                      return ListTile(
+                        leading: CircleFlag(
+                          countryCode.toLowerCase(),
+                          size: 32, // Kích thước lá cờ
+                        ),
+                        title: Text(
+                          "$currencyCode - ${item['country']}",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            if (isSender) {
+                              fromCurrency = currencyCode;
+                            } else {
+                              toCurrency = currencyCode;
+                            }
+                          });
+                          print(
+                              "🔄 Selected Currency: ${isSender ? fromCurrency : toCurrency}");
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel', style: TextStyle(fontSize: 18)),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 
@@ -479,7 +987,15 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                 },
                 child: Row(
                   children: [
-                    // Chỉ hiển thị currencyCode khi đã chọn
+                    // 🔹 Hiển thị CircleFlag khi đã chọn currencyCode
+                    if (selectedValue.isNotEmpty)
+                      CircleFlag(
+                        (currencyToCountryCode[selectedValue] ?? 'UN')
+                            .toLowerCase(),
+                        size: 24,
+                      ),
+                    SizedBox(width: 4),
+                    // 🔹 Hiển thị currencyCode
                     Text(
                       selectedValue,
                       style: TextStyle(fontSize: 16),

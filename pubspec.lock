@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: circle_flags
-      sha256: "875cd64e607b46838ce429e2f7cc88c615f8514181d2d0f9e73de37ba3fb2f52"
+      sha256: "87102c61b777dcae56d29c6f1d2b2126d98dd09dd904618ccc04a0943ac95924"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0"
+    version: "1.0.4"
   clock:
     dependency: transitive
     description:
@@ -364,7 +364,7 @@ packages:
     source: hosted
     version: "2.1.1"
   flutter_svg:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_svg
       sha256: d39e7f95621fc84376bc0f7d504f05c3a41488c562f4a8ad410569127507402c

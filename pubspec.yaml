@@ -37,7 +37,8 @@ dependencies:
   provider: ^6.1.2
   google_maps_flutter: ^2.2.0
   geolocator: ^13.0.2
-  circle_flags: ^5.0.0
+  circle_flags: ^1.0.3
+  
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -51,6 +52,7 @@ dependencies:
   flutter_facebook_auth: ^5.0.0
   js: ^0.6.7
   flutter_inappwebview: ^5.3.0
+  flutter_svg: ^2.0.7
 
 dev_dependencies:
   flutter_test:
@@ -86,7 +88,7 @@ flutter:
     - assets/images/feature-icon-1.png
     - assets/images/feature-icon-2.png
     - assets/images/feature-icon-3.png
-
+    - assets/flags/un.svg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
