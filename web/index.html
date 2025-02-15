@@ -97,7 +97,45 @@
       gapi.load('auth2', initGoogleClient);
     };
   </script>
+  <script>
+window.fbAsyncInit = function() {
+  FB.init({
+    appId      : '1138420431027567',
+    cookie     : true,
+    xfbml      : true,
+    version    : 'v12.0'
+  });
 
+  console.log("Facebook SDK đã khởi tạo thành công!");
+
+  // Cập nhật trạng thái SDK đã sẵn sàng
+  window.facebookSDKReady = true;
+
+  // Kiểm tra trạng thái đăng nhập của người dùng
+  FB.getLoginStatus(function(response) {
+    FB.login(function(response) {
+      if (response.status === 'connected') {
+        console.log('Successfully logged in');
+        var accessToken = response.authResponse.accessToken;
+        // Gọi hàm Dart để xử lý đăng nhập Firebase với token
+        window.flutter_inappwebview.callHandler('facebookLogin', accessToken);
+      } else {
+        console.log('Login failed');
+      }
+    }, {scope: 'email,public_profile'});
+  }); // Fixed: moved this closing bracket here
+};
+
+  
+    // Thêm mã tải SDK Facebook
+    (function(d, s, id){
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) {return;}
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
   <!-- Flutter Initialization -->
   <script src="flutter.js" defer></script>
 </head>
