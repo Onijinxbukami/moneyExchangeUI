@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                         ],
                         cancelButton: CupertinoActionSheetAction(
                           onPressed: () => Navigator.pop(context),
-                          child:  Text(tr("cancel")),
+                          child: Text(tr("cancel")),
                         ),
                       );
                     },
@@ -142,20 +142,24 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.white);
                     }
 
-                    if (userSnapshot.hasData) {
+                    if (userSnapshot.hasData && userSnapshot.data!.exists) {
                       final userData =
-                          userSnapshot.data!.data() as Map<String, dynamic>;
+                          userSnapshot.data!.data() as Map<String, dynamic>? ??
+                              {}; // Safely handle null
                       return Row(
                         children: [
                           const Icon(CupertinoIcons.person_circle_fill,
                               color: Colors.white, size: 28),
                           const SizedBox(width: 8),
                           Text(
-                            userData['userName'] ?? 'User',
+                            userData['userName'] ??
+                                'User', // Default value if userName is null
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16),
+                            overflow:
+                                TextOverflow.ellipsis, // Prevents overflow
                           ),
                         ],
                       );
@@ -169,21 +173,22 @@ class _HomePageState extends State<HomePage> {
 
               //return Text(tr('login'), style: const TextStyle(color: Colors.white));
               return GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, Routes.login);
-                  },
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      tr('login'),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),);
+                onTap: () {
+                  Navigator.pushNamed(context, Routes.login);
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    tr('login'),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
             },
           ),
         ],
