@@ -27,13 +27,14 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   double? sellRate;
   String? outletId;
   String searchKeyword = '';
-
+  TextEditingController _sendController = TextEditingController();
+  TextEditingController _receiveController = TextEditingController();
+  String? _currencyError;
   List<DropdownMenuItem<String>> _outletItems = [];
   List<Map<String, String>> _outletDisplayList = [];
   List<String> currencyCodes = [];
   List<Map<String, String>> _currencyDisplayList = [];
 
-  final TextEditingController _numericController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
   Map<String, String> currencyToCountryCode = {
     'USD': 'us',
@@ -173,12 +174,57 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     'MOP': 'mo', // Macanese Pataca
   };
 
+  bool isSenderActive = true;
+  bool isRecipientActive = true;
   String? _numericError;
   @override
   void initState() {
     super.initState();
     fetchOutlets();
     fetchCurrencyCodes();
+    _setupTextFieldCurrencyListeners();
+  }
+
+  void _setupTextFieldCurrencyListeners() {
+    // Lắng nghe thay đổi trên _sendController
+    _sendController.addListener(() {
+      // Nếu hợp lệ mới tính toán
+      if (_validateNumeric(_sendController) && isSenderActive) {
+        double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
+        double receiveAmount =
+            (buyRate != null && buyRate! > 0) ? sendAmount / buyRate! : 0.0;
+
+        print("📥 Calculated Recipient Gets: $receiveAmount");
+
+        // Tạm ngắt Listener để tránh vòng lặp
+        isRecipientActive = false;
+        _receiveController.text = receiveAmount.toStringAsFixed(2);
+        isRecipientActive = true;
+      }
+    });
+
+    // Lắng nghe thay đổi trên _receiveController
+    _receiveController.addListener(() {
+      // Nếu hợp lệ mới tính toán
+      if (_validateNumeric(_receiveController) && isRecipientActive) {
+        double receiveAmount = double.tryParse(_receiveController.text) ?? 0.0;
+        double sendAmount =
+            (buyRate != null && buyRate! > 0) ? receiveAmount * buyRate! : 0.0;
+
+        print("📤 Calculated You Send: $sendAmount");
+
+        // Tạm ngắt Listener để tránh vòng lặp
+        isSenderActive = false;
+        _sendController.text = sendAmount.toStringAsFixed(2);
+        isSenderActive = true;
+      }
+    });
+  }
+
+  String _calculateTotalPay() {
+    double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
+    double totalPay = sendAmount + (sendRate ?? 0.0);
+    return totalPay.toStringAsFixed(2);
   }
 
   void addOutletRates() async {
@@ -586,8 +632,18 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
       if (querySnapshot.docs.isEmpty) {
         print("❌ No outlet rates found for $fromCurrency ➡️ $toCurrency");
+
+        // Cập nhật thông báo lỗi
+        setState(() {
+          _currencyError = "Currency này không hỗ trợ";
+        });
         return;
       }
+
+      // Nếu có dữ liệu, đặt lại thông báo lỗi
+      setState(() {
+        _currencyError = null;
+      });
 
       // Lấy dữ liệu document đầu tiên (nếu có)
       var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
@@ -602,28 +658,27 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
           foreignCurrency = data['foreignCurrency'] ?? '';
         });
       }
-
-      // In ra console để kiểm tra
-      print("✅ Fetched sendRate: $sendRate");
-      print("✅ Fetched buyRate: $buyRate");
-      print("✅ Fetched sellRate: $sellRate");
-      print("✅ Fetched localCurrency: $localCurrency");
-      print("✅ Fetched foreignCurrency: $foreignCurrency");
     } catch (e) {
       print("⚠️ Error fetching outlet rates: $e");
+      setState(() {
+        _currencyError = "Lỗi khi tải dữ liệu tỉ giá";
+      });
     }
   }
 
-  void _validateNumeric() {
-    final input = _numericController.text;
-    if (input.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(input)) {
+  bool _validateNumeric(TextEditingController controller) {
+    final input = controller.text;
+    // Chỉ cho phép số và dấu chấm
+    if (input.isNotEmpty && !RegExp(r'^[0-9]*\.?[0-9]*$').hasMatch(input)) {
       setState(() {
-        _numericError = "Only numbers are allowed!";
+        _numericError = "❌ Only numbers are allowed!";
       });
+      return false;
     } else {
       setState(() {
         _numericError = null;
       });
+      return true;
     }
   }
 
@@ -897,7 +952,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                 });
               },
               isSmallScreen,
-              _numericController,
+              _sendController,
               isSender: true,
             ),
 
@@ -916,7 +971,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                 });
               },
               isSmallScreen,
-              _numericController,
+              _receiveController,
               isSender: false,
             ),
 
@@ -1053,7 +1108,13 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                 child: TextField(
                   controller: controller,
                   keyboardType: TextInputType.number,
-                  onChanged: (value) => _validateNumeric(),
+                  onChanged: (value) {
+                    if (isSender) {
+                      print("🔢 You Send: ${_sendController.text}");
+                    } else {
+                      print("🔢 Recipient Gets: ${_receiveController.text}");
+                    }
+                  },
                   decoration: InputDecoration(
                     hintText: tr('enter_amount'),
                     errorText: _numericError,
@@ -1064,6 +1125,14 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             ],
           ),
         ),
+        // Hiển thị thông báo lỗi nếu có
+        if (_currencyError != null) ...[
+          SizedBox(height: 4),
+          Text(
+            _currencyError!,
+            style: TextStyle(color: Colors.red, fontSize: 14),
+          ),
+        ]
       ],
     );
   }
@@ -1074,7 +1143,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
       children: [
         _buildInfoRow(
           tr('exchange_rate'),
-          exchangeRate,
+          (sellRate != null) ? "$sellRate " : "Loading...",
           tooltip: tr('exchange_rate_tooltip'),
           fontSize: fontSize,
         ),
@@ -1087,7 +1156,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
         ),
         _buildInfoRow(
           tr('total_pay'),
-          "549.24",
+          _calculateTotalPay(),
           isRecipient: true,
           fontSize: fontSize,
         ),
