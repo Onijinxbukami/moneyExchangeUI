@@ -7,6 +7,7 @@ import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
 import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomepageAddressPage extends StatefulWidget {
   const HomepageAddressPage({super.key});
@@ -19,7 +20,13 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
   final TextEditingController locationController = TextEditingController();
   String fromCurrency = "GBP";
   String toCurrency = "USD";
-  String _selectedLanguage = 'EN';
+
+  String sendMoneyValue = '0.00';
+  String receiveMoneyValue = '0.00';
+  String outletName = "Select Outlet";
+  double sellRate = 0.0;
+double sendRate = 0.0;
+
   final TextEditingController sendNameController =
       TextEditingController(text: "John Doe");
   final TextEditingController sendDobController =
@@ -50,46 +57,43 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
   final TextEditingController getMoneyController =
       TextEditingController(text: "200.000");
 
-  String? _numericError;
-  final TextEditingController _numericController = TextEditingController();
-
-  void _validateNumeric() {
-    final input = _numericController.text;
-
-    // Check if the input contains only numbers (no letters or special characters)
-    if (input.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(input)) {
-      setState(() {
-        _numericError = "Only numbers are allowed!";
-      });
-    } else {
-      setState(() {
-        _numericError = null; // Clear error if the input is valid
-      });
-    }
-  }
-
   final Map<String, String> flagUrls = {
     "GBP": "https://flagcdn.com/w40/gb.png",
     "USD": "https://flagcdn.com/w40/us.png",
   };
-  DropdownMenuItem<String> _buildDropdownItem(String currency) {
-    return DropdownMenuItem(
-      value: currency,
-      child: Row(
-        children: [
-          Image.network(flagUrls[currency]!,
-              width: 24, height: 16, fit: BoxFit.cover),
-          const SizedBox(width: 8),
-          Text(currency, style: TextStyle(fontSize: 16)),
-        ],
-      ),
-    );
-  }
 
   @override
   void initState() {
     super.initState();
+    _loadSavedInputs();
   }
+  String _calculateTotalPay() {
+    double sendAmount = double.tryParse(sendMoneyValue) ?? 0.0;
+    double totalPay = sendAmount + sendRate; // Assuming sendRate is an additional fee or amount
+    return totalPay.toStringAsFixed(2);  // Format to 2 decimal places
+  }
+Future<void> _loadSavedInputs() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  // Load saved values from SharedPreferences
+  String savedOutletName = prefs.getString('selectedOutletName') ?? 'No outlet selected';
+  sellRate = double.tryParse(prefs.getString('sellRate') ?? '0.0') ?? 0.0;
+  sendRate = double.tryParse(prefs.getString('sendRate') ?? '0.0') ?? 0.0;
+
+  // In ra console để kiểm tra giá trị
+  print("Loaded outletName: $savedOutletName");
+  print("Loaded buyRate: $sellRate");
+  print("Loaded sendRate: $sendRate");
+
+  // Cập nhật giá trị vào outletName, buyRate, sendRate và các giá trị khác
+  setState(() {
+    sendMoneyValue = prefs.getString('sendAmount') ?? '0.00';
+    receiveMoneyValue = prefs.getString('receiveAmount') ?? '0.00';
+    outletName = savedOutletName;  // Cập nhật outletName
+  });
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -605,7 +609,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                   children: [
                     const SizedBox(width: 6),
                     Text(
-                      'outletValue', // Giá trị Outlet
+                      outletName, // Hiển thị outletName
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -647,7 +651,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
 
                 // Số tiền gửi (căn phải)
                 Text(
-                  'sendMoneyValue', // Thay bằng giá trị thực tế
+                  sendMoneyValue, // ✅ Hiển thị giá trị đã lưu
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -658,7 +662,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
             ),
             const SizedBox(height: 20),
 
-// Receiver Money Field
+            // Receiver Money Field
             Row(
               children: [
                 // Lá cờ từ URL
@@ -686,7 +690,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
 
                 // Số tiền nhận (căn phải)
                 Text(
-                  'receiveMoneyValue', // Thay bằng giá trị thực tế
+                  receiveMoneyValue, // ✅ Hiển thị giá trị đã lưu
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -716,7 +720,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                     ),
                     const Spacer(), // Đẩy 'rateValue' về bên phải
                     Text(
-                      'rateValue', // Thay thế bằng giá trị thực tế
+                      sellRate.toString(), // Thay thế bằng giá trị thực tế
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -740,7 +744,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                     ),
                     const Spacer(),
                     Text(
-                      'feesValue',
+                      sendRate.toString(),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -764,7 +768,7 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                     ),
                     const Spacer(),
                     Text(
-                      'receiveMoneyValue',
+                       _calculateTotalPay(),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -834,68 +838,6 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildCurrencyInputField(
-      String label,
-      String selectedValue,
-      ValueChanged<String?> onChanged,
-      bool isSmallScreen,
-      TextEditingController controller,
-      {bool isSender = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.black, width: 1),
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.white,
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Row(
-            children: [
-              DropdownButton<String>(
-                value: selectedValue,
-                items: [
-                  _buildDropdownItem("GBP"),
-                  _buildDropdownItem("USD"),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    if (isSender) {
-                      fromCurrency = value!;
-                      toCurrency = (value == "USD") ? "GBP" : "USD";
-                    } else {
-                      toCurrency = value!;
-                      fromCurrency = (value == "USD") ? "GBP" : "USD";
-                    }
-                  });
-                },
-                underline: Container(),
-                icon: const Icon(Icons.arrow_drop_down),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => _validateNumeric(),
-                  decoration: InputDecoration(
-                    hintText: "Enter amount",
-                    errorText: _numericError,
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
