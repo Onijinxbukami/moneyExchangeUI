@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SendMoneyForm extends StatefulWidget {
   const SendMoneyForm({super.key});
@@ -27,13 +28,16 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   double? sellRate;
   String? outletId;
   String searchKeyword = '';
-  TextEditingController _sendController = TextEditingController();
-  TextEditingController _receiveController = TextEditingController();
+  final TextEditingController _sendController = TextEditingController();
+  final TextEditingController _receiveController = TextEditingController();
   String? _currencyError;
   List<DropdownMenuItem<String>> _outletItems = [];
   List<Map<String, String>> _outletDisplayList = [];
   List<String> currencyCodes = [];
   List<Map<String, String>> _currencyDisplayList = [];
+
+  TextEditingController searchOutletController = TextEditingController();
+  List<Map<String, String>> filteredOutletList = []; // 🔥 Khai báo ở ngoài hàm
 
   final TextEditingController locationController = TextEditingController();
   Map<String, String> currencyToCountryCode = {
@@ -183,18 +187,75 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     fetchOutlets();
     fetchCurrencyCodes();
     _setupTextFieldCurrencyListeners();
+    _loadSavedInputs();
+  }
+
+  Future<void> _loadSavedInputs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Lấy giá trị từ SharedPreferences
+    _sendController.text = prefs.getString('sendAmount') ?? '';
+    _receiveController.text = prefs.getString('receiveAmount') ?? '';
+
+    // Lấy outletId từ SharedPreferences (lưu ID chứ không phải tên)
+    String selectedOutletId = prefs.getString('selectedOutlet') ?? '';
+
+    // Kiểm tra xem outletId đã được lưu trong SharedPreferences chưa
+    print("📥 Đã lưu selectedOutletId: $selectedOutletId");
+
+    // Tìm outletName từ outletId
+    String outletName = _outletDisplayList.firstWhere(
+            (item) => item['outletId'] == selectedOutletId,
+            orElse: () => {'outletName': 'No outlet selected'})['outletName'] ??
+        'No outlet selected';
+
+    // Lưu outletName vào SharedPreferences (Nếu cần thiết, có thể lưu cả ID)
+    await prefs.setString('selectedOutlet', selectedOutletId);
+
+    // Cập nhật filteredOutletList khi tải lại giá trị
+    String savedSearchKeyword = searchOutletController.text.toLowerCase();
+
+    setState(() {
+      filteredOutletList = _outletDisplayList.where((item) {
+        final outletName = item['outletName']!.toLowerCase();
+        return outletName.contains(savedSearchKeyword);
+      }).toList();
+    });
+
+    // Lưu outletName vào SharedPreferences
+    await prefs.setString('selectedOutletName', outletName);
+
+    // In giá trị outletName ra console để kiểm tra
+    print("📥 Đã lưu outletName: $outletName");
+
+    await prefs.setString('sellRate', sellRate?.toString() ?? '0.0');
+    await prefs.setString('sendRate', sendRate?.toString() ?? '0.0');
+
+    double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
+    double totalPay = sendAmount + (sendRate ?? 0.0);
+
+    // Lưu totalPay vào SharedPreferences
+    await prefs.setString('totalPay', totalPay.toStringAsFixed(2));
+
+    // In giá trị sendRate và sellRate ra console để kiểm tra
+    print("📥 Đã lưu sendRate: $sendRate");
+    print("📥 Đã lưu sellRate: $sellRate");
+    print("📥 Đã lưu totalPay: $totalPay");
   }
 
   void _setupTextFieldCurrencyListeners() {
     // Lắng nghe thay đổi trên _sendController
-    _sendController.addListener(() {
-      // Nếu hợp lệ mới tính toán
+    _sendController.addListener(() async {
       if (_validateNumeric(_sendController) && isSenderActive) {
         double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
         double receiveAmount =
             (buyRate != null && buyRate! > 0) ? sendAmount / buyRate! : 0.0;
 
-        print("📥 Calculated Recipient Gets: $receiveAmount");
+        // Lưu tạm thời giá trị khi người dùng nhập
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('sendAmount', _sendController.text);
+        await prefs.setString('receiveAmount',
+            receiveAmount.toStringAsFixed(2)); // 🔥 Thêm dòng này
 
         // Tạm ngắt Listener để tránh vòng lặp
         isRecipientActive = false;
@@ -204,14 +265,17 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     });
 
     // Lắng nghe thay đổi trên _receiveController
-    _receiveController.addListener(() {
-      // Nếu hợp lệ mới tính toán
+    _receiveController.addListener(() async {
       if (_validateNumeric(_receiveController) && isRecipientActive) {
         double receiveAmount = double.tryParse(_receiveController.text) ?? 0.0;
         double sendAmount =
             (buyRate != null && buyRate! > 0) ? receiveAmount * buyRate! : 0.0;
 
-        print("📤 Calculated You Send: $sendAmount");
+        // Lưu tạm thời giá trị khi người dùng nhập
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('receiveAmount',
+            _receiveController.text); // 🔥 Đảm bảo lưu giá trị tại đây
+        await prefs.setString('sendAmount', sendAmount.toStringAsFixed(2));
 
         // Tạm ngắt Listener để tránh vòng lặp
         isSenderActive = false;
@@ -683,10 +747,8 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   }
 
   void _showOutletPicker(BuildContext context) {
-    TextEditingController searchController = TextEditingController();
     List<Map<String, String>> filteredOutletList =
         List.from(_outletDisplayList);
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -721,7 +783,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: TextField(
-                      controller: searchController,
+                      controller: searchOutletController,
                       decoration: InputDecoration(
                         hintText: 'Search outlet...',
                         prefixIcon: Icon(Icons.search),
@@ -797,7 +859,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   }
 
   void _showCurrencyPicker(BuildContext context, bool isSender) {
-    TextEditingController searchController = TextEditingController();
+    TextEditingController searchCurrencyController = TextEditingController();
 
     List<Map<String, String>> filteredCurrencyList =
         List.from(_currencyDisplayList);
@@ -834,7 +896,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: TextField(
-                    controller: searchController,
+                    controller: searchCurrencyController,
                     decoration: InputDecoration(
                       hintText: 'Search currency...',
                       prefixIcon: Icon(Icons.search),
@@ -1015,8 +1077,46 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             SizedBox(height: isSmallScreen ? 16 : 24),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, Routes.userDetails);
+                onPressed: () async {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+
+                  // selectedOutlet là kiểu String, không cần sử dụng .text
+                  String outletId = selectedOutlet ??
+                      ''; // Nếu selectedOutlet là null, sử dụng giá trị mặc định ''
+
+                  // Lưu outletId vào SharedPreferences (searchKeyword)
+                  await prefs.setString('searchKeyword', outletId);
+
+                  // Lấy các giá trị tiền từ SharedPreferences
+                  String sendAmount = prefs.getString('sendAmount') ?? '0.00';
+                  String receiveAmount =
+                      prefs.getString('receiveAmount') ?? '0.00';
+
+                  // Tìm outletName từ outletId
+                  String? outletName = _outletDisplayList.firstWhere(
+                      (item) => item['outletId'] == outletId,
+                      orElse: () =>
+                          {'outletName': 'No outlet selected'})['outletName'];
+
+                  // Lưu outletName vào SharedPreferences
+                  await prefs.setString('selectedOutletName', outletName!);
+
+                  await prefs.setString(
+                      'sellRate', sellRate?.toString() ?? '0.0');
+                  await prefs.setString(
+                      'sendRate', sendRate?.toString() ?? '0.0');
+
+                      
+
+                  // In ra console để kiểm tra
+                  print("📤 Số tiền gửi: $sendAmount");
+                  print("📥 Số tiền nhận: $receiveAmount");
+                  print("📥 Outlet: $outletName"); // In ra outletName
+                  print("📥 SendRate: $sendRate"); // In ra sendRate
+                  print("📥 SellRate: $sellRate"); // In ra sellRate
+
+                  Navigator.pushNamed(context, Routes.addressDetails);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6200EE),
