@@ -9,6 +9,7 @@ import 'package:flutter_application_1/features/home_page/screens/location/locati
 import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
 import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomepageUserDetailsPage extends StatefulWidget {
   const HomepageUserDetailsPage({super.key});
@@ -85,6 +86,37 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
   @override
   void initState() {
     super.initState();
+    _loadSavedInputs(isSaving: false);
+  }
+
+  Future<void> _loadSavedInputs({bool isSaving = true}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (isSaving) {
+      // Lưu tất cả các trường
+      await prefs.setString('sendName', nameController.text);
+      await prefs.setString('sendDob', dobController.text);
+      await prefs.setString('sendPhone', phoneController.text);
+      await prefs.setString('sendEmail', emailController.text);
+
+      await prefs.setString('sendAccountName', accountNameController.text);
+      await prefs.setString('sendAccountNumber', accountNumberController.text);
+      await prefs.setString('sendBankCode', bankCodeController.text);
+
+      print("📥 Đã lưu tất cả thông tin");
+    } else {
+      // Tải lại tất cả các trường
+      nameController.text = prefs.getString('sendName') ?? '';
+      dobController.text = prefs.getString('sendDob') ?? '';
+      phoneController.text = prefs.getString('sendPhone') ?? '';
+      emailController.text = prefs.getString('sendEmail') ?? '';
+
+      accountNameController.text = prefs.getString('sendAccountName') ?? '';
+      accountNumberController.text = prefs.getString('sendAccountNumber') ?? '';
+      bankCodeController.text = prefs.getString('sendBankCode') ?? '';
+
+      print("📥 Đã tải tất cả thông tin");
+    }
   }
 
   void filterdBankCode(String query) {
@@ -913,8 +945,40 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         debugPrint('Continue pressed');
+
+                        // Lưu thông tin trước khi chuyển trang
+                        await _loadSavedInputs(isSaving: true);
+
+                        // Lấy dữ liệu đã lưu từ SharedPreferences và log ra
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        String name = prefs.getString('sendName') ?? 'Chưa có';
+                        String dob = prefs.getString('sendDob') ?? 'Chưa có';
+                        String phone =
+                            prefs.getString('sendPhone') ?? 'Chưa có';
+                        String email =
+                            prefs.getString('sendEmail') ?? 'Chưa có';
+
+                        String accountName =
+                            prefs.getString('sendAccountName') ?? 'Chưa có';
+                        String accountNumber =
+                            prefs.getString('sendAccountNumber') ?? 'Chưa có';
+                        String bankCode =
+                            prefs.getString('sendBankCode') ?? 'Chưa có';
+
+                        // In ra console để kiểm tra
+                        debugPrint('📝 Thông tin đã lưu:');
+                        debugPrint('Họ tên: $name');
+                        debugPrint('Ngày sinh: $dob');
+                        debugPrint('Số điện thoại: $phone');
+                        debugPrint('Email: $email');
+                        debugPrint('Tên tài khoản: $accountName');
+                        debugPrint('Số tài khoản: $accountNumber');
+                        debugPrint('Mã ngân hàng: $bankCode');
+
+                        // Chuyển trang và hiển thị SnackBar
                         Navigator.pushNamed(context, Routes.bankAccountDetails);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Continue Pressed!")),

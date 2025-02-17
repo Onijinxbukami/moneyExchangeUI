@@ -8,6 +8,7 @@ import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
 import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
 import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomepageBankAccountDetailsPage extends StatefulWidget {
   const HomepageBankAccountDetailsPage({super.key});
@@ -76,11 +77,43 @@ class _HomepageBankAccountDetailsPageState
     },
   ];
   List<Map<String, String>> filteredBankCode = [];
-  String _selectedLanguage = 'EN';
 
   @override
   void initState() {
     super.initState();
+    _loadSavedInputs(isSaving: false);
+  }
+
+  Future<void> _loadSavedInputs({bool isSaving = true}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (isSaving) {
+      // Lưu tất cả các trường với key mới
+      await prefs.setString('receiveName', nameController.text);
+      await prefs.setString('receiveDob', dobController.text);
+      await prefs.setString('receivePhone', phoneController.text);
+      await prefs.setString('receiveEmail', emailController.text);
+
+      await prefs.setString('receiveAccountName', accountNameController.text);
+      await prefs.setString(
+          'receiveAccountNumber', accountNumberController.text);
+      await prefs.setString('receiveBankCode', bankCodeController.text);
+
+      print("📥 Đã lưu tất cả thông tin theo receive");
+    } else {
+      // Tải lại tất cả các trường theo key mới
+      nameController.text = prefs.getString('receiveName') ?? '';
+      dobController.text = prefs.getString('receiveDob') ?? '';
+      phoneController.text = prefs.getString('receivePhone') ?? '';
+      emailController.text = prefs.getString('receiveEmail') ?? '';
+
+      accountNameController.text = prefs.getString('receiveAccountName') ?? '';
+      accountNumberController.text =
+          prefs.getString('receiveAccountNumber') ?? '';
+      bankCodeController.text = prefs.getString('receiveBankCode') ?? '';
+
+      print("📥 Đã tải tất cả thông tin theo receive");
+    }
   }
 
   void filterdBankCode(String query) {
@@ -107,7 +140,7 @@ class _HomepageBankAccountDetailsPageState
     // Kiểm tra nếu đầu vào có ký tự không phải số
     if (value.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(value)) {
       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text(tr('phone_number_invalid'))),
+        SnackBar(content: Text(tr('phone_number_invalid'))),
       );
     }
   }
@@ -516,7 +549,7 @@ class _HomepageBankAccountDetailsPageState
                     value); // Truyền trực tiếp giá trị của input
               },
               decoration: InputDecoration(
-                labelText:  tr('enter_phone_number'),
+                labelText: tr('enter_phone_number'),
                 labelStyle: TextStyle(fontSize: fontSize),
                 hintStyle:
                     TextStyle(fontSize: fontSize * 0.9, color: Colors.grey),
@@ -584,7 +617,7 @@ class _HomepageBankAccountDetailsPageState
                           const BorderSide(color: Colors.red, width: 2.0),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    errorText: _isGmailError ?  tr('email_required') : null,
+                    errorText: _isGmailError ? tr('email_required') : null,
                   ),
                   style: const TextStyle(fontSize: 14),
                   onTapOutside: (_) {
@@ -610,7 +643,7 @@ class _HomepageBankAccountDetailsPageState
             const SizedBox(height: 20),
 
             Text(
-                tr('bank_details'),
+              tr('bank_details'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -670,8 +703,9 @@ class _HomepageBankAccountDetailsPageState
                           const BorderSide(color: Colors.red, width: 2.0),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    errorText:
-                        _isAccountNameError ? tr('account_name_required') : null,
+                    errorText: _isAccountNameError
+                        ? tr('account_name_required')
+                        : null,
                   ),
                   style: const TextStyle(fontSize: 14),
                   onTapOutside: (_) {
@@ -692,7 +726,6 @@ class _HomepageBankAccountDetailsPageState
                 RichText(
                   text: TextSpan(
                     text: tr('account_number'),
-
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -873,13 +906,42 @@ class _HomepageBankAccountDetailsPageState
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
-                        debugPrint('Continue pressed');
-                        Navigator.pushNamed(context, Routes.addressDetails);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Continue Pressed!")),
-                        );
-                      },
+                     onPressed: () async {
+  debugPrint('Continue pressed');
+
+  // Lưu dữ liệu trước khi chuyển trang
+  await _loadSavedInputs(isSaving: true);
+
+  // In dữ liệu đã lưu vào console để kiểm tra
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  String name = prefs.getString('receiveName') ?? 'Chưa có';
+  String dob = prefs.getString('receiveDob') ?? 'Chưa có';
+  String phone = prefs.getString('receivePhone') ?? 'Chưa có';
+  String email = prefs.getString('receiveEmail') ?? 'Chưa có';
+  String accountName = prefs.getString('receiveAccountName') ?? 'Chưa có';
+  String accountNumber = prefs.getString('receiveAccountNumber') ?? 'Chưa có';
+  String bankCode = prefs.getString('receiveBankCode') ?? 'Chưa có';
+
+  // In ra console để kiểm tra
+  debugPrint("📝 Dữ liệu đã lưu:");
+  debugPrint('Tên: $name');
+  debugPrint('Ngày sinh: $dob');
+  debugPrint('Số điện thoại: $phone');
+  debugPrint('Email: $email');
+  debugPrint('Tên tài khoản: $accountName');
+  debugPrint('Số tài khoản: $accountNumber');
+  debugPrint('Mã ngân hàng: $bankCode');
+
+  // Chuyển sang màn hình AddressDetails
+  Navigator.pushNamed(context, Routes.addressDetails);
+
+  // Hiển thị thông báo
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Continue Pressed!")),
+  );
+},
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF007AFF),
                         padding: EdgeInsets.symmetric(
@@ -904,7 +966,7 @@ class _HomepageBankAccountDetailsPageState
                               color: Colors.white, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                             tr('continue'),
+                            tr('continue'),
                             style: TextStyle(
                               fontSize: screenWidth < 600 ? 16 : 20,
                               fontWeight: FontWeight.w600,
