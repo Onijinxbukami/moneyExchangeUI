@@ -1116,7 +1116,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   print("📥 SendRate: $sendRate"); // In ra sendRate
                   print("📥 SellRate: $sellRate"); // In ra sellRate
 
-                  Navigator.pushNamed(context, Routes.addressDetails);
+                  Navigator.pushNamed(context, Routes.userDetails);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6200EE),

@@ -25,37 +25,15 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
   String receiveMoneyValue = '0.00';
   String outletName = "Select Outlet";
   double sellRate = 0.0;
-double sendRate = 0.0;
+  double sendRate = 0.0;
+  String sendName = '';
+  String sendDob = '';
+  String sendPhone = '';
+  String sendEmail = '';
 
-  final TextEditingController sendNameController =
-      TextEditingController(text: "John Doe");
-  final TextEditingController sendDobController =
-      TextEditingController(text: "1990-01-01");
-  final TextEditingController sendPhoneController =
-      TextEditingController(text: "+123456789");
-  final TextEditingController sendEmailController =
-      TextEditingController(text: "johndoe@example.com");
-
-  final TextEditingController receiverNameController =
-      TextEditingController(text: "Doe Tech");
-  final TextEditingController receiverBankNumberController =
-      TextEditingController(text: "1234567890");
-  final TextEditingController receiverBankCodeController =
-      TextEditingController(text: "Bank A");
-
-  final TextEditingController outletController =
-      TextEditingController(text: "Outlet 1");
-  final TextEditingController senMoneyController =
-      TextEditingController(text: "100.000");
-  final TextEditingController receiverMoneyController =
-      TextEditingController(text: "200.000");
-
-  final TextEditingController rateController =
-      TextEditingController(text: "1,7");
-  final TextEditingController feesController =
-      TextEditingController(text: "10");
-  final TextEditingController getMoneyController =
-      TextEditingController(text: "200.000");
+  String receiveName = '';
+  String AccounrNumber = '';
+  String BankeName = '';
 
   final Map<String, String> flagUrls = {
     "GBP": "https://flagcdn.com/w40/gb.png",
@@ -67,33 +45,61 @@ double sendRate = 0.0;
     super.initState();
     _loadSavedInputs();
   }
+
   String _calculateTotalPay() {
     double sendAmount = double.tryParse(sendMoneyValue) ?? 0.0;
-    double totalPay = sendAmount + sendRate; // Assuming sendRate is an additional fee or amount
-    return totalPay.toStringAsFixed(2);  // Format to 2 decimal places
+    double totalPay = sendAmount +
+        sendRate; // Assuming sendRate is an additional fee or amount
+    return totalPay.toStringAsFixed(2); // Format to 2 decimal places
   }
-Future<void> _loadSavedInputs() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  // Load saved values from SharedPreferences
-  String savedOutletName = prefs.getString('selectedOutletName') ?? 'No outlet selected';
-  sellRate = double.tryParse(prefs.getString('sellRate') ?? '0.0') ?? 0.0;
-  sendRate = double.tryParse(prefs.getString('sendRate') ?? '0.0') ?? 0.0;
+  Future<void> _loadSavedInputs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  // In ra console để kiểm tra giá trị
-  print("Loaded outletName: $savedOutletName");
-  print("Loaded buyRate: $sellRate");
-  print("Loaded sendRate: $sendRate");
+    // Load saved values from SharedPreferences
+    String savedOutletName =
+        prefs.getString('selectedOutletName') ?? 'No outlet selected';
+    sellRate = double.tryParse(prefs.getString('sellRate') ?? '0.0') ?? 0.0;
+    sendRate = double.tryParse(prefs.getString('sendRate') ?? '0.0') ?? 0.0;
 
-  // Cập nhật giá trị vào outletName, buyRate, sendRate và các giá trị khác
-  setState(() {
-    sendMoneyValue = prefs.getString('sendAmount') ?? '0.00';
-    receiveMoneyValue = prefs.getString('receiveAmount') ?? '0.00';
-    outletName = savedOutletName;  // Cập nhật outletName
-  });
-}
+    // Load thêm các giá trị đã lưu khác
+    String Sname = prefs.getString('sendName') ?? 'Chưa có';
+    String dob = prefs.getString('sendDob') ?? 'Chưa có';
+    String phone = prefs.getString('sendPhone') ?? 'Chưa có';
+    String email = prefs.getString('sendEmail') ?? 'Chưa có';
+
+    String Rname = prefs.getString('receiveName') ?? 'Chưa có';
+    String receviceAccounrNumber =
+        prefs.getString('receiveAccountNumber') ?? 'Chưa có';
+    String receiveBankeName =
+        prefs.getString('receiveAccountName') ?? 'Chưa có';
+
+    // In ra console để kiểm tra giá trị
+    print("Loaded outletName: $savedOutletName");
+    print("Loaded buyRate: $sellRate");
+    print("Loaded sendRate: $sendRate");
+    print("Loaded name: $Sname");
+    print("Loaded dob: $dob");
+    print("Loaded phone: $phone");
+    print("Loaded email: $email");
+
+    // Cập nhật giá trị vào state
+    setState(() {
+      sendMoneyValue = prefs.getString('sendAmount') ?? '0.00';
+      receiveMoneyValue = prefs.getString('receiveAmount') ?? '0.00';
+      outletName = savedOutletName;
+      sendName = Sname;
+      sendDob = dob;
+      sendPhone = phone;
+      sendEmail = email;
+
+      receiveName = Rname;
+      AccounrNumber = receviceAccounrNumber;
+      BankeName = receiveBankeName;
 
 
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -376,7 +382,7 @@ Future<void> _loadSavedInputs() async {
                       children: [
                         const SizedBox(width: 6),
                         Text(
-                          'sendName', // Giá trị từ state hoặc API
+                          sendName, // Giá trị từ state hoặc API
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -405,7 +411,7 @@ Future<void> _loadSavedInputs() async {
                       children: [
                         const SizedBox(width: 6),
                         Text(
-                          'sendDob', // Giá trị ngày sinh
+                          sendDob, // Giá trị ngày sinh
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -434,7 +440,7 @@ Future<void> _loadSavedInputs() async {
                       children: [
                         const SizedBox(width: 6),
                         Text(
-                          'sendPhone', // Giá trị số điện thoại
+                          sendPhone, // Giá trị số điện thoại
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -463,7 +469,7 @@ Future<void> _loadSavedInputs() async {
                       children: [
                         const SizedBox(width: 6),
                         Text(
-                          'sendEmail', // Giá trị email
+                          sendEmail, // Giá trị email
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -509,7 +515,7 @@ Future<void> _loadSavedInputs() async {
                       children: [
                         const SizedBox(width: 6),
                         Text(
-                          'receiverName', // Giá trị tên người nhận
+                          receiveName, // Giá trị tên người nhận
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -538,7 +544,7 @@ Future<void> _loadSavedInputs() async {
                       children: [
                         const SizedBox(width: 6),
                         Text(
-                          'receiverBankNumber', // Giá trị số tài khoản ngân hàng
+                          AccounrNumber, // Giá trị số tài khoản ngân hàng
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -567,7 +573,7 @@ Future<void> _loadSavedInputs() async {
                       children: [
                         const SizedBox(width: 6),
                         Text(
-                          'receiverBankCode', // Giá trị mã ngân hàng
+                          BankeName, // Giá trị mã ngân hàng
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -768,7 +774,7 @@ Future<void> _loadSavedInputs() async {
                     ),
                     const Spacer(),
                     Text(
-                       _calculateTotalPay(),
+                      _calculateTotalPay(),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
