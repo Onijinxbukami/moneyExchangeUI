@@ -332,20 +332,24 @@ class _HomepageBankAccountDetailsPageState
                           color: Colors.white);
                     }
 
-                    if (userSnapshot.hasData) {
+                    if (userSnapshot.hasData && userSnapshot.data!.exists) {
                       final userData =
-                          userSnapshot.data!.data() as Map<String, dynamic>;
+                          userSnapshot.data!.data() as Map<String, dynamic>? ??
+                              {}; // Safely handle null
                       return Row(
                         children: [
                           const Icon(CupertinoIcons.person_circle_fill,
                               color: Colors.white, size: 28),
                           const SizedBox(width: 8),
                           Text(
-                            userData['username'] ?? 'User',
+                            userData['userName'] ??
+                                'User', // Default value if userName is null
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16),
+                            overflow:
+                                TextOverflow.ellipsis, // Prevents overflow
                           ),
                         ],
                       );
@@ -906,42 +910,49 @@ class _HomepageBankAccountDetailsPageState
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(
-                     onPressed: () async {
-  debugPrint('Continue pressed');
+                      onPressed: () async {
+                        debugPrint('Continue pressed');
 
-  // Lưu dữ liệu trước khi chuyển trang
-  await _loadSavedInputs(isSaving: true);
+                        // Lưu dữ liệu trước khi chuyển trang
+                        await _loadSavedInputs(isSaving: true);
 
-  // In dữ liệu đã lưu vào console để kiểm tra
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+                        // In dữ liệu đã lưu vào console để kiểm tra
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
 
-  String name = prefs.getString('receiveName') ?? 'Chưa có';
-  String dob = prefs.getString('receiveDob') ?? 'Chưa có';
-  String phone = prefs.getString('receivePhone') ?? 'Chưa có';
-  String email = prefs.getString('receiveEmail') ?? 'Chưa có';
-  String accountName = prefs.getString('receiveAccountName') ?? 'Chưa có';
-  String accountNumber = prefs.getString('receiveAccountNumber') ?? 'Chưa có';
-  String bankCode = prefs.getString('receiveBankCode') ?? 'Chưa có';
+                        String name =
+                            prefs.getString('receiveName') ?? 'Chưa có';
+                        String dob = prefs.getString('receiveDob') ?? 'Chưa có';
+                        String phone =
+                            prefs.getString('receivePhone') ?? 'Chưa có';
+                        String email =
+                            prefs.getString('receiveEmail') ?? 'Chưa có';
+                        String accountName =
+                            prefs.getString('receiveAccountName') ?? 'Chưa có';
+                        String accountNumber =
+                            prefs.getString('receiveAccountNumber') ??
+                                'Chưa có';
+                        String bankCode =
+                            prefs.getString('receiveBankCode') ?? 'Chưa có';
 
-  // In ra console để kiểm tra
-  debugPrint("📝 Dữ liệu đã lưu:");
-  debugPrint('Tên: $name');
-  debugPrint('Ngày sinh: $dob');
-  debugPrint('Số điện thoại: $phone');
-  debugPrint('Email: $email');
-  debugPrint('Tên tài khoản: $accountName');
-  debugPrint('Số tài khoản: $accountNumber');
-  debugPrint('Mã ngân hàng: $bankCode');
+                        // In ra console để kiểm tra
+                        debugPrint("📝 Dữ liệu đã lưu:");
+                        debugPrint('Tên: $name');
+                        debugPrint('Ngày sinh: $dob');
+                        debugPrint('Số điện thoại: $phone');
+                        debugPrint('Email: $email');
+                        debugPrint('Tên tài khoản: $accountName');
+                        debugPrint('Số tài khoản: $accountNumber');
+                        debugPrint('Mã ngân hàng: $bankCode');
 
-  // Chuyển sang màn hình AddressDetails
-  Navigator.pushNamed(context, Routes.addressDetails);
+                        // Chuyển sang màn hình AddressDetails
+                        Navigator.pushNamed(context, Routes.addressDetails);
 
-  // Hiển thị thông báo
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Continue Pressed!")),
-  );
-},
-
+                        // Hiển thị thông báo
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Continue Pressed!")),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF007AFF),
                         padding: EdgeInsets.symmetric(

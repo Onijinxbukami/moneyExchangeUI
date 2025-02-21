@@ -38,14 +38,27 @@ class _EmailFieldState extends State<EmailField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
-          controller: widget.emailController, // Controller được truyền từ ngoài
+          controller: widget.emailController,
           keyboardType: TextInputType.emailAddress,
           onChanged: (value) => _validateEmail(),
           decoration: inputFieldDecoration.copyWith(
-            hintText: widget.hintText, // Placeholder tùy chỉnh
-            errorText: _emailError, // Hiển thị lỗi nếu có
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16), // Bo góc nhiều hơn
+              borderSide: BorderSide(color: Colors.grey), // Màu viền mặc định
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16), // Bo góc khi focus
+              borderSide: BorderSide(
+                  color: Colors.blue, width: 2), // Màu viền khi focus
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16), // Bo góc khi chưa focus
+              borderSide: BorderSide(color: Colors.grey.shade400),
+            ),
+            hintText: widget.hintText,
+            errorText: _emailError,
           ),
-        ),
+        )
       ],
     );
   }

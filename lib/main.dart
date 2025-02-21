@@ -14,8 +14,8 @@ Future<void> main() async {
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('vi')],
-      path: 'assets/translations', // Thư mục chứa file JSON
-      fallbackLocale: const Locale('en'), // Ngôn ngữ mặc định
+      path: 'assets/translations', 
+      fallbackLocale: const Locale('en'), 
       child: const MyApp(),
     ),
   );

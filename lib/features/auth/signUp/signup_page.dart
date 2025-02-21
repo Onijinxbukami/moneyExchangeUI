@@ -326,14 +326,6 @@ class _SignupPageState extends State<SignupPage> {
           toolbarHeight: 80,
           title: Row(
             children: [
-              // Nút back ở bên trái
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-
               const Spacer(), // Đẩy các phần tử còn lại về bên phải
 
               // Nút chọn ngôn ngữ
@@ -476,12 +468,29 @@ class _SignupPageState extends State<SignupPage> {
                         TextField(
                           controller: _userNameController,
                           obscureText: false,
-                          decoration: inputFieldDecoration.copyWith(
+                          decoration: InputDecoration(
                             hintText: "Enter Your Username",
                             errorText: _userNameError,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16), // Bo góc
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(16), // Bo góc khi focus
+                              borderSide:
+                                  BorderSide(color: Colors.blue, width: 2),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(16), // Bo góc mặc định
+                              borderSide:
+                                  BorderSide(color: Colors.grey.shade400),
+                            ),
                           ),
                           onChanged: (value) => _validateUserName(),
                         ),
+
                         const SizedBox(height: verticalSpacing),
 
                         // Email Input
@@ -498,12 +507,31 @@ class _SignupPageState extends State<SignupPage> {
                         const SizedBox(height: inputSpacing),
                         TextField(
                           controller: _phoneNumberController,
-                          decoration: inputFieldDecoration.copyWith(
-                            hintText: "Enter Your PhoneNumber",
+                          keyboardType:
+                              TextInputType.phone, // Định dạng bàn phím số
+                          decoration: InputDecoration(
+                            hintText: "Enter Your Phone Number",
                             errorText: _phoneNumberError,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16), // Bo góc
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(16), // Bo góc khi focus
+                              borderSide:
+                                  BorderSide(color: Colors.blue, width: 2),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(16), // Bo góc mặc định
+                              borderSide:
+                                  BorderSide(color: Colors.grey.shade400),
+                            ),
                           ),
                           onChanged: (value) => _validatePhoneNumber(),
                         ),
+
                         const SizedBox(height: verticalSpacing),
 
                         // Password Input

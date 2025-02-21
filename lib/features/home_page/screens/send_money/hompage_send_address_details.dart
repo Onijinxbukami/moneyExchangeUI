@@ -96,8 +96,6 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
       receiveName = Rname;
       AccounrNumber = receviceAccounrNumber;
       BankeName = receiveBankeName;
-
-
     });
   }
 
@@ -289,20 +287,24 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                           color: Colors.white);
                     }
 
-                    if (userSnapshot.hasData) {
+                    if (userSnapshot.hasData && userSnapshot.data!.exists) {
                       final userData =
-                          userSnapshot.data!.data() as Map<String, dynamic>;
+                          userSnapshot.data!.data() as Map<String, dynamic>? ??
+                              {}; // Safely handle null
                       return Row(
                         children: [
                           const Icon(CupertinoIcons.person_circle_fill,
                               color: Colors.white, size: 28),
                           const SizedBox(width: 8),
                           Text(
-                            userData['username'] ?? 'User',
+                            userData['userName'] ??
+                                'User', // Default value if userName is null
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16),
+                            overflow:
+                                TextOverflow.ellipsis, // Prevents overflow
                           ),
                         ],
                       );

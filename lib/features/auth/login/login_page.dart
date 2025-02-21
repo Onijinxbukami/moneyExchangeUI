@@ -285,13 +285,7 @@ class _LoginPageState extends State<LoginPage> {
   toolbarHeight: 80,
   title: Row(
     children: [
-      // Nút back ở bên trái
-      IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
+
 
       const Spacer(), // Đẩy các phần tử còn lại về bên phải
 
