@@ -135,7 +135,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     'IQD': 'iq', // Iraqi Dinar
     'MGA': 'mg', // Malagasy Ariary
     'LSL': 'ls', // Lesotho Loti
-    'AFA': 'af', // Afghan Afghani (cũ, thay bằng AFN)
+    'AFN': 'af', // Afghan Afghani (cũ, thay bằng AFN)
     'CVE': 'cv', // Cape Verdean Escudo
     'BGN': 'bg', // Bulgarian Lev
     'LYD': 'ly', // Libyan Dinar
@@ -157,7 +157,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     'AMD': 'am', // Armenian Dram
     'CRC': 'cr', // Costa Rican Colón
     'KMF': 'km', // Comorian Franc
-    'AOR': 'ao', // Angolan Kwanza (cũ, thay bằng AOA)
+    'AOA': 'ao', // Angolan Kwanza (cũ, thay bằng AOA)
     'ALL': 'al', // Albanian Lek
     'ERN': 'er', // Eritrean Nakfa
     'EEK': 'ee', // Estonian Kroon (đã đổi sang EUR)
@@ -175,7 +175,9 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     'BYN': 'by', // Belarusian Ruble
     'GEL': 'ge', // Georgian Lari
     'BTN': 'bt', // Bhutanese Ngultrum
-    'MOP': 'mo', // Macanese Pataca
+    'MOP': 'mo',
+    'ANG': 'ai',
+    'BYR': 'by',
   };
 
   bool isSenderActive = true;
@@ -273,8 +275,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
 
         // Lưu tạm thời giá trị khi người dùng nhập
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('receiveAmount',
-            _receiveController.text); // 🔥 Đảm bảo lưu giá trị tại đây
+        await prefs.setString('receiveAmount', _receiveController.text);
         await prefs.setString('sendAmount', sendAmount.toStringAsFixed(2));
 
         // Tạm ngắt Listener để tránh vòng lặp
@@ -1106,8 +1107,6 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                       'sellRate', sellRate?.toString() ?? '0.0');
                   await prefs.setString(
                       'sendRate', sendRate?.toString() ?? '0.0');
-
-                      
 
                   // In ra console để kiểm tra
                   print("📤 Số tiền gửi: $sendAmount");

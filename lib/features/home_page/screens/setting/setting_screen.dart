@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/app/routes.dart';
@@ -80,20 +81,43 @@ class _SettingFormState extends State<SettingForm> {
     required String lastName,
     required String address,
     required String nationality,
+    Uint8List? idFrontPhoto,
+    Uint8List? idRearPhoto,
+    Uint8List? passportPhoto,
   }) async {
     try {
       // Tham chiếu đến document của người dùng trong collection 'users'
       DocumentReference userRef =
           FirebaseFirestore.instance.collection('users').doc(userId);
+      Future<String?> uploadImage(Uint8List? imageBytes, String path) async {
+        if (imageBytes == null) return null;
+        Reference ref = FirebaseStorage.instance.ref().child(path);
+        UploadTask uploadTask = ref.putData(imageBytes);
+        TaskSnapshot snapshot = await uploadTask;
+        return await snapshot.ref.getDownloadURL();
+      }
+
+      String? idFrontUrl =
+          await uploadImage(idFrontPhoto, 'users/$userId/id_front.jpg');
+      String? idRearUrl =
+          await uploadImage(idRearPhoto, 'users/$userId/id_rear.jpg');
+      String? passportUrl =
+          await uploadImage(passportPhoto, 'users/$userId/passport.jpg');
 
       // Cập nhật các trường thông tin
-      await userRef.update({
+      Map<String, dynamic> updatedData = {
         'userName': userName,
         'firstName': firstName,
         'lastName': lastName,
         'address': address,
         'nationality': nationality,
-      });
+      };
+      if (idFrontUrl != null) updatedData['idFrontPhoto'] = idFrontUrl;
+      if (idRearUrl != null) updatedData['idRearPhoto'] = idRearUrl;
+      if (passportUrl != null) updatedData['passportPhoto'] = passportUrl;
+
+      // Cập nhật Firestore
+      await userRef.update(updatedData);
 
       print('User information updated successfully');
     } catch (e) {
@@ -515,7 +539,7 @@ class _SettingFormState extends State<SettingForm> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title:  Text(tr('change_password')),
+                  title: Text(tr('change_password')),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -523,7 +547,7 @@ class _SettingFormState extends State<SettingForm> {
                       TextField(
                         controller: oldPasswordController,
                         obscureText: true,
-                        decoration:  InputDecoration(
+                        decoration: InputDecoration(
                           labelText: tr('old_password'),
                           hintText: tr('enter_old_password'),
                         ),
@@ -533,7 +557,7 @@ class _SettingFormState extends State<SettingForm> {
                       TextField(
                         controller: newPasswordController,
                         obscureText: true,
-                        decoration:  InputDecoration(
+                        decoration: InputDecoration(
                           labelText: tr('new_password'),
                           hintText: tr('enter_new_password'),
                         ),
@@ -566,7 +590,8 @@ class _SettingFormState extends State<SettingForm> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4743C9),
                       ),
-                      child:  Text(tr('change_password'),
+                      child: Text(
+                        tr('change_password'),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.white,
@@ -598,7 +623,7 @@ class _SettingFormState extends State<SettingForm> {
         ),
         const SizedBox(height: 10),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             String userId = FirebaseAuth.instance.currentUser!.uid;
             String userName = _userNameController.text;
             String firstName = _firstNameController.text;
@@ -606,14 +631,44 @@ class _SettingFormState extends State<SettingForm> {
             String address = _addressController.text;
             String nationality = _nationalityController.text;
 
-            updateUserInformation(
-              userName: userName,
-              userId: userId,
-              firstName: firstName,
-              lastName: lastName,
-              address: address,
-              nationality: nationality,
-            );
+            try {
+              await updateUserInformation(
+                userId: userId,
+                userName: userName,
+                firstName: firstName,
+                lastName: lastName,
+                address: address,
+                nationality: nationality,
+                idFrontPhoto: _idFrontPhoto,
+                idRearPhoto: _idRearPhoto,
+                passportPhoto: _passportPhoto,
+              );
+
+              // ✅ Hiển thị thông báo khi cập nhật thành công
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    tr('update_success'), // Sử dụng localization nếu có
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor:
+                      Colors.green, // Màu nền xanh lá cho trạng thái thành công
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            } catch (e) {
+              // ❌ Hiển thị lỗi nếu có lỗi xảy ra
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    tr('update_failed'), // Sử dụng localization nếu có
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: Colors.red, // Màu nền đỏ cho trạng thái lỗi
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF4743C9),
@@ -787,7 +842,7 @@ class _SettingFormState extends State<SettingForm> {
                   PopupMenuItem(
                     value: 'Edit',
                     child: Row(
-                      children:  [
+                      children: [
                         Icon(Icons.edit, color: Colors.blue),
                         SizedBox(width: 8),
                         Text(tr('edit_photo')),

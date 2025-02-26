@@ -39,25 +39,37 @@ class _PasswordFieldState extends State<PasswordField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
-          controller:
-              widget.passwordController, // Controller được truyền từ ngoài
-          obscureText: _isObscured,
-          onChanged: (value) => _validatePassword(),
-          decoration: inputFieldDecoration.copyWith(
-            hintText: widget.hintText, // Placeholder tùy chỉnh
-            errorText: _passwordError, // Hiển thị lỗi nếu có
-            suffixIcon: IconButton(
-              icon: Icon(
-                _isObscured ? Icons.visibility_off : Icons.visibility,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isObscured = !_isObscured; // Toggle chế độ ẩn/hiện mật khẩu
-                });
-              },
-            ),
-          ),
-        ),
+  controller: widget.passwordController,
+  obscureText: _isObscured,
+  onChanged: (value) => _validatePassword(),
+  decoration: InputDecoration( // Sử dụng InputDecoration thay vì copyWith
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16), // Bo góc nhiều hơn
+      borderSide: BorderSide(color: Colors.grey),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: Colors.blue, width: 2),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: Colors.grey.shade400),
+    ),
+    hintText: widget.hintText,
+    errorText: _passwordError,
+    suffixIcon: IconButton(
+      icon: Icon(
+        _isObscured ? Icons.visibility_off : Icons.visibility,
+      ),
+      onPressed: () {
+        setState(() {
+          _isObscured = !_isObscured;
+        });
+      },
+    ),
+  ),
+)
+
       ],
     );
   }

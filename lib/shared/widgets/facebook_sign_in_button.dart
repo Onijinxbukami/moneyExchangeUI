@@ -27,7 +27,7 @@ class FacebookSignInButton extends StatelessWidget {
       icon: const FaIcon(
         FontAwesomeIcons.facebook,
         color: Colors.blue, // Màu xanh đặc trưng của Facebook
-        size: 28, // Tăng kích thước icon
+        size: 25, // Tăng kích thước icon
       ),
       label: const Text(
         "Facebook sign in",

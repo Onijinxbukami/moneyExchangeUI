@@ -27,7 +27,7 @@ class GoogleSignInButton extends StatelessWidget {
       icon: const FaIcon(
         FontAwesomeIcons.google,
         color: Colors.blue,
-        size: 28, // Tăng kích thước icon
+        size: 25, // Tăng kích thước icon
       ),
       label: const Text(
         "Google sign in",
