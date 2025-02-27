@@ -87,11 +87,10 @@ class ProgressStepper extends StatelessWidget {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           width: isActive
-                              ? screenWidth * 0.08
-                              : screenWidth * 0.07,
-                          height: isActive
-                              ? screenWidth * 0.08
-                              : screenWidth * 0.07,
+                              ? screenWidth * 0.1
+                              : screenWidth * 0.09, // Tăng kích thước vòng tròn
+                          height:
+                              isActive ? screenWidth * 0.1 : screenWidth * 0.09,
                           decoration: BoxDecoration(
                             color: isActive
                                 ? progressColor
@@ -101,10 +100,13 @@ class ProgressStepper extends StatelessWidget {
                             shape: BoxShape.circle,
                           ),
                           child: icon != null
-                              ? Icon(icon, color: Colors.white, size: 18)
+                              ? Icon(icon,
+                                  color: Colors.white,
+                                  size: screenWidth * 0.06) // Tăng size icon
                               : (isCompleted
-                                  ? const Icon(Icons.check,
-                                      color: Colors.white, size: 18)
+                                  ? Icon(Icons.check,
+                                      color: Colors.white,
+                                      size: screenWidth * 0.06)
                                   : null),
                         ),
                       ),

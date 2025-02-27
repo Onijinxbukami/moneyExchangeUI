@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
-import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
+import 'package:flutter_application_1/shared/widgets/progressbar.dart';
 import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
