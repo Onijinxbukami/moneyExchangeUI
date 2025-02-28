@@ -5,9 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
-import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
+import 'package:flutter_application_1/shared/widgets/progressbar.dart';
 import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:circle_flags/circle_flags.dart';
 
 class HomepageAddressPage extends StatefulWidget {
   const HomepageAddressPage({super.key});
@@ -18,8 +19,9 @@ class HomepageAddressPage extends StatefulWidget {
 
 class _HomepageAddressPageState extends State<HomepageAddressPage> {
   final TextEditingController locationController = TextEditingController();
-  String fromCurrency = "GBP";
-  String toCurrency = "USD";
+
+  String fromCurrency = "";
+  String toCurrency = "";
 
   String sendMoneyValue = '0.00';
   String receiveMoneyValue = '0.00';
@@ -39,11 +41,176 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
     "GBP": "https://flagcdn.com/w40/gb.png",
     "USD": "https://flagcdn.com/w40/us.png",
   };
+  List<Map<String, String>> _currencyDisplayList = [];
+  Map<String, String> currencyToCountryCode = {
+    'USD': 'us',
+    'EUR': 'eu',
+    'JPY': 'jp',
+    'GBP': 'gb',
+    'AUD': 'au',
+    'CAD': 'ca',
+    'CHF': 'ch',
+    'CNY': 'cn',
+    'SEK': 'se',
+    'NZD': 'nz',
+    'VND': 'vn',
+    'THB': 'th',
+    'SGD': 'sg',
+    'MXN': 'mx',
+    'BRL': 'br',
+    'ZAR': 'za',
+    'RUB': 'ru',
+    'INR': 'in',
+    'KRW': 'kr',
+    'HKD': 'hk',
+    'MYR': 'my',
+    'PHP': 'ph',
+    'IDR': 'id',
+    'TRY': 'tr',
+    'PLN': 'pl',
+    'HUF': 'hu',
+    'CZK': 'cz',
+    'DKK': 'dk',
+    'NOK': 'no',
+    'ILS': 'il',
+    'SAR': 'sa',
+    'AED': 'ae',
+    'EGP': 'eg',
+    'ARS': 'ar',
+    'CLP': 'cl',
+    'COP': 'co',
+    'PEN': 'pe',
+    'PKR': 'pk',
+    'BDT': 'bd',
+    'LKR': 'lk',
+    'KWD': 'kw',
+    'BHD': 'bh',
+    'OMR': 'om',
+    'QAR': 'qa',
+    'JOD': 'jo',
+    'XOF': 'bj',
+    'XAF': 'cm',
+    'XCD': 'ag',
+    'XPF': 'pf',
+    'MAD': 'ma',
+    'DZD': 'dz',
+    'TND': 'tn',
+    'LBP': 'lb',
+    'JMD': 'jm',
+    'TTD': 'tt',
+    'NGN': 'ng',
+    'GHS': 'gh',
+    'KES': 'ke',
+    'UGX': 'ug',
+    'TZS': 'tz',
+    'ETB': 'et',
+    'ZMW': 'zm',
+    'MZN': 'mz',
+    'BWP': 'bw',
+    'NAD': 'na',
+    'SCR': 'sc',
+    'MUR': 'mu',
+    'BBD': 'bb',
+    'BSD': 'bs',
+    'FJD': 'fj',
+    'SBD': 'sb',
+    'PGK': 'pg',
+    'TOP': 'to',
+    'WST': 'ws',
+    'KZT': 'kz',
+    'UZS': 'uz',
+    'TJS': 'tj',
+    'KGS': 'kg',
+    'MMK': 'mm',
+    'LAK': 'la',
+    'KHR': 'kh',
+    'MNT': 'mn',
+    'NPR': 'np',
+    'BND': 'bn',
+    'XAU': 'xau',
+    'XAG': 'xag',
+    'XPT': 'xpt',
+    'XPD': 'xpd',
+    'HTG': 'ht', // Haitian Gourde
+    'LRD': 'lr', // Liberian Dollar
+    'BIF': 'bi', // Burundian Franc
+    'IQD': 'iq', // Iraqi Dinar
+    'MGA': 'mg', // Malagasy Ariary
+    'LSL': 'ls', // Lesotho Loti
+    'AFN': 'af', // Afghan Afghani (cũ, thay bằng AFN)
+    'CVE': 'cv', // Cape Verdean Escudo
+    'BGN': 'bg', // Bulgarian Lev
+    'LYD': 'ly', // Libyan Dinar
+    'AWG': 'aw', // Aruban Florin
+    'HRK': 'hr', // Croatian Kuna (đã đổi sang EUR từ 2023)
+    'BZD': 'bz', // Belize Dollar
+    'HNL': 'hn', // Honduran Lempira
+    'MVR': 'mv', // Maldivian Rufiyaa
+    'GYD': 'gy', // Guyanese Dollar
+    'SVC': 'sv', // Salvadoran Colón
+    'ISK': 'is', // Icelandic Króna
+    'GNF': 'gn', // Guinean Franc
+    'IRR': 'ir', // Iranian Rial
+    'KYD': 'ky', // Cayman Islands Dollar
+    'DJF': 'dj', // Djiboutian Franc
+    'MWK': 'mw', // Malawian Kwacha
+    'BOB': 'bo', // Bolivian Boliviano
+    'LTL': 'lt', // Lithuanian Litas (đã đổi sang EUR)
+    'AMD': 'am', // Armenian Dram
+    'CRC': 'cr', // Costa Rican Colón
+    'KMF': 'km', // Comorian Franc
+    'AOA': 'ao', // Angolan Kwanza (cũ, thay bằng AOA)
+    'ALL': 'al', // Albanian Lek
+    'ERN': 'er', // Eritrean Nakfa
+    'EEK': 'ee', // Estonian Kroon (đã đổi sang EUR)
+    'GMD': 'gm', // Gambian Dalasi
+    'GIP': 'gi', // Gibraltar Pound
+    'CUP': 'cu', // Cuban Peso
+    'BMD': 'bm', // Bermudian Dollar
+    'FKP': 'fk', // Falkland Islands Pound
+    'CDF': 'cd', // Congolese Franc
+    'LVL': 'lv', // Latvian Lats (đã đổi sang EUR)
+    'MKD': 'mk', // Macedonian Denar
+    'GTQ': 'gt', // Guatemalan Quetzal
+    'AZN': 'az', // Azerbaijani Manat
+    'DOP': 'do', // Dominican Peso
+    'BYN': 'by', // Belarusian Ruble
+    'GEL': 'ge', // Georgian Lari
+    'BTN': 'bt', // Bhutanese Ngultrum
+    'MOP': 'mo',
+    'ANG': 'ai',
+    'BYR': 'by',
+  };
 
   @override
   void initState() {
     super.initState();
+    fetchCurrencyCodes();
     _loadSavedInputs();
+  }
+
+  Future<void> fetchCurrencyCodes() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('currencyCodes').get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return;
+      }
+
+      List<Map<String, String>> currencyList = querySnapshot.docs.map((doc) {
+        return {
+          'currencyCode': doc['currencyCode'].toString(),
+          'description': doc['description'].toString()
+        };
+      }).toList();
+
+      setState(() {
+        _currencyDisplayList = currencyList;
+      });
+    } catch (e) {
+      print("⚠️ Error fetching currency codes: $e");
+    }
   }
 
   String _calculateTotalPay() {
@@ -56,32 +223,39 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
   Future<void> _loadSavedInputs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // Load saved values from SharedPreferences
+    // Load Outlet và Rates
     String savedOutletName =
         prefs.getString('selectedOutletName') ?? 'No outlet selected';
     sellRate = double.tryParse(prefs.getString('sellRate') ?? '0.0') ?? 0.0;
     sendRate = double.tryParse(prefs.getString('sendRate') ?? '0.0') ?? 0.0;
 
-    // Load thêm các giá trị đã lưu khác
+    // Load thông tin cá nhân
     String Sname = prefs.getString('sendName') ?? 'Chưa có';
     String dob = prefs.getString('sendDob') ?? 'Chưa có';
     String phone = prefs.getString('sendPhone') ?? 'Chưa có';
     String email = prefs.getString('sendEmail') ?? 'Chưa có';
 
+    // Load thông tin người nhận
     String Rname = prefs.getString('receiveName') ?? 'Chưa có';
     String receviceAccounrNumber =
         prefs.getString('receiveAccountNumber') ?? 'Chưa có';
     String receiveBankeName =
         prefs.getString('receiveAccountName') ?? 'Chưa có';
 
-    // In ra console để kiểm tra giá trị
-    print("Loaded outletName: $savedOutletName");
-    print("Loaded buyRate: $sellRate");
-    print("Loaded sendRate: $sendRate");
-    print("Loaded name: $Sname");
-    print("Loaded dob: $dob");
-    print("Loaded phone: $phone");
-    print("Loaded email: $email");
+    // ✅ Load fromCurrency và toCurrency
+    String savedFromCurrency = prefs.getString('fromCurrency') ?? "";
+    String savedToCurrency = prefs.getString('toCurrency') ?? "";
+
+    // In ra console để kiểm tra
+    print("📥 Loaded outletName: $savedOutletName");
+    print("💱 From Currency: $savedFromCurrency");
+    print("💱 To Currency: $savedToCurrency");
+    print("📥 Sell Rate: $sellRate");
+    print("📥 Send Rate: $sendRate");
+    print("📥 Send Name: $Sname");
+    print("📥 DOB: $dob");
+    print("📥 Phone: $phone");
+    print("📥 Email: $email");
 
     // Cập nhật giá trị vào state
     setState(() {
@@ -96,6 +270,10 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
       receiveName = Rname;
       AccounrNumber = receviceAccounrNumber;
       BankeName = receiveBankeName;
+
+      // Gán từ SharedPreferences vào biến từ state
+      fromCurrency = savedFromCurrency;
+      toCurrency = savedToCurrency;
     });
   }
 
@@ -371,8 +549,8 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
                 // Full Name
                 Row(
                   children: [
-                    const Text(
-                      'Full Name:',
+                     Text(
+                      tr('full_name'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -632,16 +810,13 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
             const SizedBox(height: 20),
 
 // Send Money Field
+
             Row(
               children: [
-                // Lá cờ từ URL
-                Image.network(
-                  flagUrls[fromCurrency] ?? "", // Lấy URL từ Map
-                  width: 24,
-                  height: 16,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.flag, color: Colors.grey, size: 20);
-                  },
+                // Sử dụng CircleFlag thay vì Image.network
+                CircleFlag(
+                  (currencyToCountryCode[fromCurrency] ?? 'UN').toLowerCase(),
+                  size: 24, // Kích thước lá cờ
                 ),
                 const SizedBox(width: 8),
 
@@ -670,17 +845,12 @@ class _HomepageAddressPageState extends State<HomepageAddressPage> {
             ),
             const SizedBox(height: 20),
 
-            // Receiver Money Field
+// Receiver Money Field
             Row(
               children: [
-                // Lá cờ từ URL
-                Image.network(
-                  flagUrls[toCurrency] ?? "",
-                  width: 24,
-                  height: 16,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.flag, color: Colors.grey, size: 20);
-                  },
+                CircleFlag(
+                  (currencyToCountryCode[toCurrency] ?? 'UN').toLowerCase(),
+                  size: 24, // Kích thước lá cờ
                 ),
                 const SizedBox(width: 8),
 

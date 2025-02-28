@@ -4,7 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
-import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
+import 'package:flutter_application_1/shared/widgets/progressbar.dart';
+import 'package:flutter_application_1/features/home_page/screens/send_money/send_money_service.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SendMoneyForm extends StatefulWidget {
@@ -17,27 +19,27 @@ class SendMoneyForm extends StatefulWidget {
 class _SendMoneyFormState extends State<SendMoneyForm> {
   String fromCurrency = "";
   String toCurrency = "";
-  String exchangeRate = "1.37310";
+  String exchangeRate = "";
 
   String? selectedOutlet;
-  double? sendRate;
   String? localCurrency;
   String? foreignCurrency;
   String? selectedCurrency;
-  double? buyRate;
-  double? sellRate;
+  double? sendRate, buyRate, sellRate;
   String? outletId;
   String searchKeyword = '';
+
   final TextEditingController _sendController = TextEditingController();
   final TextEditingController _receiveController = TextEditingController();
+  final SendMoneyService _service = SendMoneyService();
+
   String? _currencyError;
-  List<DropdownMenuItem<String>> _outletItems = [];
-  List<Map<String, String>> _outletDisplayList = [];
   List<String> currencyCodes = [];
+  List<Map<String, String>> _outletDisplayList = [];
   List<Map<String, String>> _currencyDisplayList = [];
 
   TextEditingController searchOutletController = TextEditingController();
-  List<Map<String, String>> filteredOutletList = []; // 🔥 Khai báo ở ngoài hàm
+  List<Map<String, String>> filteredOutletList = [];
 
   final TextEditingController locationController = TextEditingController();
   Map<String, String> currencyToCountryCode = {
@@ -183,6 +185,9 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   bool isSenderActive = true;
   bool isRecipientActive = true;
   String? _numericError;
+
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -190,443 +195,31 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     fetchCurrencyCodes();
     _setupTextFieldCurrencyListeners();
     _loadSavedInputs();
+    //_fetchData();
   }
 
-  Future<void> _loadSavedInputs() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  // Future<void> _fetchData() async {
+  //   final outlets = await _service.fetchOutlets();
+  //   final currencies = await _service.fetchCurrencyCodes();
 
-    // Lấy giá trị từ SharedPreferences
-    _sendController.text = prefs.getString('sendAmount') ?? '';
-    _receiveController.text = prefs.getString('receiveAmount') ?? '';
+  //   setState(() {
+  //     _outletDisplayList = outlets;
+  //     _currencyDisplayList = currencies;
+  //     isLoading = false;
+  //   });
+  // }
 
-    // Lấy outletId từ SharedPreferences (lưu ID chứ không phải tên)
-    String selectedOutletId = prefs.getString('selectedOutlet') ?? '';
+  // void _fetchRates(
+  //     String outletId, String fromCurrency, String toCurrency) async {
+  //   final rates =
+  //       await _service.fetchOutletRates(outletId, fromCurrency, toCurrency);
 
-    // Kiểm tra xem outletId đã được lưu trong SharedPreferences chưa
-    print("📥 Đã lưu selectedOutletId: $selectedOutletId");
-
-    // Tìm outletName từ outletId
-    String outletName = _outletDisplayList.firstWhere(
-            (item) => item['outletId'] == selectedOutletId,
-            orElse: () => {'outletName': 'No outlet selected'})['outletName'] ??
-        'No outlet selected';
-
-    // Lưu outletName vào SharedPreferences (Nếu cần thiết, có thể lưu cả ID)
-    await prefs.setString('selectedOutlet', selectedOutletId);
-
-    // Cập nhật filteredOutletList khi tải lại giá trị
-    String savedSearchKeyword = searchOutletController.text.toLowerCase();
-
-    setState(() {
-      filteredOutletList = _outletDisplayList.where((item) {
-        final outletName = item['outletName']!.toLowerCase();
-        return outletName.contains(savedSearchKeyword);
-      }).toList();
-    });
-
-    // Lưu outletName vào SharedPreferences
-    await prefs.setString('selectedOutletName', outletName);
-
-    // In giá trị outletName ra console để kiểm tra
-    print("📥 Đã lưu outletName: $outletName");
-
-    await prefs.setString('sellRate', sellRate?.toString() ?? '0.0');
-    await prefs.setString('sendRate', sendRate?.toString() ?? '0.0');
-
-    double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
-    double totalPay = sendAmount + (sendRate ?? 0.0);
-
-    // Lưu totalPay vào SharedPreferences
-    await prefs.setString('totalPay', totalPay.toStringAsFixed(2));
-
-    // In giá trị sendRate và sellRate ra console để kiểm tra
-    print("📥 Đã lưu sendRate: $sendRate");
-    print("📥 Đã lưu sellRate: $sellRate");
-    print("📥 Đã lưu totalPay: $totalPay");
-  }
-
-  void _setupTextFieldCurrencyListeners() {
-    // Lắng nghe thay đổi trên _sendController
-    _sendController.addListener(() async {
-      if (_validateNumeric(_sendController) && isSenderActive) {
-        double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
-        double receiveAmount =
-            (buyRate != null && buyRate! > 0) ? sendAmount / buyRate! : 0.0;
-
-        // Lưu tạm thời giá trị khi người dùng nhập
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('sendAmount', _sendController.text);
-        await prefs.setString('receiveAmount',
-            receiveAmount.toStringAsFixed(2)); // 🔥 Thêm dòng này
-
-        // Tạm ngắt Listener để tránh vòng lặp
-        isRecipientActive = false;
-        _receiveController.text = receiveAmount.toStringAsFixed(2);
-        isRecipientActive = true;
-      }
-    });
-
-    // Lắng nghe thay đổi trên _receiveController
-    _receiveController.addListener(() async {
-      if (_validateNumeric(_receiveController) && isRecipientActive) {
-        double receiveAmount = double.tryParse(_receiveController.text) ?? 0.0;
-        double sendAmount =
-            (buyRate != null && buyRate! > 0) ? receiveAmount * buyRate! : 0.0;
-
-        // Lưu tạm thời giá trị khi người dùng nhập
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('receiveAmount', _receiveController.text);
-        await prefs.setString('sendAmount', sendAmount.toStringAsFixed(2));
-
-        // Tạm ngắt Listener để tránh vòng lặp
-        isSenderActive = false;
-        _sendController.text = sendAmount.toStringAsFixed(2);
-        isSenderActive = true;
-      }
-    });
-  }
-
-  String _calculateTotalPay() {
-    double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
-    double totalPay = sendAmount + (sendRate ?? 0.0);
-    return totalPay.toStringAsFixed(2);
-  }
-
-  void addOutletRates() async {
-    CollectionReference outletRates =
-        FirebaseFirestore.instance.collection('outletRates');
-
-    List<Map<String, dynamic>> ratesData = [
-      {
-        'buyRate': 25000,
-        'foreignCurrency': 'EUR',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_1',
-        'sellRate': 25150,
-        'sendRate': 25200
-      },
-      {
-        'buyRate': 23000,
-        'foreignCurrency': 'USD',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_2',
-        'sellRate': 23150,
-        'sendRate': 23200
-      },
-      {
-        'buyRate': 180,
-        'foreignCurrency': 'JPY',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_3',
-        'sellRate': 181,
-        'sendRate': 182
-      },
-      {
-        'buyRate': 31000,
-        'foreignCurrency': 'GBP',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_4',
-        'sellRate': 31150,
-        'sendRate': 31200
-      },
-      {
-        'buyRate': 1500,
-        'foreignCurrency': 'KRW',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_5',
-        'sellRate': 1510,
-        'sendRate': 1520
-      },
-      {
-        'buyRate': 27000,
-        'foreignCurrency': 'AUD',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_6',
-        'sellRate': 27150,
-        'sendRate': 27200
-      },
-      {
-        'buyRate': 6000,
-        'foreignCurrency': 'CNY',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_7',
-        'sellRate': 6050,
-        'sendRate': 6100
-      },
-      {
-        'buyRate': 3500,
-        'foreignCurrency': 'SGD',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_8',
-        'sellRate': 3550,
-        'sendRate': 3600
-      },
-      {
-        'buyRate': 3000,
-        'foreignCurrency': 'HKD',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_9',
-        'sellRate': 3050,
-        'sendRate': 3100
-      },
-      {
-        'buyRate': 500,
-        'foreignCurrency': 'THB',
-        'localCurrency': 'VND',
-        'outletId': '3kf82kd91s',
-        'outletRateId': 'rate_3kf82kd91s_10',
-        'sellRate': 510,
-        'sendRate': 520
-      }
-    ];
-
-    for (var rate in ratesData) {
-      await outletRates.add(rate);
-      print(
-          "✅ Added outletRate: ${rate['foreignCurrency']} - ${rate['localCurrency']}");
-    }
-  }
-
-  void addOutlets() async {
-    CollectionReference outlets =
-        FirebaseFirestore.instance.collection('outlets');
-
-    List<Map<String, dynamic>> outletData = [
-      {
-        'outletAddress': '123 Đường ABC, Hà Nội',
-        'outletCode': 'OUT123',
-        'outletId': '1a2b3c4d5e',
-        'outletName': 'Outlet ABC'
-      },
-      {
-        'outletAddress': '456 Đường XYZ, Hà Nội',
-        'outletCode': 'OUT456',
-        'outletId': '3hfu29sjd92',
-        'outletName': 'Outlet XYZ'
-      },
-      {
-        'outletAddress': '789 Đường PQR, TP.HCM',
-        'outletCode': 'OUT789',
-        'outletId': '9df8s7a6g5',
-        'outletName': 'Outlet PQR'
-      },
-      {
-        'outletAddress': '101 Đường LMN, Đà Nẵng',
-        'outletCode': 'OUT101',
-        'outletId': '8fj29dk30s',
-        'outletName': 'Outlet LMN'
-      },
-      {
-        'outletAddress': '202 Đường UVW, Cần Thơ',
-        'outletCode': 'OUT202',
-        'outletId': '4hf8s6a2g1',
-        'outletName': 'Outlet UVW'
-      },
-      {
-        'outletAddress': '303 Đường STU, Hải Phòng',
-        'outletCode': 'OUT303',
-        'outletId': '5js92kdj38',
-        'outletName': 'Outlet STU'
-      },
-      {
-        'outletAddress': '404 Đường GHI, Nha Trang',
-        'outletCode': 'OUT404',
-        'outletId': '2jsk8d92hd',
-        'outletName': 'Outlet GHI'
-      },
-      {
-        'outletAddress': '505 Đường MNO, Vũng Tàu',
-        'outletCode': 'OUT505',
-        'outletId': '3kf82kd91s',
-        'outletName': 'Outlet MNO'
-      },
-      {
-        'outletAddress': '606 Đường DEF, Huế',
-        'outletCode': 'OUT606',
-        'outletId': '9fj47sjd92',
-        'outletName': 'Outlet DEF'
-      },
-      {
-        'outletAddress': '707 Đường ABC, Biên Hòa',
-        'outletCode': 'OUT707',
-        'outletId': '8dj39skd72',
-        'outletName': 'Outlet ABC Biên Hòa'
-      },
-      {
-        'outletAddress': '808 Đường XYZ, Buôn Ma Thuột',
-        'outletCode': 'OUT808',
-        'outletId': '6dj38skd91',
-        'outletName': 'Outlet XYZ Buôn Ma Thuột'
-      },
-      {
-        'outletAddress': '909 Đường PQR, Quy Nhơn',
-        'outletCode': 'OUT909',
-        'outletId': '1kd83js92d',
-        'outletName': 'Outlet PQR Quy Nhơn'
-      },
-      {
-        'outletAddress': '010 Đường LMN, Phú Quốc',
-        'outletCode': 'OUT010',
-        'outletId': '3jd83ks92d',
-        'outletName': 'Outlet LMN Phú Quốc'
-      },
-      {
-        'outletAddress': '111 Đường UVW, Đà Lạt',
-        'outletCode': 'OUT111',
-        'outletId': '4ks92jd83f',
-        'outletName': 'Outlet UVW Đà Lạt'
-      },
-      {
-        'outletAddress': '222 Đường STU, Thanh Hóa',
-        'outletCode': 'OUT222',
-        'outletId': '5hd92ks83d',
-        'outletName': 'Outlet STU Thanh Hóa'
-      },
-      {
-        'outletAddress': '333 Đường GHI, Thái Nguyên',
-        'outletCode': 'OUT333',
-        'outletId': '6jd83ks92d',
-        'outletName': 'Outlet GHI Thái Nguyên'
-      },
-      {
-        'outletAddress': '444 Đường MNO, Nam Định',
-        'outletCode': 'OUT444',
-        'outletId': '7ks92jd83f',
-        'outletName': 'Outlet MNO Nam Định'
-      },
-      {
-        'outletAddress': '555 Đường DEF, Vinh',
-        'outletCode': 'OUT555',
-        'outletId': '8hd92ks83d',
-        'outletName': 'Outlet DEF Vinh'
-      },
-      {
-        'outletAddress': '666 Đường ABC, Hạ Long',
-        'outletCode': 'OUT666',
-        'outletId': '9jd83ks92d',
-        'outletName': 'Outlet ABC Hạ Long'
-      },
-      {
-        'outletAddress': '777 Đường XYZ, Long Xuyên',
-        'outletCode': 'OUT777',
-        'outletId': '0ks92jd83f',
-        'outletName': 'Outlet XYZ Long Xuyên'
-      }
-    ];
-
-    for (var data in outletData) {
-      await outlets.add(data);
-      print(
-          "✅ Added outlet: ${data['outletName']} at ${data['outletAddress']}");
-    }
-  }
-
-  void addCurrencyCodes() async {
-    CollectionReference currencyCodes =
-        FirebaseFirestore.instance.collection('currencyCodes');
-
-    List<Map<String, dynamic>> currencyData = [
-      {"currencyCode": "AED", "description": "UAE Dirham"},
-      {"currencyCode": "AFN", "description": "Afghani"},
-      {"currencyCode": "ALL", "description": "Lek"},
-      {"currencyCode": "AMD", "description": "Armenian Dram"},
-      {"currencyCode": "ANG", "description": "Netherlands Antillian Guilder"},
-      {"currencyCode": "AOA", "description": "Kwanza"},
-      {"currencyCode": "ARS", "description": "Argentine Peso"},
-      {"currencyCode": "AUD", "description": "Australian Dollar"},
-      {"currencyCode": "AWG", "description": "Aruban Guilder"},
-      {"currencyCode": "AZN", "description": "Azerbaijanian Manat"},
-      {"currencyCode": "BAM", "description": "Convertible Marks"},
-      {"currencyCode": "BBD", "description": "Barbados Dollar"},
-      {"currencyCode": "BDT", "description": "Taka"},
-      {"currencyCode": "BGN", "description": "Bulgarian Lev"},
-      {"currencyCode": "BHD", "description": "Bahraini Dinar"},
-      {"currencyCode": "BIF", "description": "Burundi Franc"},
-      {"currencyCode": "BMD", "description": "Bermuda Dollar"},
-      {"currencyCode": "BND", "description": "Brunei Dollar"},
-      {"currencyCode": "BOB", "description": "Boliviano Mvdol"},
-      {"currencyCode": "BRL", "description": "Brazilian Real"},
-      {"currencyCode": "BSD", "description": "Bahamian Dollar"},
-      {"currencyCode": "BTN", "description": "Ngultrum"},
-      {"currencyCode": "BWP", "description": "Pula"},
-      {"currencyCode": "BYN", "description": "Belarussian Ruble"},
-      {"currencyCode": "BYR", "description": "Belarussian Ruble (obsolete)"},
-      {"currencyCode": "BZD", "description": "Belize Dollar"},
-      {"currencyCode": "CAD", "description": "Canadian Dollar"},
-      {"currencyCode": "CDF", "description": "Congolese Franc"},
-      {"currencyCode": "CHF", "description": "Swiss Franc"},
-      {"currencyCode": "CLP", "description": "Chilean Peso"},
-      {"currencyCode": "CNY", "description": "Yuan Renminbi"},
-      {"currencyCode": "COP", "description": "Colombian Peso"},
-      {"currencyCode": "CRC", "description": "Costa Rican Colon"},
-      {"currencyCode": "CUP", "description": "Cuban Peso"},
-      {"currencyCode": "CVE", "description": "Cape Verde Escudo"},
-      {"currencyCode": "CZK", "description": "Czech Koruna"},
-      {"currencyCode": "DJF", "description": "Djibouti Franc"},
-      {"currencyCode": "DKK", "description": "Danish Krone"},
-      {"currencyCode": "DOP", "description": "Dominican Peso"},
-      {"currencyCode": "DZD", "description": "Algerian Dinar"},
-      {"currencyCode": "EGP", "description": "Egyptian Pound"},
-      {"currencyCode": "ERN", "description": "Nakfa"},
-      {"currencyCode": "ETB", "description": "Ethiopian Birr"},
-      {"currencyCode": "EUR", "description": "Euro"},
-      {"currencyCode": "FJD", "description": "Fiji Dollar"},
-      {"currencyCode": "FKP", "description": "Falkland Islands Pound"},
-      {"currencyCode": "GBP", "description": "Pound Sterling"},
-      {"currencyCode": "GEL", "description": "Lari"},
-      {"currencyCode": "GHS", "description": "Cedi"},
-      {"currencyCode": "GIP", "description": "Gibraltar Pound"},
-      {"currencyCode": "GMD", "description": "Dalasi"},
-      {"currencyCode": "GNF", "description": "Guinea Franc"},
-      {"currencyCode": "GTQ", "description": "Quetzal"},
-      {"currencyCode": "GYD", "description": "Guyana Dollar"},
-      {"currencyCode": "HKD", "description": "Hong Kong Dollar"},
-      {"currencyCode": "HNL", "description": "Lempira"},
-      {"currencyCode": "HRK", "description": "Croatian Kuna"},
-      {"currencyCode": "HTG", "description": "Gourde"},
-      {"currencyCode": "HUF", "description": "Forint"},
-      {"currencyCode": "IDR", "description": "Rupiah"},
-      {"currencyCode": "ILS", "description": "New Israeli Sheqel"},
-      {"currencyCode": "INR", "description": "Indian Rupee"},
-      {"currencyCode": "IQD", "description": "Iraqi Dinar"},
-      {"currencyCode": "IRR", "description": "Iranian Rial"},
-      {"currencyCode": "ISK", "description": "Iceland Krona"},
-      {"currencyCode": "JMD", "description": "Jamaican Dollar"},
-      {"currencyCode": "JOD", "description": "Jordanian Dinar"},
-      {"currencyCode": "JPY", "description": "Yen"},
-      {"currencyCode": "KES", "description": "Kenyan Shilling"},
-      {"currencyCode": "KGS", "description": "Som"},
-      {"currencyCode": "KHR", "description": "Riel"},
-      {"currencyCode": "KMF", "description": "Comorian Franc"},
-      {"currencyCode": "KRW", "description": "Won"},
-      {"currencyCode": "KWD", "description": "Kuwaiti Dinar"},
-      {"currencyCode": "KYD", "description": "Cayman Islands Dollar"},
-      {"currencyCode": "KZT", "description": "Tenge"},
-      {"currencyCode": "LAK", "description": "Kip"},
-      {"currencyCode": "LBP", "description": "Lebanese Pound"},
-      {"currencyCode": "LKR", "description": "Sri Lanka Rupee"},
-      {"currencyCode": "LRD", "description": "Liberian Dollar"},
-      {"currencyCode": "LSL", "description": "Loti"},
-      {"currencyCode": "LTL", "description": "Lithuanian Litas"},
-      {"currencyCode": "LVL", "description": "Latvian Lats"},
-      {"currencyCode": "LYD", "description": "Libyan Dinar"},
-      {"currencyCode": "HNL", "description": "Lempira"}
-    ];
-
-    for (var data in currencyData) {
-      await currencyCodes.add(data);
-      print("✅ Added currency code: ${data['currencyCode']}");
-    }
-  }
+  //   setState(() {
+  //     sendRate = rates['sendRate'];
+  //     buyRate = rates['buyRate'];
+  //     sellRate = rates['sellRate'];
+  //   });
+  // }
 
   Future<void> fetchOutlets() async {
     try {
@@ -731,6 +324,71 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     }
   }
 
+  Future<void> _loadSavedInputs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      // Khôi phục giá trị currency
+      fromCurrency = prefs.getString('fromCurrency') ?? "";
+      toCurrency = prefs.getString('toCurrency') ?? "";
+
+      // Khôi phục số tiền gửi & nhận
+      _sendController.text = prefs.getString('sendAmount') ?? '';
+      _receiveController.text = prefs.getString('receiveAmount') ?? '';
+
+      // Khôi phục outlet đã chọn
+      selectedOutlet = prefs.getString('selectedOutlet') ?? '';
+
+      // Khôi phục tỷ giá
+      sellRate = double.tryParse(prefs.getString('sellRate') ?? '0.0') ?? 0.0;
+      sendRate = double.tryParse(prefs.getString('sendRate') ?? '0.0') ?? 0.0;
+    });
+
+    // Kiểm tra & tìm outlet name từ danh sách outlets
+    String? selectedOutletId = selectedOutlet;
+    String outletName = _outletDisplayList.firstWhere(
+          (item) => item['outletId'] == selectedOutletId,
+          orElse: () => {'outletName': 'No outlet selected'},
+        )['outletName'] ??
+        'No outlet selected';
+
+    // Cập nhật UI và SharedPreferences
+    setState(() {
+      searchOutletController.text = outletName;
+    });
+    await prefs.setString('selectedOutletName', outletName);
+
+    // Cập nhật danh sách lọc outlet
+    setState(() {
+      filteredOutletList = _outletDisplayList.where((item) {
+        final outletNameLower = item['outletName']!.toLowerCase();
+        return outletNameLower.contains(outletName.toLowerCase());
+      }).toList();
+    });
+
+    // Tính totalPay
+    double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
+    double totalPay = sendAmount + (sendRate ?? 0.0);
+    await prefs.setString('totalPay', totalPay.toStringAsFixed(2));
+
+    // Debug log để kiểm tra giá trị đã khôi phục
+    print("📥 Khôi phục fromCurrency: $fromCurrency");
+    print("📥 Khôi phục toCurrency: $toCurrency");
+    print("📥 Khôi phục sendAmount: ${_sendController.text}");
+    print("📥 Khôi phục receiveAmount: ${_receiveController.text}");
+    print("📥 Khôi phục selectedOutlet: $selectedOutlet");
+    print("📥 Khôi phục outletName: $outletName");
+    print("📥 Khôi phục sellRate: $sellRate");
+    print("📥 Khôi phục sendRate: $sendRate");
+    print("📥 Khôi phục totalPay: $totalPay");
+  }
+
+  String _calculateTotalPay() {
+    double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
+    double totalPay = sendAmount + (sendRate ?? 0.0);
+    return totalPay.toStringAsFixed(2);
+  }
+
   bool _validateNumeric(TextEditingController controller) {
     final input = controller.text;
     // Chỉ cho phép số và dấu chấm
@@ -745,6 +403,47 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
       });
       return true;
     }
+  }
+
+  void _setupTextFieldCurrencyListeners() {
+    // Lắng nghe thay đổi trên _sendController
+    _sendController.addListener(() async {
+      if (_validateNumeric(_sendController) && isSenderActive) {
+        double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
+        double receiveAmount =
+            (buyRate != null && buyRate! > 0) ? sendAmount / buyRate! : 0.0;
+
+        // Lưu tạm thời giá trị khi người dùng nhập
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('sendAmount', _sendController.text);
+        await prefs.setString('receiveAmount',
+            receiveAmount.toStringAsFixed(2)); // 🔥 Thêm dòng này
+
+        // Tạm ngắt Listener để tránh vòng lặp
+        isRecipientActive = false;
+        _receiveController.text = receiveAmount.toStringAsFixed(2);
+        isRecipientActive = true;
+      }
+    });
+
+    // Lắng nghe thay đổi trên _receiveController
+    _receiveController.addListener(() async {
+      if (_validateNumeric(_receiveController) && isRecipientActive) {
+        double receiveAmount = double.tryParse(_receiveController.text) ?? 0.0;
+        double sendAmount =
+            (buyRate != null && buyRate! > 0) ? receiveAmount * buyRate! : 0.0;
+
+        // Lưu tạm thời giá trị khi người dùng nhập
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('receiveAmount', _receiveController.text);
+        await prefs.setString('sendAmount', sendAmount.toStringAsFixed(2));
+
+        // Tạm ngắt Listener để tránh vòng lặp
+        isSenderActive = false;
+        _sendController.text = sendAmount.toStringAsFixed(2);
+        isSenderActive = true;
+      }
+    });
   }
 
   void _showOutletPicker(BuildContext context) {
@@ -1003,16 +702,15 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             _buildCurrencyInputField(
               tr('you_send'),
               fromCurrency,
-              (value) {
+              (value) async {
                 setState(() {
                   fromCurrency = value!;
                   print("🔄 Updated fromCurrency: $fromCurrency");
-
-                  // Gọi fetchOutletRates nếu outletId đã được chọn
-                  if (outletId != null) {
-                    fetchOutletRates(outletId, fromCurrency, toCurrency);
-                  }
                 });
+
+                // Lưu vào SharedPreferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setString('fromCurrency', fromCurrency);
               },
               isSmallScreen,
               _sendController,
@@ -1022,16 +720,15 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             _buildCurrencyInputField(
               tr('recipient_gets'),
               toCurrency,
-              (value) {
+              (value) async {
                 setState(() {
                   toCurrency = value!;
                   print("🔄 Updated toCurrency: $toCurrency");
-
-                  // Gọi fetchOutletRates nếu outletId đã được chọn
-                  if (outletId != null) {
-                    fetchOutletRates(outletId, fromCurrency, toCurrency);
-                  }
                 });
+
+                // Lưu vào SharedPreferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setString('toCurrency', toCurrency);
               },
               isSmallScreen,
               _receiveController,
@@ -1089,6 +786,9 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   // Lưu outletId vào SharedPreferences (searchKeyword)
                   await prefs.setString('searchKeyword', outletId);
 
+                  await prefs.setString('fromCurrency', fromCurrency);
+                  await prefs.setString('toCurrency', toCurrency);
+
                   // Lấy các giá trị tiền từ SharedPreferences
                   String sendAmount = prefs.getString('sendAmount') ?? '0.00';
                   String receiveAmount =
@@ -1111,9 +811,11 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   // In ra console để kiểm tra
                   print("📤 Số tiền gửi: $sendAmount");
                   print("📥 Số tiền nhận: $receiveAmount");
-                  print("📥 Outlet: $outletName"); // In ra outletName
-                  print("📥 SendRate: $sendRate"); // In ra sendRate
-                  print("📥 SellRate: $sellRate"); // In ra sellRate
+                  print("💱 From Currency: $fromCurrency");
+                  print("💱 To Currency: $toCurrency");
+                  print("📥 Outlet: $outletName");
+                  print("📥 SendRate: $sendRate");
+                  print("📥 SellRate: $sellRate");
 
                   Navigator.pushNamed(context, Routes.userDetails);
                 },

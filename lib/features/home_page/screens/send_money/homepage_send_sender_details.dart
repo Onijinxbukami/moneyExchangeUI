@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/features/home_page/screens/location/location_screen.dart';
-import 'package:flutter_application_1/features/home_page/screens/send_money/progressbar.dart';
+import 'package:flutter_application_1/shared/widgets/progressbar.dart';
 import 'package:flutter_application_1/features/home_page/screens/setting/setting_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -950,7 +950,7 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () async {
-                        debugPrint('Continue pressed');
+                        
 
                         // Lưu thông tin trước khi chuyển trang
                         await _loadSavedInputs(isSaving: true);
@@ -984,9 +984,7 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
 
                         // Chuyển trang và hiển thị SnackBar
                         Navigator.pushNamed(context, Routes.bankAccountDetails);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Continue Pressed!")),
-                        );
+
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF007AFF),
