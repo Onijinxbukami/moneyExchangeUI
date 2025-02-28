@@ -198,28 +198,28 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
     //_fetchData();
   }
 
-  Future<void> _fetchData() async {
-    final outlets = await _service.fetchOutlets();
-    final currencies = await _service.fetchCurrencyCodes();
+  // Future<void> _fetchData() async {
+  //   final outlets = await _service.fetchOutlets();
+  //   final currencies = await _service.fetchCurrencyCodes();
 
-    setState(() {
-      _outletDisplayList = outlets;
-      _currencyDisplayList = currencies;
-      isLoading = false;
-    });
-  }
+  //   setState(() {
+  //     _outletDisplayList = outlets;
+  //     _currencyDisplayList = currencies;
+  //     isLoading = false;
+  //   });
+  // }
 
-  void _fetchRates(
-      String outletId, String fromCurrency, String toCurrency) async {
-    final rates =
-        await _service.fetchOutletRates(outletId, fromCurrency, toCurrency);
+  // void _fetchRates(
+  //     String outletId, String fromCurrency, String toCurrency) async {
+  //   final rates =
+  //       await _service.fetchOutletRates(outletId, fromCurrency, toCurrency);
 
-    setState(() {
-      sendRate = rates['sendRate'];
-      buyRate = rates['buyRate'];
-      sellRate = rates['sellRate'];
-    });
-  }
+  //   setState(() {
+  //     sendRate = rates['sendRate'];
+  //     buyRate = rates['buyRate'];
+  //     sellRate = rates['sellRate'];
+  //   });
+  // }
 
   Future<void> fetchOutlets() async {
     try {
@@ -327,54 +327,60 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   Future<void> _loadSavedInputs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // Lấy giá trị từ SharedPreferences
-    _sendController.text = prefs.getString('sendAmount') ?? '';
-    _receiveController.text = prefs.getString('receiveAmount') ?? '';
+    setState(() {
+      // Khôi phục giá trị currency
+      fromCurrency = prefs.getString('fromCurrency') ?? "";
+      toCurrency = prefs.getString('toCurrency') ?? "";
 
-    // Lấy outletId từ SharedPreferences (lưu ID chứ không phải tên)
-    String selectedOutletId = prefs.getString('selectedOutlet') ?? '';
+      // Khôi phục số tiền gửi & nhận
+      _sendController.text = prefs.getString('sendAmount') ?? '';
+      _receiveController.text = prefs.getString('receiveAmount') ?? '';
 
-    // Kiểm tra xem outletId đã được lưu trong SharedPreferences chưa
-    print("📥 Đã lưu selectedOutletId: $selectedOutletId");
+      // Khôi phục outlet đã chọn
+      selectedOutlet = prefs.getString('selectedOutlet') ?? '';
 
-    // Tìm outletName từ outletId
+      // Khôi phục tỷ giá
+      sellRate = double.tryParse(prefs.getString('sellRate') ?? '0.0') ?? 0.0;
+      sendRate = double.tryParse(prefs.getString('sendRate') ?? '0.0') ?? 0.0;
+    });
+
+    // Kiểm tra & tìm outlet name từ danh sách outlets
+    String? selectedOutletId = selectedOutlet;
     String outletName = _outletDisplayList.firstWhere(
-            (item) => item['outletId'] == selectedOutletId,
-            orElse: () => {'outletName': 'No outlet selected'})['outletName'] ??
+          (item) => item['outletId'] == selectedOutletId,
+          orElse: () => {'outletName': 'No outlet selected'},
+        )['outletName'] ??
         'No outlet selected';
 
-    // Lưu outletName vào SharedPreferences (Nếu cần thiết, có thể lưu cả ID)
-    await prefs.setString('selectedOutlet', selectedOutletId);
+    // Cập nhật UI và SharedPreferences
+    setState(() {
+      searchOutletController.text = outletName;
+    });
+    await prefs.setString('selectedOutletName', outletName);
 
-    // Cập nhật filteredOutletList khi tải lại giá trị
-    String savedSearchKeyword = searchOutletController.text.toLowerCase();
-
+    // Cập nhật danh sách lọc outlet
     setState(() {
       filteredOutletList = _outletDisplayList.where((item) {
-        final outletName = item['outletName']!.toLowerCase();
-        return outletName.contains(savedSearchKeyword);
+        final outletNameLower = item['outletName']!.toLowerCase();
+        return outletNameLower.contains(outletName.toLowerCase());
       }).toList();
     });
 
-    // Lưu outletName vào SharedPreferences
-    await prefs.setString('selectedOutletName', outletName);
-
-    // In giá trị outletName ra console để kiểm tra
-    print("📥 Đã lưu outletName: $outletName");
-
-    await prefs.setString('sellRate', sellRate?.toString() ?? '0.0');
-    await prefs.setString('sendRate', sendRate?.toString() ?? '0.0');
-
+    // Tính totalPay
     double sendAmount = double.tryParse(_sendController.text) ?? 0.0;
     double totalPay = sendAmount + (sendRate ?? 0.0);
-
-    // Lưu totalPay vào SharedPreferences
     await prefs.setString('totalPay', totalPay.toStringAsFixed(2));
 
-    // In giá trị sendRate và sellRate ra console để kiểm tra
-    print("📥 Đã lưu sendRate: $sendRate");
-    print("📥 Đã lưu sellRate: $sellRate");
-    print("📥 Đã lưu totalPay: $totalPay");
+    // Debug log để kiểm tra giá trị đã khôi phục
+    print("📥 Khôi phục fromCurrency: $fromCurrency");
+    print("📥 Khôi phục toCurrency: $toCurrency");
+    print("📥 Khôi phục sendAmount: ${_sendController.text}");
+    print("📥 Khôi phục receiveAmount: ${_receiveController.text}");
+    print("📥 Khôi phục selectedOutlet: $selectedOutlet");
+    print("📥 Khôi phục outletName: $outletName");
+    print("📥 Khôi phục sellRate: $sellRate");
+    print("📥 Khôi phục sendRate: $sendRate");
+    print("📥 Khôi phục totalPay: $totalPay");
   }
 
   String _calculateTotalPay() {
@@ -696,16 +702,15 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             _buildCurrencyInputField(
               tr('you_send'),
               fromCurrency,
-              (value) {
+              (value) async {
                 setState(() {
                   fromCurrency = value!;
                   print("🔄 Updated fromCurrency: $fromCurrency");
-
-                  // Gọi fetchOutletRates nếu outletId đã được chọn
-                  if (outletId != null) {
-                    fetchOutletRates(outletId, fromCurrency, toCurrency);
-                  }
                 });
+
+                // Lưu vào SharedPreferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setString('fromCurrency', fromCurrency);
               },
               isSmallScreen,
               _sendController,
@@ -715,16 +720,15 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
             _buildCurrencyInputField(
               tr('recipient_gets'),
               toCurrency,
-              (value) {
+              (value) async {
                 setState(() {
                   toCurrency = value!;
                   print("🔄 Updated toCurrency: $toCurrency");
-
-                  // Gọi fetchOutletRates nếu outletId đã được chọn
-                  if (outletId != null) {
-                    fetchOutletRates(outletId, fromCurrency, toCurrency);
-                  }
                 });
+
+                // Lưu vào SharedPreferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setString('toCurrency', toCurrency);
               },
               isSmallScreen,
               _receiveController,
@@ -782,6 +786,9 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   // Lưu outletId vào SharedPreferences (searchKeyword)
                   await prefs.setString('searchKeyword', outletId);
 
+                  await prefs.setString('fromCurrency', fromCurrency);
+                  await prefs.setString('toCurrency', toCurrency);
+
                   // Lấy các giá trị tiền từ SharedPreferences
                   String sendAmount = prefs.getString('sendAmount') ?? '0.00';
                   String receiveAmount =
@@ -804,9 +811,11 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   // In ra console để kiểm tra
                   print("📤 Số tiền gửi: $sendAmount");
                   print("📥 Số tiền nhận: $receiveAmount");
-                  print("📥 Outlet: $outletName"); // In ra outletName
-                  print("📥 SendRate: $sendRate"); // In ra sendRate
-                  print("📥 SellRate: $sellRate"); // In ra sellRate
+                  print("💱 From Currency: $fromCurrency");
+                  print("💱 To Currency: $toCurrency");
+                  print("📥 Outlet: $outletName");
+                  print("📥 SendRate: $sendRate");
+                  print("📥 SellRate: $sellRate");
 
                   Navigator.pushNamed(context, Routes.userDetails);
                 },

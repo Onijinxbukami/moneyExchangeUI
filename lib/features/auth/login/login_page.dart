@@ -464,7 +464,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
 
-                        // Forgot Password Section
+                        const SizedBox(height: 16),
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
                           child: Row(
@@ -498,7 +498,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         // Sign Up Section
                         Padding(
-                          padding: const EdgeInsets.only(top: 12),
+                          padding: const EdgeInsets.only(top: 2),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

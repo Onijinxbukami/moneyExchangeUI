@@ -950,7 +950,7 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () async {
-                        debugPrint('Continue pressed');
+                        
 
                         // Lưu thông tin trước khi chuyển trang
                         await _loadSavedInputs(isSaving: true);
@@ -984,9 +984,7 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
 
                         // Chuyển trang và hiển thị SnackBar
                         Navigator.pushNamed(context, Routes.bankAccountDetails);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Continue Pressed!")),
-                        );
+
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF007AFF),
