@@ -3,7 +3,7 @@
       "origin": ["*"],
       "method": ["GET", "POST", "PUT", "DELETE"],
       "maxAgeSeconds": 3600,
-      "responseHeader": ["Content-Type", "Authorization"]
+      "responseHeader": ["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
     }
   ]
   
