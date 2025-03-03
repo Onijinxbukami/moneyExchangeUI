@@ -34,7 +34,7 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
   bool _isAccountNumberError = false;
   bool _isBankCodeError = false;
 
-  String _selectedLanguage = 'EN';
+
   final List<Map<String, String>> bankCodes = [
     {
       "code": "001",
@@ -184,7 +184,7 @@ class _HomepageUserDetailsPageState extends State<HomepageUserDetailsPage> {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Container(
-            color: const Color(0xFF6610F2), // Màu nền AppBar
+            color: const Color(0xFF6610F2), 
             child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),

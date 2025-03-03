@@ -125,34 +125,64 @@ class _SettingFormState extends State<SettingForm> {
     }
   }
 
-  Future<void> _fetchUserData() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        // Fetch data from Firestore
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
+ Future<void> _fetchUserData() async {
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Fetch data from Firestore
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
-        // If data exists, update controllers
-        if (userDoc.exists) {
-          final userData = userDoc.data();
-          setState(() {
-            _userNameController.text = userData?['userName'] ?? '';
-            _phoneNumberController.text = userData?['phoneNumber'] ?? '';
-            _emailController.text = userData?['email'] ?? '';
-            _firstNameController.text = userData?['firstName'] ?? '';
-            _lastNameController.text = userData?['lastName'] ?? '';
-            _addressController.text = userData?['address'] ?? '';
-            _nationalityController.text = userData?['nationality'] ?? '';
-          });
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+
+        setState(() {
+          _userNameController.text = userData?['userName'] ?? '';
+          _phoneNumberController.text = userData?['phoneNumber'] ?? '';
+          _emailController.text = userData?['email'] ?? '';
+          _firstNameController.text = userData?['firstName'] ?? '';
+          _lastNameController.text = userData?['lastName'] ?? '';
+          _addressController.text = userData?['address'] ?? '';
+          _nationalityController.text = userData?['nationality'] ?? '';
+        });
+
+        // Lấy URL ảnh
+        String? idFrontUrl = userData?['idFrontPhoto'];
+        String? idRearUrl = userData?['idRearPhoto'];
+        String? passportUrl = userData?['passportPhoto'];
+
+        // Hàm tải ảnh từ Storage
+        Future<Uint8List?> downloadImage(String? imageUrl) async {
+          if (imageUrl == null) return null;
+          try {
+            final ref = FirebaseStorage.instance.refFromURL(imageUrl);
+            return await ref.getData(); // Lấy ảnh dưới dạng Uint8List
+          } catch (e) {
+            print('Error loading image: $e');
+            return null;
+          }
         }
+
+        // Tải ảnh từ Firebase Storage
+        Uint8List? idFrontPhoto = await downloadImage(idFrontUrl);
+        Uint8List? idRearPhoto = await downloadImage(idRearUrl);
+        Uint8List? passportPhoto = await downloadImage(passportUrl);
+
+        // Cập nhật UI
+        setState(() {
+          _idFrontPhoto = idFrontPhoto;
+          _idRearPhoto = idRearPhoto;
+          _passportPhoto = passportPhoto;
+        });
       }
-    } catch (e) {
-      print('Error fetching user data: $e');
     }
+  } catch (e) {
+    print('Error fetching user data: $e');
   }
+}
+
 
   Future<void> changePassword({
     required BuildContext context,
