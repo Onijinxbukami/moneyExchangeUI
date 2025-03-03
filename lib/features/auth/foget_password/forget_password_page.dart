@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,11 +7,10 @@ import 'package:flutter_application_1/app/routes.dart';
 import 'package:flutter_application_1/shared/widgets/facebook_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/google_sign_in_button.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_application_1/shared/services/auth_service.dart';
+import 'package:flutter_application_1/shared/services/facebook_auth_service.dart';
+import 'package:flutter_application_1/shared/services/firebase_auth_service.dart';
 
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:js' as js;
-import 'package:js/js_util.dart' as js_util;
 
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({super.key});
@@ -24,8 +22,10 @@ class ForgetPasswordPage extends StatefulWidget {
 
 class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
+   final AuthService _authService = AuthService();
+  final FacebookAuthService _facebookAuthService = FacebookAuthService();
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
   bool _isLoading = false;
-
   bool _isFacebookSDKReady = false;
 
   Future<void> _handleLogin() async {
@@ -42,148 +42,70 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
     // Hiển thị thông tin nhập vào trong console log
     print('Username: ${_emailController.text}');
   }
+    Future<void> _handleGoogleSignIn() async {
+    try {
+      User? user = await _authService.signInWithGoogle();
+      if (user != null) {
+        await _authService.saveUserData(user);
+        Navigator.pushReplacementNamed(context, '/homepage');
+      }
+    } catch (e) {
+      _showSnackBar("Google Sign-In Failed", Colors.red);
+    }
+  }
 
-  @override
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: color),
+    );
+  }
+
+   @override
   void initState() {
     super.initState();
-
-    // Đợi một chút để SDK Facebook có thể khởi tạo
-    Future.delayed(Duration(seconds: 3), () {
-      // Sử dụng js_util để lấy giá trị của facebookSDKReady từ JavaScript
-      bool? isSDKReady =
-          js_util.getProperty(js_util.globalThis, 'facebookSDKReady');
-
-      setState(() {
-        _isFacebookSDKReady = isSDKReady ?? false;
-      });
-      print("SDK ready status: $_isFacebookSDKReady");
-    });
+    _initFacebookSDK();
   }
 
-  void _handleFacebookSignIn() {
-    try {
-      // Kiểm tra nếu Facebook SDK đã sẵn sàng
-      if (js.context['FB'] == null || js.context['FB'].callMethod == null) {
-        print("Facebook SDK chưa sẵn sàng hoặc không thể gọi phương thức.");
-        return;
-      }
-
-      // Gọi FB.login
-      var fb = js.context['FB'];
-      fb.callMethod('login', [
-        js.allowInterop((response) {
-          print("Facebook login response: $response");
-
-          if (response is js.JsObject &&
-              response.hasProperty('status') &&
-              response['status'] == 'connected') {
-            final accessToken = response['authResponse']['accessToken'];
-            print("Facebook Access Token: $accessToken");
-
-            // Gọi Firebase Auth
-            _signInWithFirebase(accessToken);
-          } else {
-            print("Facebook login failed: ${response['status']}");
-          }
-        }),
-        {'scope': 'email,public_profile'}
-      ]);
-    } catch (e) {
-      print("Facebook Sign-In Error: $e");
+ void _handleFacebookSignIn() {
+    if (!_isFacebookSDKReady) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Facebook SDK chưa sẵn sàng"),
+            backgroundColor: Colors.red),
+      );
+      return;
     }
-  }
 
-  void _signInWithFirebase(String accessToken) async {
-    try {
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken);
-
-      // Đăng nhập vào Firebase
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-      User? firebaseUser = userCredential.user;
-
-      if (firebaseUser != null) {
-        final userRef = FirebaseFirestore.instance
-            .collection("users")
-            .doc(firebaseUser.uid);
-        DocumentSnapshot doc = await userRef.get();
-
-        if (!doc.exists) {
-          await userRef.set({
-            "uid": firebaseUser.uid,
-            "userName": firebaseUser.displayName,
-            "email": firebaseUser.email,
-            "photoUrl": firebaseUser.photoURL,
-            "createdAt": FieldValue.serverTimestamp(),
-          });
-        } else {
-          await userRef.update({
-            "userName": firebaseUser.displayName,
-            "photoUrl": firebaseUser.photoURL,
-          });
+    _facebookAuthService.handleFacebookLogin(
+      (accessToken) async {
+        try {
+          await _firebaseAuthService.signInWithFacebook(accessToken);
+          Navigator.pushReplacementNamed(context, Routes.homepage);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text("Lỗi đăng nhập Firebase: $e"),
+                backgroundColor: Colors.red),
+          );
         }
-
-        print("User signed in: ${firebaseUser.displayName}");
-        Navigator.pushReplacementNamed(context, Routes.homepage);
-      }
-    } catch (e) {
-      print("Error during Firebase sign-in: $e");
-    }
+      },
+      (errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+        );
+      },
+    );
   }
 
-  Future<void> _handleGoogleSignIn() async {
+  Future<void> _initFacebookSDK() async {
+    bool sdkReady = await _facebookAuthService.isFacebookSDKReady();
     setState(() {
-      _isLoading = true;
+      _isFacebookSDKReady = sdkReady;
     });
-
-    try {
-      // Bước 1: Đăng nhập tài khoản Google
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        // Người dùng hủy đăng nhập
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-
-      // Bước 2: Xác thực tài khoản Google
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Bước 3: Nhận thông tin đăng nhập từ Firebase
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Bước 4: Đăng nhập Firebase
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // Thông báo thành công
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Welcome, ${userCredential.user?.displayName}!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      // Xử lý lỗi đăng nhập
-      print('Google Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Google Sign-In Failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    print("SDK ready status: $_isFacebookSDKReady");
   }
+
+ 
 
   @override
   Widget build(BuildContext context) {
