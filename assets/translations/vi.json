@@ -81,7 +81,7 @@
     
     "user_infor": "Thông tin người gửi",
     "full_name": "Họ và tên đầy đủ",
-    "full_name_hint": "Nhập họ và tên đầy đủ theo pháp lý",
+    "full_name_hint": "Nhập họ và tên đầy đủ",
     "full_name_required": "Họ và tên là bắt buộc",
     "account_name": "Tên tài khoản",
     "account_name_hint": "Nhập tên tài khoản",
