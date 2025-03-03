@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_application_1/features/home_page/screens/location/location_service.dart';
+import 'package:flutter_application_1/shared/services/outlets_service.dart';
 
 class LocationForm extends StatefulWidget {
   const LocationForm({super.key});

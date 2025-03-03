@@ -1,12 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/app/routes.dart';
+import 'package:flutter_application_1/shared/services/auth_service.dart';
+import 'package:flutter_application_1/shared/services/users_service.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:js' as js;
 
 class SettingForm extends StatefulWidget {
   const SettingForm({super.key});
@@ -30,8 +29,8 @@ class _SettingFormState extends State<SettingForm> {
   final TextEditingController _bankCodeController = TextEditingController();
   final TextEditingController _bankNameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final oldPasswordController = TextEditingController();
-  final newPasswordController = TextEditingController();
+  final _oldPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
   Uint8List? _idFrontPhoto;
   Uint8List? _idRearPhoto;
   Uint8List? _passportPhoto;
@@ -51,7 +50,8 @@ class _SettingFormState extends State<SettingForm> {
     {"name": "Vietnamese"},
   ];
   List<Map<String, String>> filteredNationalities = [];
-
+  bool _isLoading = false;
+  final UserService _userService = UserService();
   @override
   void dispose() {
     _userNameController.dispose();
@@ -74,117 +74,40 @@ class _SettingFormState extends State<SettingForm> {
     _fetchUserData();
   }
 
-  Future<void> updateUserInformation({
-    required String userId,
-    required String userName,
-    required String firstName,
-    required String lastName,
-    required String address,
-    required String nationality,
-    Uint8List? idFrontPhoto,
-    Uint8List? idRearPhoto,
-    Uint8List? passportPhoto,
-  }) async {
+  Future<void> _fetchUserData() async {
     try {
-      // Tham chiếu đến document của người dùng trong collection 'users'
-      DocumentReference userRef =
-          FirebaseFirestore.instance.collection('users').doc(userId);
-      Future<String?> uploadImage(Uint8List? imageBytes, String path) async {
-        if (imageBytes == null) return null;
-        Reference ref = FirebaseStorage.instance.ref().child(path);
-        UploadTask uploadTask = ref.putData(imageBytes);
-        TaskSnapshot snapshot = await uploadTask;
-        return await snapshot.ref.getDownloadURL();
-      }
-
-      String? idFrontUrl =
-          await uploadImage(idFrontPhoto, 'users/$userId/id_front.jpg');
-      String? idRearUrl =
-          await uploadImage(idRearPhoto, 'users/$userId/id_rear.jpg');
-      String? passportUrl =
-          await uploadImage(passportPhoto, 'users/$userId/passport.jpg');
-
-      // Cập nhật các trường thông tin
-      Map<String, dynamic> updatedData = {
-        'userName': userName,
-        'firstName': firstName,
-        'lastName': lastName,
-        'address': address,
-        'nationality': nationality,
-      };
-      if (idFrontUrl != null) updatedData['idFrontPhoto'] = idFrontUrl;
-      if (idRearUrl != null) updatedData['idRearPhoto'] = idRearUrl;
-      if (passportUrl != null) updatedData['passportPhoto'] = passportUrl;
-
-      // Cập nhật Firestore
-      await userRef.update(updatedData);
-
-      print('User information updated successfully');
-    } catch (e) {
-      print('Error updating user information: $e');
-    }
-  }
-
- Future<void> _fetchUserData() async {
-  try {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Fetch data from Firestore
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      if (userDoc.exists) {
-        final userData = userDoc.data();
-
+      final userData = await _userService.fetchUserData();
+      if (userData != null) {
         setState(() {
-          _userNameController.text = userData?['userName'] ?? '';
-          _phoneNumberController.text = userData?['phoneNumber'] ?? '';
-          _emailController.text = userData?['email'] ?? '';
-          _firstNameController.text = userData?['firstName'] ?? '';
-          _lastNameController.text = userData?['lastName'] ?? '';
-          _addressController.text = userData?['address'] ?? '';
-          _nationalityController.text = userData?['nationality'] ?? '';
+          _userNameController.text = userData['userName'] ?? '';
+          _phoneNumberController.text = userData['phoneNumber'] ?? '';
+          _emailController.text = userData['email'] ?? '';
+          _firstNameController.text = userData['firstName'] ?? '';
+          _lastNameController.text = userData['lastName'] ?? '';
+          _addressController.text = userData['address'] ?? '';
+          _nationalityController.text = userData['nationality'] ?? '';
         });
 
-        // Lấy URL ảnh
-        String? idFrontUrl = userData?['idFrontPhoto'];
-        String? idRearUrl = userData?['idRearPhoto'];
-        String? passportUrl = userData?['passportPhoto'];
+        // Tải ảnh nếu có
+        Uint8List? idFrontPhoto =
+            await _userService.downloadImage(userData['idFrontPhoto']);
+        Uint8List? idRearPhoto =
+            await _userService.downloadImage(userData['idRearPhoto']);
+        Uint8List? passportPhoto =
+            await _userService.downloadImage(userData['passportPhoto']);
 
-        // Hàm tải ảnh từ Storage
-        Future<Uint8List?> downloadImage(String? imageUrl) async {
-          if (imageUrl == null) return null;
-          try {
-            final ref = FirebaseStorage.instance.refFromURL(imageUrl);
-            return await ref.getData(); // Lấy ảnh dưới dạng Uint8List
-          } catch (e) {
-            print('Error loading image: $e');
-            return null;
-          }
-        }
-
-        // Tải ảnh từ Firebase Storage
-        Uint8List? idFrontPhoto = await downloadImage(idFrontUrl);
-        Uint8List? idRearPhoto = await downloadImage(idRearUrl);
-        Uint8List? passportPhoto = await downloadImage(passportUrl);
-
-        // Cập nhật UI
         setState(() {
           _idFrontPhoto = idFrontPhoto;
           _idRearPhoto = idRearPhoto;
           _passportPhoto = passportPhoto;
         });
       }
+    } catch (e) {
+      print('Error fetching user data: $e');
     }
-  } catch (e) {
-    print('Error fetching user data: $e');
   }
-}
 
-
-  Future<void> changePassword({
+  Future<void> _handleChangePassword({
     required BuildContext context,
     required String oldPassword,
     required String newPassword,
@@ -199,25 +122,11 @@ class _SettingFormState extends State<SettingForm> {
       return;
     }
 
+    setState(() => _isLoading = true);
+    AuthService authService = AuthService();
+
     try {
-      // Get current user
-      final user = FirebaseAuth.instance.currentUser;
-
-      // Use email and old password to reauthenticate
-      final credential = EmailAuthProvider.credential(
-        email: user!.email!,
-        password: oldPassword,
-      );
-      await user.reauthenticateWithCredential(credential);
-
-      // Update the password
-      await user.updatePassword(newPassword);
-
-      // Optional: Update Firestore if needed
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({'passwordUpdatedAt': FieldValue.serverTimestamp()});
+      await authService.changePassword(oldPassword, newPassword);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -225,40 +134,28 @@ class _SettingFormState extends State<SettingForm> {
           backgroundColor: Colors.green,
         ),
       );
+
+      Navigator.of(context).pop();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Password change failed: $e'),
+          content: Text(e.toString()),
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _handleLogout(BuildContext context) async {
+  Future<void> _handleLogout() async {
+    setState(() => _isLoading = true);
+    AuthService authService = AuthService();
+
     try {
-      var fb = js.context['FB'];
-
-      // Kiểm tra nếu Facebook SDK đã sẵn sàng
-      if (fb != null && fb.callMethod != null) {
-        print("Logging out from Facebook...");
-
-        // Gọi FB.logout() để đăng xuất khỏi Facebook
-        fb.callMethod('logout', [
-          js.allowInterop((response) {
-            print("User logged out from Facebook.");
-          })
-        ]);
-      }
-
-      // Đăng xuất khỏi Firebase
-      await FirebaseAuth.instance.signOut();
-      print('User logged out successfully from Firebase');
-
-      // Điều hướng về màn hình đăng nhập
+      await authService.logout();
       Navigator.pushReplacementNamed(context, Routes.login);
 
-      // Hiển thị thông báo thành công
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Logout successful'),
@@ -266,13 +163,14 @@ class _SettingFormState extends State<SettingForm> {
         ),
       );
     } catch (e) {
-      print('Logout error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Logout failed: $e'),
+          content: Text(e.toString()),
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -575,7 +473,7 @@ class _SettingFormState extends State<SettingForm> {
                     children: [
                       // Old Password TextField
                       TextField(
-                        controller: oldPasswordController,
+                        controller: _oldPasswordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: tr('old_password'),
@@ -585,7 +483,7 @@ class _SettingFormState extends State<SettingForm> {
                       const SizedBox(height: 16),
                       // New Password TextField
                       TextField(
-                        controller: newPasswordController,
+                        controller: _newPasswordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: tr('new_password'),
@@ -605,17 +503,15 @@ class _SettingFormState extends State<SettingForm> {
                     // Submit button
                     ElevatedButton(
                       onPressed: () async {
-                        final oldPassword = oldPasswordController.text.trim();
-                        final newPassword = newPasswordController.text.trim();
+                        final oldPassword = _oldPasswordController.text.trim();
+                        final newPassword = _newPasswordController.text.trim();
 
                         // Call changePassword function
-                        await changePassword(
+                        await _handleChangePassword(
                           context: context,
                           oldPassword: oldPassword,
                           newPassword: newPassword,
                         );
-
-                        Navigator.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4743C9),
@@ -654,15 +550,26 @@ class _SettingFormState extends State<SettingForm> {
         const SizedBox(height: 10),
         ElevatedButton(
           onPressed: () async {
-            String userId = FirebaseAuth.instance.currentUser!.uid;
-            String userName = _userNameController.text;
-            String firstName = _firstNameController.text;
-            String lastName = _lastNameController.text;
-            String address = _addressController.text;
-            String nationality = _nationalityController.text;
+            String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+            if (userId.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("User is not logged in"),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
+            }
+
+            String userName = _userNameController.text.trim();
+            String firstName = _firstNameController.text.trim();
+            String lastName = _lastNameController.text.trim();
+            String address = _addressController.text.trim();
+            String nationality = _nationalityController.text.trim();
 
             try {
-              await updateUserInformation(
+              await _userService.updateUserInformation(
                 userId: userId,
                 userName: userName,
                 firstName: firstName,
@@ -674,27 +581,24 @@ class _SettingFormState extends State<SettingForm> {
                 passportPhoto: _passportPhoto,
               );
 
-              // ✅ Hiển thị thông báo khi cập nhật thành công
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    tr('update_success'), // Sử dụng localization nếu có
+                    tr('update_success'),
                     style: TextStyle(color: Colors.white),
                   ),
-                  backgroundColor:
-                      Colors.green, // Màu nền xanh lá cho trạng thái thành công
+                  backgroundColor: Colors.green,
                   duration: Duration(seconds: 3),
                 ),
               );
             } catch (e) {
-              // ❌ Hiển thị lỗi nếu có lỗi xảy ra
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    tr('update_failed'), // Sử dụng localization nếu có
+                    tr('update_failed'),
                     style: TextStyle(color: Colors.white),
                   ),
-                  backgroundColor: Colors.red, // Màu nền đỏ cho trạng thái lỗi
+                  backgroundColor: Colors.red,
                   duration: Duration(seconds: 3),
                 ),
               );
@@ -720,7 +624,7 @@ class _SettingFormState extends State<SettingForm> {
         const SizedBox(height: 10),
         ElevatedButton(
           onPressed: () {
-            _handleLogout(context);
+            _handleLogout();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red,

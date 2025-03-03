@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,11 +10,10 @@ import 'package:flutter_application_1/shared/widgets/password_field.dart';
 import 'package:flutter_application_1/shared/widgets/email_field.dart';
 
 import 'package:flutter_application_1/features/auth/signUp/signup_service.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_application_1/shared/services/auth_service.dart';
+import 'package:flutter_application_1/shared/services/facebook_auth_service.dart';
+import 'package:flutter_application_1/shared/services/firebase_auth_service.dart';
 
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:js' as js;
-import 'package:js/js_util.dart' as js_util;
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -31,275 +29,129 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final ValidationService _validationService = ValidationService();
+  final AuthService _authService = AuthService();
+  final FacebookAuthService _facebookAuthService = FacebookAuthService();
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
   bool _isLoading = false;
   String? _userNameError;
   String? _phoneNumberError;
-  String _selectedLanguage = 'EN';
   bool _isFacebookSDKReady = false;
 
   Future<void> _handleRegister() async {
-    // Kiểm tra các trường nhập liệu
-    if (_userNameController.text.isEmpty ||
-            _emailController.text.isEmpty ||
-            _phoneNumberController.text.isEmpty ||
-            _passwordController.text.isEmpty
+    if (!_validateInputs()) return;
 
-        // _initialsController.text.isEmpty ||
-        // _roleController.text.isEmpty
-        ) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all the information'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-    print('Username: ${_userNameController.text}');
-    print('Email: ${_emailController.text}');
-    print('Phone Number: ${_phoneNumberController.text}');
-    print('Password: ${_passwordController.text}');
+    setState(() => _isLoading = true);
+    AuthService authService = AuthService();
 
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Đăng ký tài khoản trên Firebase Authentication
-      final userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      User? user = await authService.registerWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+        _userNameController.text.trim(),
+        _phoneNumberController.text.trim(),
       );
 
-      // Lưu thông tin bổ sung vào Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set({
-        'userId': userCredential.user!.uid,
-        'userName': _userNameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'phoneNumber': _phoneNumberController.text.trim(),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      if (user != null) {
+        print('User registered and data saved successfully');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration Successful'),
+            backgroundColor: Colors.green,
+          ),
+        );
 
-      print('User registered and data saved successfully');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration Successful'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Chuyển hướng tới trang chính hoặc đăng nhập tự động
-      Navigator.pushReplacementNamed(context, Routes.homepage);
+        Navigator.pushReplacementNamed(context, Routes.homepage);
+      }
     } catch (e) {
       print('Registration error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Registration failed: $e'),
+          content: Text('Registration failed: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+  bool _validateInputs() {
+    if (_userNameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _phoneNumberController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all the information'),
           backgroundColor: Colors.red,
         ),
       );
-      return;
+      return false;
     }
-
-    // Hiển thị thông tin nhập vào trong console log
-    print('Username: ${_emailController.text}');
-    print('Password: ${_passwordController.text}');
-
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Đăng nhập bằng email và password qua Firebase Authentication
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      // Đăng nhập thành công, chuyển hướng đến trang chính
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login successful'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pushReplacementNamed(context, Routes.homepage);
-    } catch (e) {
-      // Xử lý lỗi đăng nhập
-      print('Login error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    return true;
   }
 
   Future<void> _handleGoogleSignIn() async {
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
-      // Bước 1: Đăng nhập tài khoản Google
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        // Người dùng hủy đăng nhập
-        setState(() {
-          _isLoading = false;
-        });
-        return;
+      User? user = await _authService.signInWithGoogle();
+      if (user != null) {
+        await _authService.saveUserData(user);
+        Navigator.pushReplacementNamed(context, '/homepage');
       }
-
-      // Bước 2: Xác thực tài khoản Google
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Bước 3: Nhận thông tin đăng nhập từ Firebase
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Bước 4: Đăng nhập Firebase
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // Thông báo thành công
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Welcome, ${userCredential.user?.displayName}!'),
-          backgroundColor: Colors.green,
-        ),
-      );
     } catch (e) {
-      // Xử lý lỗi đăng nhập
-      print('Google Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Google Sign-In Failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      _showSnackBar("Google Sign-In Failed", Colors.red);
     }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: color),
+    );
   }
 
   @override
   void initState() {
     super.initState();
-
-    // Đợi một chút để SDK Facebook có thể khởi tạo
-    Future.delayed(Duration(seconds: 3), () {
-      // Sử dụng js_util để lấy giá trị của facebookSDKReady từ JavaScript
-      bool? isSDKReady =
-          js_util.getProperty(js_util.globalThis, 'facebookSDKReady');
-
-      setState(() {
-        _isFacebookSDKReady = isSDKReady ?? false;
-      });
-      print("SDK ready status: $_isFacebookSDKReady");
-    });
+    _initFacebookSDK();
   }
 
   void _handleFacebookSignIn() {
-    try {
-      // Kiểm tra nếu Facebook SDK đã sẵn sàng
-      if (js.context['FB'] == null || js.context['FB'].callMethod == null) {
-        print("Facebook SDK chưa sẵn sàng hoặc không thể gọi phương thức.");
-        return;
-      }
-
-      // Gọi FB.login
-      var fb = js.context['FB'];
-      fb.callMethod('login', [
-        js.allowInterop((response) {
-          print("Facebook login response: $response");
-
-          if (response is js.JsObject &&
-              response.hasProperty('status') &&
-              response['status'] == 'connected') {
-            final accessToken = response['authResponse']['accessToken'];
-            print("Facebook Access Token: $accessToken");
-
-            // Gọi Firebase Auth
-            _signInWithFirebase(accessToken);
-          } else {
-            print("Facebook login failed: ${response['status']}");
-          }
-        }),
-        {'scope': 'email,public_profile'}
-      ]);
-    } catch (e) {
-      print("Facebook Sign-In Error: $e");
+    if (!_isFacebookSDKReady) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Facebook SDK chưa sẵn sàng"),
+            backgroundColor: Colors.red),
+      );
+      return;
     }
+
+    _facebookAuthService.handleFacebookLogin(
+      (accessToken) async {
+        try {
+          await _firebaseAuthService.signInWithFacebook(accessToken);
+          Navigator.pushReplacementNamed(context, Routes.homepage);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text("Lỗi đăng nhập Firebase: $e"),
+                backgroundColor: Colors.red),
+          );
+        }
+      },
+      (errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+        );
+      },
+    );
   }
 
-  void _signInWithFirebase(String accessToken) async {
-    try {
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken);
-
-      // Đăng nhập vào Firebase
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-      User? firebaseUser = userCredential.user;
-
-      if (firebaseUser != null) {
-        final userRef = FirebaseFirestore.instance
-            .collection("users")
-            .doc(firebaseUser.uid);
-        DocumentSnapshot doc = await userRef.get();
-
-        if (!doc.exists) {
-          await userRef.set({
-            "uid": firebaseUser.uid,
-            "userName": firebaseUser.displayName,
-            "email": firebaseUser.email,
-            "photoUrl": firebaseUser.photoURL,
-            "createdAt": FieldValue.serverTimestamp(),
-          });
-        } else {
-          await userRef.update({
-            "userName": firebaseUser.displayName,
-            "photoUrl": firebaseUser.photoURL,
-          });
-        }
-
-        print("User signed in: ${firebaseUser.displayName}");
-        Navigator.pushReplacementNamed(context, Routes.homepage);
-      }
-    } catch (e) {
-      print("Error during Firebase sign-in: $e");
-    }
+  Future<void> _initFacebookSDK() async {
+    bool sdkReady = await _facebookAuthService.isFacebookSDKReady();
+    setState(() {
+      _isFacebookSDKReady = sdkReady;
+    });
+    print("SDK ready status: $_isFacebookSDKReady");
   }
 
   void _validateUserName() {

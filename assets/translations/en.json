@@ -1,6 +1,7 @@
 {
     "hello": "Hello",
     "login": "LOGIN",
+    "sign_up": "REGISTER",
     "select_language": "Select Language",
     "cancel": "Cancel",
     "near_me": "Near me",
