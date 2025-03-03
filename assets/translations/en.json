@@ -79,9 +79,9 @@
     "enter_amount": "Enter amount",
     "continue": "Continue",
 
-    "user_infor": "Tell us about yourself",
-    "full_name": "Full legal first and middle name",
-    "full_name_hint": "Enter your full legal name",
+    "user_infor": "YYour details ",
+    "full_name": "Full name",
+    "full_name_hint": "Enter your full name",
     "full_name_required": "Full name is required",
     "account_name": "Account Name",
     "account_name_hint": "Enter your account name",

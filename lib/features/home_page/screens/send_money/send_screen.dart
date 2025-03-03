@@ -4,8 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/app/routes.dart';
+import 'package:flutter_application_1/shared/services/outlets_service.dart';
 import 'package:flutter_application_1/shared/widgets/progressbar.dart';
-import 'package:flutter_application_1/features/home_page/screens/send_money/send_money_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,166 +20,58 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   String fromCurrency = "";
   String toCurrency = "";
   String exchangeRate = "";
+  String? outletId;
 
   String? selectedOutlet;
   String? localCurrency;
   String? foreignCurrency;
   String? selectedCurrency;
   double? sendRate, buyRate, sellRate;
-  String? outletId;
   String searchKeyword = '';
 
   final TextEditingController _sendController = TextEditingController();
   final TextEditingController _receiveController = TextEditingController();
-  final SendMoneyService _service = SendMoneyService();
 
   String? _currencyError;
   List<String> currencyCodes = [];
   List<Map<String, String>> _outletDisplayList = [];
+  List<Map<String, String>> filteredOutletList = [];
+  
+
   List<Map<String, String>> _currencyDisplayList = [];
 
   TextEditingController searchOutletController = TextEditingController();
-  List<Map<String, String>> filteredOutletList = [];
 
   final TextEditingController locationController = TextEditingController();
-  Map<String, String> currencyToCountryCode = {
-    'USD': 'us',
-    'EUR': 'eu',
-    'JPY': 'jp',
-    'GBP': 'gb',
-    'AUD': 'au',
-    'CAD': 'ca',
-    'CHF': 'ch',
-    'CNY': 'cn',
-    'SEK': 'se',
-    'NZD': 'nz',
-    'VND': 'vn',
-    'THB': 'th',
-    'SGD': 'sg',
-    'MXN': 'mx',
-    'BRL': 'br',
-    'ZAR': 'za',
-    'RUB': 'ru',
-    'INR': 'in',
-    'KRW': 'kr',
-    'HKD': 'hk',
-    'MYR': 'my',
-    'PHP': 'ph',
-    'IDR': 'id',
-    'TRY': 'tr',
-    'PLN': 'pl',
-    'HUF': 'hu',
-    'CZK': 'cz',
-    'DKK': 'dk',
-    'NOK': 'no',
-    'ILS': 'il',
-    'SAR': 'sa',
-    'AED': 'ae',
-    'EGP': 'eg',
-    'ARS': 'ar',
-    'CLP': 'cl',
-    'COP': 'co',
-    'PEN': 'pe',
-    'PKR': 'pk',
-    'BDT': 'bd',
-    'LKR': 'lk',
-    'KWD': 'kw',
-    'BHD': 'bh',
-    'OMR': 'om',
-    'QAR': 'qa',
-    'JOD': 'jo',
-    'XOF': 'bj',
-    'XAF': 'cm',
-    'XCD': 'ag',
-    'XPF': 'pf',
-    'MAD': 'ma',
-    'DZD': 'dz',
-    'TND': 'tn',
-    'LBP': 'lb',
-    'JMD': 'jm',
-    'TTD': 'tt',
-    'NGN': 'ng',
-    'GHS': 'gh',
-    'KES': 'ke',
-    'UGX': 'ug',
-    'TZS': 'tz',
-    'ETB': 'et',
-    'ZMW': 'zm',
-    'MZN': 'mz',
-    'BWP': 'bw',
-    'NAD': 'na',
-    'SCR': 'sc',
-    'MUR': 'mu',
-    'BBD': 'bb',
-    'BSD': 'bs',
-    'FJD': 'fj',
-    'SBD': 'sb',
-    'PGK': 'pg',
-    'TOP': 'to',
-    'WST': 'ws',
-    'KZT': 'kz',
-    'UZS': 'uz',
-    'TJS': 'tj',
-    'KGS': 'kg',
-    'MMK': 'mm',
-    'LAK': 'la',
-    'KHR': 'kh',
-    'MNT': 'mn',
-    'NPR': 'np',
-    'BND': 'bn',
-    'XAU': 'xau',
-    'XAG': 'xag',
-    'XPT': 'xpt',
-    'XPD': 'xpd',
-    'HTG': 'ht', // Haitian Gourde
-    'LRD': 'lr', // Liberian Dollar
-    'BIF': 'bi', // Burundian Franc
-    'IQD': 'iq', // Iraqi Dinar
-    'MGA': 'mg', // Malagasy Ariary
-    'LSL': 'ls', // Lesotho Loti
-    'AFN': 'af', // Afghan Afghani (cũ, thay bằng AFN)
-    'CVE': 'cv', // Cape Verdean Escudo
-    'BGN': 'bg', // Bulgarian Lev
-    'LYD': 'ly', // Libyan Dinar
-    'AWG': 'aw', // Aruban Florin
-    'HRK': 'hr', // Croatian Kuna (đã đổi sang EUR từ 2023)
-    'BZD': 'bz', // Belize Dollar
-    'HNL': 'hn', // Honduran Lempira
-    'MVR': 'mv', // Maldivian Rufiyaa
-    'GYD': 'gy', // Guyanese Dollar
-    'SVC': 'sv', // Salvadoran Colón
-    'ISK': 'is', // Icelandic Króna
-    'GNF': 'gn', // Guinean Franc
-    'IRR': 'ir', // Iranian Rial
-    'KYD': 'ky', // Cayman Islands Dollar
-    'DJF': 'dj', // Djiboutian Franc
-    'MWK': 'mw', // Malawian Kwacha
-    'BOB': 'bo', // Bolivian Boliviano
-    'LTL': 'lt', // Lithuanian Litas (đã đổi sang EUR)
-    'AMD': 'am', // Armenian Dram
-    'CRC': 'cr', // Costa Rican Colón
-    'KMF': 'km', // Comorian Franc
-    'AOA': 'ao', // Angolan Kwanza (cũ, thay bằng AOA)
-    'ALL': 'al', // Albanian Lek
-    'ERN': 'er', // Eritrean Nakfa
-    'EEK': 'ee', // Estonian Kroon (đã đổi sang EUR)
-    'GMD': 'gm', // Gambian Dalasi
-    'GIP': 'gi', // Gibraltar Pound
-    'CUP': 'cu', // Cuban Peso
-    'BMD': 'bm', // Bermudian Dollar
-    'FKP': 'fk', // Falkland Islands Pound
-    'CDF': 'cd', // Congolese Franc
-    'LVL': 'lv', // Latvian Lats (đã đổi sang EUR)
-    'MKD': 'mk', // Macedonian Denar
-    'GTQ': 'gt', // Guatemalan Quetzal
-    'AZN': 'az', // Azerbaijani Manat
-    'DOP': 'do', // Dominican Peso
-    'BYN': 'by', // Belarusian Ruble
-    'GEL': 'ge', // Georgian Lari
-    'BTN': 'bt', // Bhutanese Ngultrum
-    'MOP': 'mo',
-    'ANG': 'ai',
-    'BYR': 'by',
+   final Map<String, String> _currencyToCountryCode = {
+    'USD': 'us', 'EUR': 'eu', 'JPY': 'jp', 'GBP': 'gb', 'AUD': 'au',
+    'CAD': 'ca', 'CHF': 'ch', 'CNY': 'cn', 'SEK': 'se', 'NZD': 'nz',
+    'VND': 'vn', 'THB': 'th', 'SGD': 'sg', 'MXN': 'mx', 'BRL': 'br',
+    'ZAR': 'za', 'RUB': 'ru', 'INR': 'in', 'KRW': 'kr', 'HKD': 'hk',
+    'MYR': 'my', 'PHP': 'ph', 'IDR': 'id', 'TRY': 'tr', 'PLN': 'pl',
+    'HUF': 'hu', 'CZK': 'cz', 'DKK': 'dk', 'NOK': 'no', 'ILS': 'il',
+    'SAR': 'sa', 'AED': 'ae', 'EGP': 'eg', 'ARS': 'ar', 'CLP': 'cl',
+    'COP': 'co', 'PEN': 'pe', 'PKR': 'pk', 'BDT': 'bd', 'LKR': 'lk',
+    'KWD': 'kw', 'BHD': 'bh', 'OMR': 'om', 'QAR': 'qa', 'JOD': 'jo',
+    'XOF': 'bj', 'XAF': 'cm', 'XCD': 'ag', 'XPF': 'pf', 'MAD': 'ma',
+    'DZD': 'dz', 'TND': 'tn', 'LBP': 'lb', 'JMD': 'jm', 'TTD': 'tt',
+    'NGN': 'ng', 'GHS': 'gh', 'KES': 'ke', 'UGX': 'ug', 'TZS': 'tz',
+    'ETB': 'et', 'ZMW': 'zm', 'MZN': 'mz', 'BWP': 'bw', 'NAD': 'na',
+    'SCR': 'sc', 'MUR': 'mu', 'BBD': 'bb', 'BSD': 'bs', 'FJD': 'fj',
+    'SBD': 'sb', 'PGK': 'pg', 'TOP': 'to', 'WST': 'ws', 'KZT': 'kz',
+    'UZS': 'uz', 'TJS': 'tj', 'KGS': 'kg', 'MMK': 'mm', 'LAK': 'la',
+    'KHR': 'kh', 'MNT': 'mn', 'NPR': 'np', 'BND': 'bn', 'XAU': 'xau',
+    'XAG': 'xag', 'XPT': 'xpt', 'XPD': 'xpd', 'HTG': 'ht', 'LRD': 'lr',
+    'BIF': 'bi', 'IQD': 'iq', 'MGA': 'mg', 'LSL': 'ls', 'AFN': 'af',
+    'CVE': 'cv', 'BGN': 'bg', 'LYD': 'ly', 'AWG': 'aw', 'HRK': 'hr',
+    'BZD': 'bz', 'HNL': 'hn', 'MVR': 'mv', 'GYD': 'gy', 'SVC': 'sv',
+    'ISK': 'is', 'GNF': 'gn', 'IRR': 'ir', 'KYD': 'ky', 'DJF': 'dj',
+    'MWK': 'mw', 'BOB': 'bo', 'LTL': 'lt', 'AMD': 'am', 'CRC': 'cr',
+    'KMF': 'km', 'AOA': 'ao', 'ALL': 'al', 'ERN': 'er', 'EEK': 'ee',
+    'GMD': 'gm', 'GIP': 'gi', 'CUP': 'cu', 'BMD': 'bm', 'FKP': 'fk',
+    'CDF': 'cd', 'LVL': 'lv', 'MKD': 'mk', 'GTQ': 'gt', 'AZN': 'az',
+    'DOP': 'do', 'BYN': 'by', 'GEL': 'ge', 'BTN': 'bt', 'MOP': 'mo',
+    'ANG': 'ai', 'BYR': 'by'
   };
 
   bool isSenderActive = true;
@@ -187,142 +79,70 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
   String? _numericError;
 
   bool isLoading = true;
+  final OutletsService _outletsService = OutletsService();
 
   @override
   void initState() {
     super.initState();
-    fetchOutlets();
+    _fetchOutlets();
     fetchCurrencyCodes();
     _setupTextFieldCurrencyListeners();
     _loadSavedInputs();
-    //_fetchData();
+   
+  }
+Future<void> _fetchOutletRates(String? outletId, String fromCurrency, String toCurrency) async {
+    if (outletId == null || fromCurrency.isEmpty || toCurrency.isEmpty) {
+      setState(() {
+        _currencyError = "Missing required parameters";
+      });
+      return;
+    }
+
+    final ratesData = await _outletsService.fetchOutletRates(
+      outletId: outletId!,
+      fromCurrency: fromCurrency,
+      toCurrency: toCurrency,
+    );
+
+    if (mounted) {
+      setState(() {
+        if (ratesData == null) {
+          _currencyError = "Currency này không hỗ trợ hoặc lỗi khi tải dữ liệu";
+          sendRate = 0.0;
+          buyRate = 0.0;
+          sellRate = 0.0;
+        } else {
+          _currencyError = null;
+          sendRate = ratesData['sendRate'];
+          buyRate = ratesData['buyRate'];
+          sellRate = ratesData['sellRate'];
+          localCurrency = ratesData['localCurrency'];
+          foreignCurrency = ratesData['foreignCurrency'];
+        }
+      });
+    }
   }
 
-  // Future<void> _fetchData() async {
-  //   final outlets = await _service.fetchOutlets();
-  //   final currencies = await _service.fetchCurrencyCodes();
 
-  //   setState(() {
-  //     _outletDisplayList = outlets;
-  //     _currencyDisplayList = currencies;
-  //     isLoading = false;
-  //   });
-  // }
-
-  // void _fetchRates(
-  //     String outletId, String fromCurrency, String toCurrency) async {
-  //   final rates =
-  //       await _service.fetchOutletRates(outletId, fromCurrency, toCurrency);
-
-  //   setState(() {
-  //     sendRate = rates['sendRate'];
-  //     buyRate = rates['buyRate'];
-  //     sellRate = rates['sellRate'];
-  //   });
-  // }
-
-  Future<void> fetchOutlets() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('outlets').get();
-
-      if (querySnapshot.docs.isEmpty) {
-        print("❌ No outlets found in Firestore.");
-        return;
-      }
-
-      List<Map<String, String>> outletList = querySnapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
-        return {
-          'outletId': doc.id, // 🔹 Dùng document ID
-          'outletName': data['outletName']?.toString() ?? "Unnamed Outlet",
-        };
-      }).toList();
-
+   Future<void> _fetchOutlets() async {
+    final outlets = await _outletsService.fetchOutlets();
+    if (mounted) {
       setState(() {
-        _outletDisplayList = outletList;
+        _outletDisplayList = outlets;
+        filteredOutletList = _outletDisplayList.take(5).toList();
+        isLoading = false; 
       });
-    } catch (e) {
-      print("⚠️ Error fetching outlets: $e");
     }
   }
 
   Future<void> fetchCurrencyCodes() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('currencyCodes').get();
-
-      if (querySnapshot.docs.isEmpty) {
-        return;
-      }
-
-      List<Map<String, String>> currencyList = querySnapshot.docs.map((doc) {
-        return {
-          'currencyCode': doc['currencyCode'].toString(),
-          'description': doc['description'].toString()
-        };
-      }).toList();
-
-      setState(() {
-        _currencyDisplayList = currencyList;
-      });
-    } catch (e) {
-      print("⚠️ Error fetching currency codes: $e");
-    }
+    final currencyList = await _outletsService.fetchCurrencyCodes();
+    setState(() {
+      _currencyDisplayList = currencyList;
+    });
   }
 
-  Future<void> fetchOutletRates(
-      String? outletId, String? fromCurrency, String? toCurrency) async {
-    // Kiểm tra đầu vào
-    if (outletId == null || fromCurrency == null || toCurrency == null) {
-      print("⚠️ Missing required parameters for fetching outlet rates.");
-      return;
-    }
 
-    try {
-      // Truy vấn Firestore với điều kiện outletId, fromCurrency, toCurrency
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('outletRates')
-          .where('outletId', isEqualTo: outletId)
-          .where('localCurrency', isEqualTo: fromCurrency)
-          .where('foreignCurrency', isEqualTo: toCurrency)
-          .get();
-
-      if (querySnapshot.docs.isEmpty) {
-        print("❌ No outlet rates found for $fromCurrency ➡️ $toCurrency");
-
-        // Cập nhật thông báo lỗi
-        setState(() {
-          _currencyError = "Currency này không hỗ trợ";
-        });
-        return;
-      }
-
-      // Nếu có dữ liệu, đặt lại thông báo lỗi
-      setState(() {
-        _currencyError = null;
-      });
-
-      // Lấy dữ liệu document đầu tiên (nếu có)
-      var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
-
-      // Cập nhật State nếu Widget vẫn đang hiện diện (mounted)
-      if (mounted) {
-        setState(() {
-          sendRate = double.tryParse(data['sendRate'].toString()) ?? 0.0;
-          buyRate = double.tryParse(data['buyRate'].toString()) ?? 0.0;
-          sellRate = double.tryParse(data['sellRate'].toString()) ?? 0.0;
-          localCurrency = data['localCurrency'] ?? '';
-          foreignCurrency = data['foreignCurrency'] ?? '';
-        });
-      }
-    } catch (e) {
-      print("⚠️ Error fetching outlet rates: $e");
-      setState(() {
-        _currencyError = "Lỗi khi tải dữ liệu tỉ giá";
-      });
-    }
-  }
 
   Future<void> _loadSavedInputs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -527,7 +347,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                                   // Kiểm tra nếu fromCurrency và toCurrency đã được chọn
                                   if (fromCurrency.isNotEmpty &&
                                       toCurrency.isNotEmpty) {
-                                    fetchOutletRates(
+                                    _fetchOutletRates(
                                         outletId, fromCurrency, toCurrency);
                                   } else {
                                     print(
@@ -624,7 +444,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                     itemBuilder: (context, index) {
                       final item = filteredCurrencyList[index];
                       final currencyCode = item['currencyCode']!;
-                      final countryCode = currencyToCountryCode[currencyCode] ??
+                      final countryCode = _currencyToCountryCode[currencyCode] ??
                           'UN'; // UN: Unknown
 
                       return ListTile(
@@ -891,7 +711,7 @@ class _SendMoneyFormState extends State<SendMoneyForm> {
                   children: [
                     if (selectedValue.isNotEmpty)
                       CircleFlag(
-                        (currencyToCountryCode[selectedValue] ?? 'UN')
+                        (_currencyToCountryCode[selectedValue] ?? 'UN')
                             .toLowerCase(),
                         size: 24,
                       ),
